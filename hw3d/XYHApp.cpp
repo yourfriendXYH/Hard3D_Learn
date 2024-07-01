@@ -39,8 +39,8 @@ void TestFun()
 	}
 }
 
-XYHApp::XYHApp() 
-	: 
+XYHApp::XYHApp()
+	:
 	m_wnd(1280, 720, "XYH"),
 	m_pointLight(m_wnd.GetGfx()),
 	m_testPlane(m_wnd.GetGfx(), 3.0f)
@@ -50,7 +50,7 @@ XYHApp::XYHApp()
 	//Assimp::Importer imp;
 	//auto model = imp.ReadFile("Models\\suzanne.obj",
 	//	aiProcess_Triangulate | aiProcess_JoinIdenticalVertices);
-	
+
 	// 测试动态顶点
 	//TestFun();
 
@@ -112,7 +112,7 @@ XYHApp::XYHApp()
 
 	//const auto surface = Surface::FromFile("pix_1.png");
 
-	m_testPlane.SetPos({1.0f, 17.0f, -1.0f});
+	m_testPlane.SetPos({ 1.0f, 17.0f, -1.0f });
 
 	// 给Graphic设置投影矩阵
 	m_wnd.GetGfx().SetProjection(DirectX::XMMatrixPerspectiveLH(1.f, 9.f / 16.f, 0.5f, 100.f));
@@ -166,7 +166,7 @@ void XYHApp::DoFrame()
 
 	// 绘制模型
 	m_model.Draw(m_wnd.GetGfx());
-	m_modelTest.Draw(m_wnd.GetGfx());
+	//m_modelTest.Draw(m_wnd.GetGfx());
 
 	//
 	m_testPlane.Draw(m_wnd.GetGfx());
@@ -178,9 +178,9 @@ void XYHApp::DoFrame()
 	//	boxRef->Update(delta);
 	//	boxRef->Draw(m_wnd.GetGfx());
 	//}
-	
+
 	// 绘制点光源
-	m_pointLight.Draw(m_wnd.GetGfx()); 
+	m_pointLight.Draw(m_wnd.GetGfx());
 
 	while (const auto keyEvent = m_wnd.kbd.ReadKey())
 	{
@@ -268,7 +268,9 @@ void XYHApp::DoFrame()
 	m_pointLight.SpawnControlWindow();
 
 	m_model.ShowWindow();
-	m_modelTest.ShowWindow();
+	//m_modelTest.ShowWindow();
+
+	m_testPlane.SpawnControlWindow(m_wnd.GetGfx());
 
 	ShowRawInputWindow(); // 显示鼠标偏移
 

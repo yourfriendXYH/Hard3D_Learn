@@ -66,6 +66,9 @@
     <Filter Include="Code\Geometry">
       <UniqueIdentifier>{31738ead-8805-4fbc-afbb-723fe24659cb}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Code\HLSL">
+      <UniqueIdentifier>{0ac049ff-ad5b-4ee2-9c9c-b4b8f461e154}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="dxerr.cpp">
@@ -434,6 +437,9 @@
     </FxCompile>
     <FxCompile Include="PhongPSSpecMap.hlsl">
       <Filter>Shader</Filter>
+    </FxCompile>
+    <FxCompile Include="HLSL\PhongPSNormalMap.hlsl">
+      <Filter>Code\HLSL</Filter>
     </FxCompile>
   </ItemGroup>
 </Project>

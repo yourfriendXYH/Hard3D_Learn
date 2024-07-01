@@ -9,6 +9,7 @@
 #include "../InputLayout.h"
 #include "../Topology.h"
 #include "../TransformCBuf.h"
+#include "../imgui/imgui.h"
 
 TestPlane::TestPlane(Graphics& gfx, float size)
 {
@@ -23,22 +24,17 @@ TestPlane::TestPlane(Graphics& gfx, float size)
 	AddBind(IndexBuffer::Resolve(gfx, geometryTag, model.m_indices));
 	// 纹理资源
 	AddBind(Texture::Resolve(gfx, "Resources/Wall/brickwall.jpg"));
+	AddBind(Texture::Resolve(gfx, "Resources/Wall/brickwall_normal.jpg", 1u));
 
 	// 顶点着色器
 	auto spVertexShader = VertexShader::Resolve(gfx, "PhongVS.cso");
 	auto pVertexShaderByteCode = spVertexShader->GetByteCode();
 	AddBind(std::move(spVertexShader));
 	// 像素着色器
-	AddBind(PixelShader::Resolve(gfx, "PhongPS.cso"));
-	
+	AddBind(PixelShader::Resolve(gfx, "PhongPSNormalMap.cso"));
+
 	// 像素着色器常量缓存
-	struct PSMaterialConstant
-	{
-		float specularIntensity = 0.8f;
-		float specularPower = 45.0f;
-		float padding[2]; // 内存对齐（四字节对齐）
-	} pmc;
-	AddBind(PixelConstantBuffer<PSMaterialConstant>::Resolve(gfx, pmc, 1u));
+	AddBind(PixelConstantBuffer<PSMaterialConstant>::Resolve(gfx, m_pmc, 1u));
 
 	// 顶点输入布局
 	AddBind(InputLayout::Resolve(gfx, model.m_vertices.GetVertexLayout(), pVertexShaderByteCode));
@@ -63,6 +59,32 @@ void TestPlane::SetRotation(float roll, float pitch, float yaw) noexcept
 DirectX::XMMATRIX TestPlane::GetTransformXM() const noexcept
 {
 	// 先旋转再平移（自身旋转）
-	return DirectX::XMMatrixRotationRollPitchYaw(m_roll, m_pitch, m_yaw) * 
+	return DirectX::XMMatrixRotationRollPitchYaw(m_roll, m_pitch, m_yaw) *
 		DirectX::XMMatrixTranslation(m_pos.x, m_pos.y, m_pos.z);
+}
+
+void TestPlane::SpawnControlWindow(Graphics& gfx) noexcept
+{
+	if (ImGui::Begin("Plane"))
+	{
+		ImGui::Text("Position");
+		ImGui::SliderFloat("X", &m_pos.x, -80.0f, 80.0f, "%.1f");
+		ImGui::SliderFloat("Y", &m_pos.y, -80.0f, 80.0f, "%.1f");
+		ImGui::SliderFloat("Z", &m_pos.z, -80.0f, 80.0f, "%.1f");
+		ImGui::Text("Orientation");
+		ImGui::SliderAngle("Roll", &m_roll, -180.0f, 180.0f);
+		ImGui::SliderAngle("Pitch", &m_pitch, -180.0f, 180.0f);
+		ImGui::SliderAngle("Yaw", &m_yaw, -180.0f, 180.0f);
+		ImGui::Text("Shading");
+		bool changed0 = ImGui::SliderFloat("Spec. Int.", &m_pmc.m_specularIntensity, 0.0f, 1.0f);
+		bool changed1 = ImGui::SliderFloat("Spec. Power", &m_pmc.m_specularPower, 0.0f, 100.0f);
+		bool checkState = m_pmc.m_normalMappingEnabled == TRUE;
+		bool changed2 = ImGui::Checkbox("Enable Normal Map", &checkState);
+		m_pmc.m_normalMappingEnabled = checkState ? TRUE : FALSE;
+		if (changed0 || changed1 || changed2)
+		{
+			QueryBindable<Bind::PixelConstantBuffer<PSMaterialConstant>>()->Update(gfx, m_pmc);
+		}
+	}
+	ImGui::End();
 }
