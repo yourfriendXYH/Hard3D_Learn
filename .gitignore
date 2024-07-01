@@ -263,3 +263,7 @@ __pycache__/
 *.pyc
 *.cso
 /hw3d/imgui.ini
+
+# 
+x64/
+hw3d/x64/
