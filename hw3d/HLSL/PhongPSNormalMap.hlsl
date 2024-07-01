@@ -22,8 +22,6 @@ Texture2D nmap;
 
 SamplerState splr;
 
-// ???
-
 float4 main(float3 worldPos : Position, float3 n : Normal, float2 tc : Texcoord) : SV_Target
 {
     // sample normal from map if normal mapping enabled
