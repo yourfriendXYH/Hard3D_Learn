@@ -69,6 +69,9 @@
     <Filter Include="Code\HLSL">
       <UniqueIdentifier>{0ac049ff-ad5b-4ee2-9c9c-b4b8f461e154}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Code\Bindable">
+      <UniqueIdentifier>{dd5b5ef1-e49f-40e8-a59b-a6f8330aecd1}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="dxerr.cpp">
@@ -211,6 +214,9 @@
     </ClCompile>
     <ClCompile Include="Drawable\TestPlane.cpp">
       <Filter>Code\Drawable</Filter>
+    </ClCompile>
+    <ClCompile Include="Bindable\TransformCBufDoubleboi.cpp">
+      <Filter>Code\Bindable</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -378,6 +384,9 @@
     </ClInclude>
     <ClInclude Include="Geometry\Plane.h">
       <Filter>Code\Geometry</Filter>
+    </ClInclude>
+    <ClInclude Include="Bindable\TransformCBufDoubleboi.h">
+      <Filter>Code\Bindable</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

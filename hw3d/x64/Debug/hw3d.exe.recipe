@@ -2,39 +2,39 @@
 <Project>
   <ProjectOutputs>
     <ProjectOutput>
-      <FullPath>D:\DX_C++\Hard3D_Learn\x64\Debug\hw3d.exe</FullPath>
+      <FullPath>E:\DirectX_file\Direct3D_Learn\x64\Debug\hw3d.exe</FullPath>
     </ProjectOutput>
   </ProjectOutputs>
   <ContentFiles>
     <ContentFile>
-      <FullPath>D:\DX_C++\Hard3D_Learn\x64\Debug\PhongPSNormalMap.cso</FullPath>
+      <FullPath>E:\DirectX_file\Direct3D_Learn\x64\Debug\PhongPSNormalMap.cso</FullPath>
     </ContentFile>
     <ContentFile>
-      <FullPath>D:\DX_C++\Hard3D_Learn\x64\Debug\PhongPS.cso</FullPath>
+      <FullPath>E:\DirectX_file\Direct3D_Learn\x64\Debug\PhongPS.cso</FullPath>
     </ContentFile>
     <ContentFile>
-      <FullPath>D:\DX_C++\Hard3D_Learn\x64\Debug\PhongPSSpecMap.cso</FullPath>
+      <FullPath>E:\DirectX_file\Direct3D_Learn\x64\Debug\PhongPSSpecMap.cso</FullPath>
     </ContentFile>
     <ContentFile>
-      <FullPath>D:\DX_C++\Hard3D_Learn\x64\Debug\PhongVS.cso</FullPath>
+      <FullPath>E:\DirectX_file\Direct3D_Learn\x64\Debug\PhongVS.cso</FullPath>
     </ContentFile>
     <ContentFile>
-      <FullPath>D:\DX_C++\Hard3D_Learn\hw3d\PixelShader.cso</FullPath>
+      <FullPath>E:\DirectX_file\Direct3D_Learn\hw3d\PixelShader.cso</FullPath>
     </ContentFile>
     <ContentFile>
-      <FullPath>D:\DX_C++\Hard3D_Learn\x64\Debug\SolidPS.cso</FullPath>
+      <FullPath>E:\DirectX_file\Direct3D_Learn\x64\Debug\SolidPS.cso</FullPath>
     </ContentFile>
     <ContentFile>
-      <FullPath>D:\DX_C++\Hard3D_Learn\x64\Debug\SolidVS.cso</FullPath>
+      <FullPath>E:\DirectX_file\Direct3D_Learn\x64\Debug\SolidVS.cso</FullPath>
     </ContentFile>
     <ContentFile>
-      <FullPath>D:\DX_C++\Hard3D_Learn\x64\Debug\TexturePS.cso</FullPath>
+      <FullPath>E:\DirectX_file\Direct3D_Learn\x64\Debug\TexturePS.cso</FullPath>
     </ContentFile>
     <ContentFile>
-      <FullPath>D:\DX_C++\Hard3D_Learn\x64\Debug\TextureVS.cso</FullPath>
+      <FullPath>E:\DirectX_file\Direct3D_Learn\x64\Debug\TextureVS.cso</FullPath>
     </ContentFile>
     <ContentFile>
-      <FullPath>D:\DX_C++\Hard3D_Learn\hw3d\VertexShader.cso</FullPath>
+      <FullPath>E:\DirectX_file\Direct3D_Learn\hw3d\VertexShader.cso</FullPath>
     </ContentFile>
   </ContentFiles>
   <SatelliteDlls />

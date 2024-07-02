@@ -9,6 +9,7 @@
 #include "../InputLayout.h"
 #include "../Topology.h"
 #include "../TransformCBuf.h"
+#include "../Bindable/TransformCBufDoubleboi.h"
 #include "../imgui/imgui.h"
 
 TestPlane::TestPlane(Graphics& gfx, float size)
@@ -41,7 +42,7 @@ TestPlane::TestPlane(Graphics& gfx, float size)
 	// Í¼ÔªÍØÆË
 	AddBind(Topology::Resolve(gfx, D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST));
 	// ¶¥µã±ä»»
-	AddBind(std::make_shared<TransformCBuf>(gfx, *this));
+	AddBind(std::make_shared<TransformCBufDoubleboi>(gfx, *this, 0u, 2u));
 }
 
 void TestPlane::SetPos(DirectX::XMFLOAT3 pos) noexcept

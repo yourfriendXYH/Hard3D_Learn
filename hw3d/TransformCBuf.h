@@ -8,24 +8,25 @@ namespace Bind
 	class TransformCBuf : public Bindable
 	{
 	protected:
-		//struct Transforms
-		//{
-		//	DirectX::XMMATRIX m_model;
-		//	DirectX::XMMATRIX m_modelView;
-		//	DirectX::XMMATRIX m_modelViewProj;
-		//};
-
-	public:
-		// TransformCBuf(Graphics& gfx);
-		TransformCBuf(Graphics& gfx, const Drawable& parent, UINT slot = 0u);
-		void Bind(Graphics& gfx) noexcept override;
-		//void InitializeParentReference(const Drawable& parent) noexcept override;
-	private:
 		struct Transforms
 		{
-			DirectX::XMMATRIX model;
+			DirectX::XMMATRIX modelView;
 			DirectX::XMMATRIX modelViewProj;
 		};
+
+	public:
+		TransformCBuf(Graphics& gfx, const Drawable& parent, UINT slot = 0u);
+
+		// 将矩阵变换绑定到顶点着色器上
+		void Bind(Graphics& gfx) noexcept override;
+
+	protected:
+		// 更新着色器 矩阵常数缓存
+		void UpdateBindImpl(Graphics& gfx, const Transforms& tranforms) noexcept;
+
+		// 获取给到着色器上的矩阵
+		Transforms GetTransforms(Graphics& gfx) noexcept;
+
 	private:
 		// 顶点常量缓存
 		// static std::unique_ptr<VertexConstantBuffer<Transforms>> m_pVertexCBuf;
