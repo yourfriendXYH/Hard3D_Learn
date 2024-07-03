@@ -6,6 +6,7 @@
 #include "Light/PointLight.h"
 #include "Drawable/Mesh.h"
 #include "Drawable/TestPlane.h"
+#include "Drawable/TestCube.h"
 
 class XYHApp
 {
@@ -38,7 +39,9 @@ private:
 
 	static constexpr size_t m_drawablesNum = 180;
 
-	Model m_model{m_wnd.GetGfx(), "Models\\nano_textured\\nanosuit.obj"};
+	Model m_model{ m_wnd.GetGfx(), "Models\\nano_textured\\nanosuit.obj" };
 	Model m_modelTest{ m_wnd.GetGfx(), "Models\\nano_textured\\nanosuit.obj" };
 	TestPlane m_testPlane;
+
+	TestCube m_testCube;
 };

@@ -70,4 +70,21 @@ namespace DynamicData
 		return code;
 	}
 
+	VerticesBuffer::VerticesBuffer(VertexLayout layout, size_t size /*= 0u*/) noexcept
+		:
+		m_vertexLayout(std::move(layout))
+	{
+		Resize(size);
+	}
+
+	void VerticesBuffer::Resize(size_t newSize) noexcept
+	{
+		// 将顶点数据设置为指定大小
+		const auto currnetSize = VerticesSize();
+		if (currnetSize < newSize)
+		{
+			m_buffer.resize(m_buffer.size() + m_vertexLayout.Size() * (newSize - currnetSize));
+		}
+	}
+
 }

@@ -31,30 +31,26 @@ public:
 	}
 
 	// 生成每个顶点的法线方向
-	//void SetNormalsIndependentFlat()
-	//{
-	//	using namespace DirectX;
-	//	assert(m_indices.size() % 3 == 0 && m_indices.size() > 0);
-	//	for (size_t i = 0; i < m_indices.size(); i += 3)
-	//	{
-	//		auto& vertex0 = m_vertices[m_indices[i]];
-	//		auto& vertex1 = m_vertices[m_indices[i + 1]];
-	//		auto& vertex2 = m_vertices[m_indices[i + 2]];
+	void SetNormalsIndependentFlat()
+	{
+		using namespace DirectX;
+		using Type = DynamicData::VertexLayout::ElementType;
+		for (size_t i = 0; i < m_indices.size(); i += 3)
+		{
+			auto v0 = m_vertices[m_indices[i]];
+			auto v1 = m_vertices[m_indices[i + 1]];
+			auto v2 = m_vertices[m_indices[i + 2]];
+			const auto p0 = XMLoadFloat3(&v0.Attr<Type::Position3D>());
+			const auto p1 = XMLoadFloat3(&v1.Attr<Type::Position3D>());
+			const auto p2 = XMLoadFloat3(&v2.Attr<Type::Position3D>());
 
-	//		DirectX::XMVECTOR pos0 = DirectX::XMLoadFloat3(&vertex0.pos);
-	//		DirectX::XMVECTOR pos1 = DirectX::XMLoadFloat3(&vertex1.pos);
-	//		DirectX::XMVECTOR pos2 = DirectX::XMLoadFloat3(&vertex2.pos);
+			const auto n = XMVector3Normalize(XMVector3Cross((p1 - p0), (p2 - p0)));
 
-	//		// 叉乘算法线方向
-	//		DirectX::XMVECTOR vector1 = pos1 - pos0;
-	//		DirectX::XMVECTOR vector2 = pos2 - pos0;
-	//		auto normal = DirectX::XMVector3Normalize(DirectX::XMVector3Cross(vector1, vector2));
-	//		// 存储法线方向
-	//		DirectX::XMStoreFloat3(&vertex0.normal, normal);
-	//		DirectX::XMStoreFloat3(&vertex1.normal, normal);
-	//		DirectX::XMStoreFloat3(&vertex2.normal, normal);
-	//	}
-	//}
+			XMStoreFloat3(&v0.Attr<Type::Normal>(), n);
+			XMStoreFloat3(&v1.Attr<Type::Normal>(), n);
+			XMStoreFloat3(&v2.Attr<Type::Normal>(), n);
+		}
+	}
 
 public:
 	DynamicData::VerticesBuffer m_vertices;

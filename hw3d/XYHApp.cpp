@@ -43,7 +43,8 @@ XYHApp::XYHApp()
 	:
 	m_wnd(1280, 720, "XYH"),
 	m_pointLight(m_wnd.GetGfx()),
-	m_testPlane(m_wnd.GetGfx(), 3.0f)
+	m_testPlane(m_wnd.GetGfx(), 3.0f),
+	m_testCube(m_wnd.GetGfx(), 4.0f)
 {
 	// 测试资源导入
 	// asset import
@@ -114,15 +115,12 @@ XYHApp::XYHApp()
 
 	m_testPlane.SetPos({ 1.0f, 17.0f, -1.0f });
 
+	m_testCube.SetPos({ 0.0f, 0.0f, 0.0f });
+
 	// 给Graphic设置投影矩阵
 	m_wnd.GetGfx().SetProjection(DirectX::XMMatrixPerspectiveLH(1.f, 9.f / 16.f, 0.5f, 100.f));
 	//m_wnd.GetGfx().SetProjection(DirectX::XMMatrixPerspectiveFovRH(PI / 2.f, 4.f / 3.f, 0.5f, 100.f));
 
-	auto spBind = Bind::VertexShader::Resolve(m_wnd.GetGfx(), "PhongVS.cso");
-	auto bind2 = Bind::Sampler::Resolve(m_wnd.GetGfx());
-	if (1)
-	{
-	}
 }
 
 int XYHApp::Go()
@@ -170,6 +168,7 @@ void XYHApp::DoFrame()
 
 	//
 	m_testPlane.Draw(m_wnd.GetGfx());
+	m_testCube.Draw(m_wnd.GetGfx());
 
 	auto delta = m_timer.Mark();
 
@@ -271,6 +270,8 @@ void XYHApp::DoFrame()
 	//m_modelTest.ShowWindow();
 
 	m_testPlane.SpawnControlWindow(m_wnd.GetGfx());
+
+	m_testCube.SpawnControlWindow(m_wnd.GetGfx());
 
 	ShowRawInputWindow(); // 显示鼠标偏移
 

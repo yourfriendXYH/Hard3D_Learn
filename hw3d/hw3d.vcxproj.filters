@@ -218,6 +218,9 @@
     <ClCompile Include="Bindable\TransformCBufDoubleboi.cpp">
       <Filter>Code\Bindable</Filter>
     </ClCompile>
+    <ClCompile Include="Drawable\TestCube.cpp">
+      <Filter>Code\Drawable</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Window.h">
@@ -387,6 +390,12 @@
     </ClInclude>
     <ClInclude Include="Bindable\TransformCBufDoubleboi.h">
       <Filter>Code\Bindable</Filter>
+    </ClInclude>
+    <ClInclude Include="Geometry\Cube.h">
+      <Filter>Code\Geometry</Filter>
+    </ClInclude>
+    <ClInclude Include="Drawable\TestCube.h">
+      <Filter>Code\Drawable</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

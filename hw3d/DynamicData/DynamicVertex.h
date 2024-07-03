@@ -241,22 +241,6 @@ namespace DynamicData
 			const auto& element = m_vertexLayout.Resolve<Type>();
 			auto attribute = m_pData + element.GetOffset();
 			return *reinterpret_cast<VertexLayout::Map<Type>::m_sysType*>(attribute);
-			//if constexpr (Type == VertexLayout::Position2D)
-			//{
-			//	return *reinterpret_cast<DirectX::XMFLOAT2*>(attribute);
-			//}
-			//else if constexpr (Type == VertexLayout::Position3D)
-			//{
-			//	return *reinterpret_cast<DirectX::XMFLOAT3*>(attribute);
-			//}
-			//else if constexpr (Type == VertexLayout::Texture2D)
-			//{
-			//	return *reinterpret_cast<DirectX::XMFLOAT2*>(attribute);
-			//}
-			//else if constexpr (Type == VertexLayout::Normal)
-			//{
-			//	return *reinterpret_cast<DirectX::XMFLOAT3*>(attribute);
-			//}
 		}
 
 
@@ -350,17 +334,15 @@ namespace DynamicData
 	class VerticesBuffer
 	{
 	public:
-		VerticesBuffer(VertexLayout layout)
-			:
-			m_vertexLayout(std::move(layout))
-		{
-		}
+		VerticesBuffer(VertexLayout layout, size_t size = 0u) noexcept;
 
 	public:
 		const VertexLayout& GetVertexLayout() const
 		{
 			return m_vertexLayout;
 		}
+
+		void Resize(size_t newSize) noexcept;
 
 		// 顶点的数量
 		size_t VerticesSize() const
