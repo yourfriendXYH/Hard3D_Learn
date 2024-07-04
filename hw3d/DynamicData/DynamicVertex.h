@@ -27,6 +27,8 @@ namespace DynamicData
 			Position3D,
 			Texture2D,	// 纹理坐标
 			Normal,		// 法线方向
+			Tangent, // 切线方向
+			Bitangent, // 与切线垂直的方向?
 			Float3Color,// 颜色
 			Float4Color,
 			BGRAColor,
@@ -62,6 +64,20 @@ namespace DynamicData
 			static constexpr DXGI_FORMAT m_dxgiFormat = DXGI_FORMAT_R32G32B32_FLOAT;
 			static constexpr const char* m_semantic = "Normal";
 			static constexpr const char* m_code = "N";
+		};
+		template<> struct Map<Tangent>
+		{
+			using m_sysType = DirectX::XMFLOAT3;
+			static constexpr DXGI_FORMAT m_dxgiFormat = DXGI_FORMAT_R32G32B32_FLOAT;
+			static constexpr const char* m_semantic = "Tangent";
+			static constexpr const char* m_code = "Nt";
+		};
+		template<> struct Map<Bitangent>
+		{
+			using m_sysType = DirectX::XMFLOAT3;
+			static constexpr DXGI_FORMAT m_dxgiFormat = DXGI_FORMAT_R32G32B32_FLOAT;
+			static constexpr const char* m_semantic = "Bitangent";
+			static constexpr const char* m_code = "Nb";
 		};
 		template<> struct Map<Float3Color>
 		{
@@ -131,6 +147,10 @@ namespace DynamicData
 					return sizeof(Map<VertexLayout::Texture2D>::m_sysType);
 				case VertexLayout::Normal:
 					return sizeof(Map<VertexLayout::Normal>::m_sysType);
+				case VertexLayout::Tangent:
+					return sizeof(Map<VertexLayout::Tangent>::m_sysType);
+				case VertexLayout::Bitangent:
+					return sizeof(Map<VertexLayout::Bitangent>::m_sysType);
 				case VertexLayout::Float3Color:
 					return sizeof(Map<VertexLayout::Float3Color>::m_sysType);
 				case VertexLayout::Float4Color:
@@ -264,6 +284,12 @@ namespace DynamicData
 				break;
 			case VertexLayout::Normal:
 				SetAttribute<VertexLayout::Normal>(pAttribute, std::forward<T>(value));
+				break;
+			case VertexLayout::Tangent:
+				SetAttribute<VertexLayout::Tangent>(pAttribute, std::forward<T>(value));
+				break;
+			case VertexLayout::Bitangent:
+				SetAttribute<VertexLayout::Bitangent>(pAttribute, std::forward<T>(value));
 				break;
 			case VertexLayout::Float3Color:
 				SetAttribute<VertexLayout::Float3Color>(pAttribute, std::forward<T>(value));

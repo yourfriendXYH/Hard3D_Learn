@@ -18,6 +18,12 @@ namespace DynamicData
 		case DynamicData::VertexLayout::Normal:
 			return GenerateDesc<VertexLayout::Normal>(GetOffset());
 			break;
+		case DynamicData::VertexLayout::Tangent:
+			return GenerateDesc<VertexLayout::Tangent>(GetOffset());
+			break;
+		case DynamicData::VertexLayout::Bitangent:
+			return GenerateDesc<VertexLayout::Bitangent>(GetOffset());
+			break;
 		case DynamicData::VertexLayout::Float3Color:
 			return GenerateDesc<VertexLayout::Float3Color>(GetOffset());
 			break;
@@ -46,6 +52,10 @@ namespace DynamicData
 			return Map<Texture2D>::m_code;
 		case Normal:
 			return Map<Normal>::m_code;
+		case Tangent:
+			return Map<Tangent>::m_code;
+		case Bitangent:
+			return Map<Bitangent>::m_code;
 		case Float3Color:
 			return Map<Float3Color>::m_code;
 		case Float4Color:

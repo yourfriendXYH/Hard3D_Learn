@@ -163,8 +163,11 @@ void XYHApp::DoFrame()
 	m_pointLight.Bind(m_wnd.GetGfx(), m_camera.GetMatrix());
 
 	// 绘制模型
-	m_model.Draw(m_wnd.GetGfx());
+	//m_model.Draw(m_wnd.GetGfx());
 	//m_modelTest.Draw(m_wnd.GetGfx());
+
+	// 绘制用model加载的模型
+	m_TestCube1.Draw(m_wnd.GetGfx());
 
 	//
 	m_testPlane.Draw(m_wnd.GetGfx());
@@ -266,8 +269,9 @@ void XYHApp::DoFrame()
 	// 控制灯的UI
 	m_pointLight.SpawnControlWindow();
 
-	m_model.ShowWindow();
+	//m_model.ShowWindow();
 	//m_modelTest.ShowWindow();
+	m_TestCube1.ShowWindow();
 
 	m_testPlane.SpawnControlWindow(m_wnd.GetGfx());
 

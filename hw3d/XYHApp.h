@@ -44,4 +44,6 @@ private:
 	TestPlane m_testPlane;
 
 	TestCube m_testCube;
+
+	Model m_TestCube1{ m_wnd.GetGfx(), "Models\\brick_wall\\brick_wall.obj" };
 };

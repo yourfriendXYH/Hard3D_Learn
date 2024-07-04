@@ -13,10 +13,13 @@
       <FullPath>E:\DirectX_file\Direct3D_Learn\x64\Debug\PhongPS.cso</FullPath>
     </ContentFile>
     <ContentFile>
-      <FullPath>E:\DirectX_file\Direct3D_Learn\x64\Debug\PhongPSSpecMap.cso</FullPath>
+      <FullPath>E:\DirectX_file\Direct3D_Learn\x64\Debug\PhongPSSpecNormalMap.cso</FullPath>
     </ContentFile>
     <ContentFile>
       <FullPath>E:\DirectX_file\Direct3D_Learn\x64\Debug\PhongVS.cso</FullPath>
+    </ContentFile>
+    <ContentFile>
+      <FullPath>E:\DirectX_file\Direct3D_Learn\x64\Debug\PhongVSNormalMap.cso</FullPath>
     </ContentFile>
     <ContentFile>
       <FullPath>E:\DirectX_file\Direct3D_Learn\hw3d\PixelShader.cso</FullPath>

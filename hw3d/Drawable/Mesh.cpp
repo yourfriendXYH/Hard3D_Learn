@@ -40,7 +40,7 @@ Node::Node(int id, const std::string& name, std::vector<Mesh*> meshPtrs, const D
 
 void Node::Draw(Graphics& gfx, DirectX::FXMMATRIX accumulatedTransform) const
 {
-	const auto built = 
+	const auto built =
 		DirectX::XMLoadFloat4x4(&this->m_appliedTransform) *
 		DirectX::XMLoadFloat4x4(&this->m_transform) *
 		accumulatedTransform;
@@ -165,7 +165,11 @@ Model::Model(Graphics& gfx, const std::string fileName)
 {
 	Assimp::Importer importer;
 	const auto pScene = importer.ReadFile(fileName,
-		aiProcess_Triangulate | aiProcess_JoinIdenticalVertices);
+		aiProcess_Triangulate |
+		aiProcess_JoinIdenticalVertices |
+		aiProcess_ConvertToLeftHanded |
+		aiProcess_GenNormals | // 获取法线数据?
+		aiProcess_CalcTangentSpace); // 获取切线空间数据
 
 	for (size_t i = 0u; i < pScene->mNumMeshes; ++i)
 	{
@@ -199,7 +203,7 @@ void Model::ShowWindow(const char* windowName /*= nullptr*/) noexcept
 	m_pModelWindow->Show(windowName, *m_pRootNode);
 }
 
-std::unique_ptr<Mesh> Model::ParseMesh(Graphics& gfx, const aiMesh& mesh, const aiMaterial*const* pMaterials)
+std::unique_ptr<Mesh> Model::ParseMesh(Graphics& gfx, const aiMesh& mesh, const aiMaterial* const* pMaterials)
 {
 	using namespace Bind;
 
@@ -207,6 +211,8 @@ std::unique_ptr<Mesh> Model::ParseMesh(Graphics& gfx, const aiMesh& mesh, const 
 		DynamicData::VertexLayout{}
 		.Append(DynamicData::VertexLayout::Position3D)
 		.Append(DynamicData::VertexLayout::Normal)
+		.Append(DynamicData::VertexLayout::Tangent)
+		.Append(DynamicData::VertexLayout::Bitangent)
 		.Append(DynamicData::VertexLayout::Texture2D)
 	);
 	// 获取当前网格的材质
@@ -224,6 +230,8 @@ std::unique_ptr<Mesh> Model::ParseMesh(Graphics& gfx, const aiMesh& mesh, const 
 		vBuf.EmplaceBack(
 			*reinterpret_cast<DirectX::XMFLOAT3*>(&mesh.mVertices[i]),
 			*reinterpret_cast<DirectX::XMFLOAT3*>(&mesh.mNormals[i]),
+			*reinterpret_cast<DirectX::XMFLOAT3*>(&mesh.mTangents[i]),
+			*reinterpret_cast<DirectX::XMFLOAT3*>(&mesh.mBitangents[i]),
 			*reinterpret_cast<DirectX::XMFLOAT2*>(&mesh.mTextureCoords[0][i])
 		);
 	}
@@ -242,7 +250,8 @@ std::unique_ptr<Mesh> Model::ParseMesh(Graphics& gfx, const aiMesh& mesh, const 
 
 	std::vector<std::shared_ptr<Bindable>> bindablePtrs;
 	using namespace std::string_literals;
-	const auto basePath = "Models\\nano_textured\\"s;
+	//const auto basePath = "Models\\nano_textured\\"s;
+	const auto basePath = "Models\\brick_wall\\"s;
 	bool hasSpecularMap = false; // 是否有镜面高光贴图
 	float shininess = 35.0f; // 没有高光贴图时的镜面强度
 	if (mesh.mMaterialIndex >= 0)
@@ -264,6 +273,9 @@ std::unique_ptr<Mesh> Model::ParseMesh(Graphics& gfx, const aiMesh& mesh, const 
 		{
 			material.Get(AI_MATKEY_SHININESS, shininess);
 		}
+		// 获取法线贴图
+		material.GetTexture(aiTextureType_NORMALS, 0, &textureFileName);
+		bindablePtrs.push_back(Texture::Resolve(gfx, basePath + textureFileName.C_Str(), 2u));
 
 		// 纹理采样
 		bindablePtrs.push_back(Sampler::Resolve(gfx));
@@ -275,7 +287,7 @@ std::unique_ptr<Mesh> Model::ParseMesh(Graphics& gfx, const aiMesh& mesh, const 
 	// 索引缓存
 	bindablePtrs.emplace_back(IndexBuffer::Resolve(gfx, meshTag, indices));
 	// 顶点着色器
-	auto pVertexShader = VertexShader::Resolve(gfx, "PhongVS.cso");
+	auto pVertexShader = VertexShader::Resolve(gfx, "PhongVSNormalMap.cso");
 	auto pVertexShaderByteCode = pVertexShader->GetByteCode();
 	bindablePtrs.emplace_back(std::move(pVertexShader));
 
@@ -284,17 +296,24 @@ std::unique_ptr<Mesh> Model::ParseMesh(Graphics& gfx, const aiMesh& mesh, const 
 
 	if (hasSpecularMap) // 有高光贴图，则用高光贴图的数据算镜面高光
 	{
-		bindablePtrs.emplace_back(PixelShader::Resolve(gfx, "PhongPSSpecMap.cso"));
+		bindablePtrs.emplace_back(PixelShader::Resolve(gfx, "PhongPSSpecNormalMap.cso"));
+		struct PSMatrialConstant
+		{
+			BOOL normalMapEnabled = TRUE;
+			float padding[3];
+		}pmc;
+		bindablePtrs.emplace_back(PixelConstantBuffer<PSMatrialConstant>::Resolve(gfx, pmc, 1u));
 	}
 	else // 否则用常量
 	{
-		bindablePtrs.emplace_back(PixelShader::Resolve(gfx, "PhongPS.cso"));
+		bindablePtrs.emplace_back(PixelShader::Resolve(gfx, "PhongPSNormalMap.cso"));
 		// 像素着色器常量缓存
 		struct PSMaterialConstant
 		{
 			float specularIntensity = 0.8f;
 			float specularPower = 40.0f;
-			float padding[2];
+			BOOL normalMapEnabled = TRUE;
+			float padding[1];
 		} psMaterialConst;
 		psMaterialConst.specularPower = shininess;
 		bindablePtrs.emplace_back(PixelConstantBuffer<PSMaterialConstant>::Resolve(gfx, psMaterialConst, 1u));
