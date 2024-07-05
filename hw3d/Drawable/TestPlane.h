@@ -12,7 +12,7 @@ public:
 	void SpawnControlWindow(Graphics& gfx) noexcept;
 
 private:
-	DirectX::XMFLOAT3 m_pos;
+	DirectX::XMFLOAT3 m_pos = { 0.0f, 0.0f, 0.0f };
 	float m_roll = 0.0;
 	float m_pitch = 0.0;
 	float m_yaw = 0.0;
@@ -20,8 +20,8 @@ private:
 	// 着色器常量
 	struct PSMaterialConstant
 	{
-		float m_specularIntensity = 0.1f;
-		float m_specularPower = 20.0f;
+		float m_specularIntensity = 0.18f;
+		float m_specularPower = 18.0f;
 		BOOL m_normalMappingEnabled = TRUE;
 		float padding[1]; // 内存对齐（四字节对齐）
 	} m_pmc;

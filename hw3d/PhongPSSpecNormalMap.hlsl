@@ -21,7 +21,7 @@ Texture2D normalMap; // 法线贴图
 
 SamplerState splr; // 采样器
 
-float4 main(float3 worldPos : Position, float3 normal : Normal, float3 tangent : Tangent, float3 bitangent : Bitangent, float2 tc : Texcoord) : SV_TARGET
+float4 main(float3 viewPos : Position, float3 normal : Normal, float3 tangent : Tangent, float3 bitangent : Bitangent, float2 tc : Texcoord) : SV_TARGET
 {
     if (normalMapEnabled)
     {
@@ -41,7 +41,7 @@ float4 main(float3 worldPos : Position, float3 normal : Normal, float3 tangent :
     }
     
 	// 顶点到点光源的向量
-    const float3 vectorToLight = lightPos - worldPos;
+    const float3 vectorToLight = lightPos - viewPos;
     const float distVectorToLight = length(vectorToLight);
 	// 顶点到点光源的方向
     const float3 directionToLight = vectorToLight / distVectorToLight;
@@ -59,7 +59,7 @@ float4 main(float3 worldPos : Position, float3 normal : Normal, float3 tangent :
     const float4 specularSample = specTex.Sample(splr, tc);
     const float3 specularReflectionColor = specularSample.rgb; // 高光强度
     const float specularPower = pow(2.0f, specularSample.a * 13.0f);
-    const float3 specular = att * (diffuseColor * diffuseIntensity) * pow(max(0.0f, dot(normalize(-r), normalize(worldPos))), specularPower);
+    const float3 specular = att * (diffuseColor * diffuseIntensity) * pow(max(0.0f, dot(normalize(-r), normalize(viewPos))), specularPower);
 
 	// 最终颜色 漫反射+环境光
     return float4(saturate((diffuse + ambient) * tex.Sample(splr, tc).rgb + specular * specularReflectionColor), 1.0f);

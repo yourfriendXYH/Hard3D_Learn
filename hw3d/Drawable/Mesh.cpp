@@ -159,9 +159,10 @@ private:
 	std::unordered_map<int, TransformParameters> m_transformsMap;
 };
 
-Model::Model(Graphics& gfx, const std::string fileName)
+Model::Model(Graphics& gfx, const std::string fileName, std::string texBasePath)
 	:
-	m_pModelWindow(std::make_unique<ModelWindow>())
+	m_pModelWindow(std::make_unique<ModelWindow>()),
+	m_textureBasePath(texBasePath)
 {
 	Assimp::Importer importer;
 	const auto pScene = importer.ReadFile(fileName,
@@ -201,6 +202,11 @@ void Model::Draw(Graphics& gfx) const
 void Model::ShowWindow(const char* windowName /*= nullptr*/) noexcept
 {
 	m_pModelWindow->Show(windowName, *m_pRootNode);
+}
+
+void Model::SetModelRootTransform(DirectX::FXMMATRIX transform)
+{
+	m_pRootNode->SetAppliedTransform(transform);
 }
 
 std::unique_ptr<Mesh> Model::ParseMesh(Graphics& gfx, const aiMesh& mesh, const aiMaterial* const* pMaterials)
@@ -251,7 +257,7 @@ std::unique_ptr<Mesh> Model::ParseMesh(Graphics& gfx, const aiMesh& mesh, const 
 	std::vector<std::shared_ptr<Bindable>> bindablePtrs;
 	using namespace std::string_literals;
 	//const auto basePath = "Models\\nano_textured\\"s;
-	const auto basePath = "Models\\brick_wall\\"s;
+	const auto basePath = "Models\\nano_textured\\"s;
 	bool hasSpecularMap = false; // 是否有镜面高光贴图
 	float shininess = 35.0f; // 没有高光贴图时的镜面强度
 	if (mesh.mMaterialIndex >= 0)

@@ -17,7 +17,7 @@
 #include "..\Sampler.h"
 
 // 模型异常类
-class ModelException 
+class ModelException
 {
 public:
 
@@ -55,7 +55,7 @@ public:
 	int GetId() const noexcept;
 
 	void ShowTree(Node*& pSelectedNode) const noexcept;
-	
+
 private:
 	// 给Model使用
 	void AddChild(std::unique_ptr<Node> pChild);
@@ -73,21 +73,23 @@ private:
 class Model
 {
 public:
-	Model(Graphics& gfx, const std::string fileName);
+	Model(Graphics& gfx, const std::string fileName, std::string texBasePath);
 	~Model();
 
 public:
 	void Draw(Graphics& gfx) const;
 
 	void ShowWindow(const char* windowName = nullptr) noexcept;
+	void SetModelRootTransform(DirectX::FXMMATRIX transform);
 
 private:
 	// 创建网格模型
-	static std::unique_ptr<Mesh> ParseMesh(Graphics& gfx, const aiMesh& mesh, const aiMaterial*const* pMaterials);
+	static std::unique_ptr<Mesh> ParseMesh(Graphics& gfx, const aiMesh& mesh, const aiMaterial* const* pMaterials);
 	std::unique_ptr<Node> ParseNode(int& nextId, const aiNode& node);
 
 private:
 	std::unique_ptr<Node> m_pRootNode; // 模型根节点
 	std::vector<std::unique_ptr<Mesh>> m_meshPtrs;
 	std::unique_ptr<class ModelWindow> m_pModelWindow;
+	std::string m_textureBasePath = "";
 };

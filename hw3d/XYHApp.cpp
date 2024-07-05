@@ -117,6 +117,8 @@ XYHApp::XYHApp()
 
 	m_testCube.SetPos({ 0.0f, 0.0f, 0.0f });
 
+	m_TestCube1.SetModelRootTransform(DirectX::XMMatrixTranslation(-5.0f, 0.0f, 0.0f));
+
 	// 给Graphic设置投影矩阵
 	m_wnd.GetGfx().SetProjection(DirectX::XMMatrixPerspectiveLH(1.f, 9.f / 16.f, 0.5f, 100.f));
 	//m_wnd.GetGfx().SetProjection(DirectX::XMMatrixPerspectiveFovRH(PI / 2.f, 4.f / 3.f, 0.5f, 100.f));
@@ -163,7 +165,7 @@ void XYHApp::DoFrame()
 	m_pointLight.Bind(m_wnd.GetGfx(), m_camera.GetMatrix());
 
 	// 绘制模型
-	//m_model.Draw(m_wnd.GetGfx());
+	m_model.Draw(m_wnd.GetGfx());
 	//m_modelTest.Draw(m_wnd.GetGfx());
 
 	// 绘制用model加载的模型
@@ -269,7 +271,7 @@ void XYHApp::DoFrame()
 	// 控制灯的UI
 	m_pointLight.SpawnControlWindow();
 
-	//m_model.ShowWindow();
+	m_model.ShowWindow();
 	//m_modelTest.ShowWindow();
 	m_TestCube1.ShowWindow();
 
