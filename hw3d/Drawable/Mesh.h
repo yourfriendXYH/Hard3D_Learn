@@ -73,7 +73,7 @@ private:
 class Model
 {
 public:
-	Model(Graphics& gfx, const std::string fileName, std::string texBasePath);
+	Model(Graphics& gfx, const std::string fileName, std::string texBasePath = "");
 	~Model();
 
 public:

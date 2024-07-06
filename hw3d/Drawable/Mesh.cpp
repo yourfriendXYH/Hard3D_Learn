@@ -2,6 +2,7 @@
 #include "../imgui/imgui.h"
 #include <unordered_map>
 #include "../Surface.h"
+#include <stdexcept>
 
 Mesh::Mesh(Graphics& gfx, std::vector<std::shared_ptr<Bindable>> bindPtrs)
 {
@@ -211,65 +212,33 @@ void Model::SetModelRootTransform(DirectX::FXMMATRIX transform)
 
 std::unique_ptr<Mesh> Model::ParseMesh(Graphics& gfx, const aiMesh& mesh, const aiMaterial* const* pMaterials)
 {
+	using namespace std::string_literals;
 	using namespace Bind;
 
-	DynamicData::VerticesBuffer vBuf(
-		DynamicData::VertexLayout{}
-		.Append(DynamicData::VertexLayout::Position3D)
-		.Append(DynamicData::VertexLayout::Normal)
-		.Append(DynamicData::VertexLayout::Tangent)
-		.Append(DynamicData::VertexLayout::Bitangent)
-		.Append(DynamicData::VertexLayout::Texture2D)
-	);
-	// 获取当前网格的材质
-	//auto& material = *pMaterials[mesh.mMaterialIndex];
-	//for (int i = 0; i < material.mNumProperties; ++i)
-	//{
-	//	auto& prop = *material.mProperties[i];
-	//}
-
-
-	// 获取顶点数据
-	for (unsigned int i = 0u; i < mesh.mNumVertices; ++i)
-	{
-		auto test = mesh.mVertices[i];
-		vBuf.EmplaceBack(
-			*reinterpret_cast<DirectX::XMFLOAT3*>(&mesh.mVertices[i]),
-			*reinterpret_cast<DirectX::XMFLOAT3*>(&mesh.mNormals[i]),
-			*reinterpret_cast<DirectX::XMFLOAT3*>(&mesh.mTangents[i]),
-			*reinterpret_cast<DirectX::XMFLOAT3*>(&mesh.mBitangents[i]),
-			*reinterpret_cast<DirectX::XMFLOAT2*>(&mesh.mTextureCoords[0][i])
-		);
-	}
-
-	// 获取索引数据
-	std::vector<unsigned short> indices;
-	indices.reserve(mesh.mNumFaces * 3);
-	for (unsigned int i = 0; i < mesh.mNumFaces; i++)
-	{
-		const auto& face = mesh.mFaces[i];
-		assert(face.mNumIndices == 3);
-		indices.push_back(face.mIndices[0]);
-		indices.push_back(face.mIndices[1]);
-		indices.push_back(face.mIndices[2]);
-	}
-
 	std::vector<std::shared_ptr<Bindable>> bindablePtrs;
-	using namespace std::string_literals;
-	//const auto basePath = "Models\\nano_textured\\"s;
-	const auto basePath = "Models\\nano_textured\\"s;
-	bool hasSpecularMap = false; // 是否有镜面高光贴图
-	float shininess = 35.0f; // 没有高光贴图时的镜面强度
+	const auto basePath = "Models\\gobber\\"s;
+
+	bool hasDiffuseMap = false; // 是否有漫反射纹理
+	bool hasNormalMap = false;
+	bool hasSpecularMap = false;
+	float shininess = 35.f;
+
+	// 获取网格模型的纹理
 	if (mesh.mMaterialIndex >= 0)
 	{
 		auto& material = *pMaterials[mesh.mMaterialIndex];
 		aiString textureFileName;
-		material.GetTexture(aiTextureType_DIFFUSE, 0, &textureFileName);
-		// 添加纹理资源（像素着色器）
-		bindablePtrs.push_back(Texture::Resolve(gfx, basePath + textureFileName.C_Str()));
 
-		auto result = material.GetTexture(aiTextureType_SPECULAR, 0, &textureFileName);
-		if (result == aiReturn_SUCCESS) // 如果有高光贴图
+		// 获取漫反射纹理
+		if (material.GetTexture(aiTextureType_DIFFUSE, 0, &textureFileName) == aiReturn_SUCCESS)
+		{
+			// 添加纹理资源（像素着色器）
+			bindablePtrs.push_back(Texture::Resolve(gfx, basePath + textureFileName.C_Str()));
+			hasDiffuseMap = true;
+		}
+
+		// 获取高光纹理
+		if (material.GetTexture(aiTextureType_SPECULAR, 0, &textureFileName) == aiReturn_SUCCESS) // 如果有高光贴图
 		{
 			// 添加纹理资源（像素着色器）
 			bindablePtrs.push_back(Texture::Resolve(gfx, basePath + textureFileName.C_Str(), 1));
@@ -279,50 +248,265 @@ std::unique_ptr<Mesh> Model::ParseMesh(Graphics& gfx, const aiMesh& mesh, const 
 		{
 			material.Get(AI_MATKEY_SHININESS, shininess);
 		}
-		// 获取法线贴图
-		material.GetTexture(aiTextureType_NORMALS, 0, &textureFileName);
-		bindablePtrs.push_back(Texture::Resolve(gfx, basePath + textureFileName.C_Str(), 2u));
 
-		// 纹理采样
-		bindablePtrs.push_back(Sampler::Resolve(gfx));
+		// 获取法线纹理
+		if (material.GetTexture(aiTextureType_NORMALS, 0, &textureFileName) == aiReturn_SUCCESS)
+		{
+			bindablePtrs.push_back(Texture::Resolve(gfx, basePath + textureFileName.C_Str(), 2u));
+			hasNormalMap = true;
+		}
+
+		if (hasDiffuseMap || hasSpecularMap || hasNormalMap)
+		{
+			// 纹理采样
+			bindablePtrs.push_back(Sampler::Resolve(gfx));
+		}
 	}
 
-	// 顶点缓存
 	const auto meshTag = basePath + "%" + mesh.mName.C_Str();
-	bindablePtrs.emplace_back(VertexBuffer::Resolve(gfx, meshTag, vBuf));
-	// 索引缓存
-	bindablePtrs.emplace_back(IndexBuffer::Resolve(gfx, meshTag, indices));
-	// 顶点着色器
-	auto pVertexShader = VertexShader::Resolve(gfx, "PhongVSNormalMap.cso");
-	auto pVertexShaderByteCode = pVertexShader->GetByteCode();
-	bindablePtrs.emplace_back(std::move(pVertexShader));
+	const float scale = 6.0f;
 
-	// 输入布局
-	bindablePtrs.emplace_back(InputLayout::Resolve(gfx, vBuf.GetVertexLayout(), pVertexShaderByteCode));
-
-	if (hasSpecularMap) // 有高光贴图，则用高光贴图的数据算镜面高光
+	if (hasDiffuseMap && hasSpecularMap && hasNormalMap)
 	{
-		bindablePtrs.emplace_back(PixelShader::Resolve(gfx, "PhongPSSpecNormalMap.cso"));
-		struct PSMatrialConstant
+		// 动态顶点对象
+		DynamicData::VerticesBuffer vBuf(
+			DynamicData::VertexLayout{}
+			.Append(DynamicData::VertexLayout::Position3D)
+			.Append(DynamicData::VertexLayout::Normal)
+			.Append(DynamicData::VertexLayout::Tangent)
+			.Append(DynamicData::VertexLayout::Bitangent)
+			.Append(DynamicData::VertexLayout::Texture2D)
+		);
+
+		// 获取顶点数据
+		for (unsigned int i = 0u; i < mesh.mNumVertices; ++i)
 		{
-			BOOL normalMapEnabled = TRUE;
+			auto test = mesh.mVertices[i];
+			vBuf.EmplaceBack(
+				DirectX::XMFLOAT3(mesh.mVertices[i].x * scale, mesh.mVertices[i].y * scale, mesh.mVertices[i].z * scale),
+				*reinterpret_cast<DirectX::XMFLOAT3*>(&mesh.mNormals[i]),
+				*reinterpret_cast<DirectX::XMFLOAT3*>(&mesh.mTangents[i]),
+				*reinterpret_cast<DirectX::XMFLOAT3*>(&mesh.mBitangents[i]),
+				*reinterpret_cast<DirectX::XMFLOAT2*>(&mesh.mTextureCoords[0][i])
+			);
+		}
+
+		// 获取索引数据
+		std::vector<unsigned short> indices;
+		indices.reserve(mesh.mNumFaces * 3);
+		for (unsigned int i = 0; i < mesh.mNumFaces; i++)
+		{
+			const auto& face = mesh.mFaces[i];
+			assert(face.mNumIndices == 3);
+			indices.push_back(face.mIndices[0]);
+			indices.push_back(face.mIndices[1]);
+			indices.push_back(face.mIndices[2]);
+		}
+
+		// 顶点缓存
+		bindablePtrs.emplace_back(VertexBuffer::Resolve(gfx, meshTag, vBuf));
+		// 索引缓存
+		bindablePtrs.emplace_back(IndexBuffer::Resolve(gfx, meshTag, indices));
+
+		// 顶点着色器
+		auto pVertexShader = VertexShader::Resolve(gfx, "PhongVSNormalMap.cso");
+		auto pVertexShaderByteCode = pVertexShader->GetByteCode();
+		bindablePtrs.emplace_back(std::move(pVertexShader));
+		// 像素着色器
+		bindablePtrs.emplace_back(PixelShader::Resolve(gfx, "PhongPSSpecNormalMap.cso")); // 有高光纹理的像素着色器
+
+		// 输入布局
+		bindablePtrs.emplace_back(InputLayout::Resolve(gfx, vBuf.GetVertexLayout(), pVertexShaderByteCode));
+
+		struct PSMaterialConstantFullmonte
+		{
+			BOOL  normalMapEnabled = TRUE; // 是否使用法线纹理
 			float padding[3];
-		}pmc;
-		bindablePtrs.emplace_back(PixelConstantBuffer<PSMatrialConstant>::Resolve(gfx, pmc, 1u));
+		} pmc;
+
+		bindablePtrs.emplace_back(PixelConstantBuffer<PSMaterialConstantFullmonte>::Resolve(gfx, pmc, 1u));
 	}
-	else // 否则用常量
+	else if (hasDiffuseMap && hasNormalMap) // 没有高光纹理
 	{
-		bindablePtrs.emplace_back(PixelShader::Resolve(gfx, "PhongPSNormalMap.cso"));
-		// 像素着色器常量缓存
-		struct PSMaterialConstant
+		DynamicData::VerticesBuffer vBuf{
+			DynamicData::VertexLayout{}
+			.Append(DynamicData::VertexLayout::Position3D)
+			.Append(DynamicData::VertexLayout::Normal)
+			.Append(DynamicData::VertexLayout::Tangent)
+			.Append(DynamicData::VertexLayout::Bitangent)
+			.Append(DynamicData::VertexLayout::Texture2D)
+		};
+
+		// 获取顶点数据
+		for (unsigned int i = 0u; i < mesh.mNumVertices; ++i)
 		{
-			float specularIntensity = 0.8f;
-			float specularPower = 40.0f;
-			BOOL normalMapEnabled = TRUE;
+			auto test = mesh.mVertices[i];
+			vBuf.EmplaceBack(
+				DirectX::XMFLOAT3(mesh.mVertices[i].x * scale, mesh.mVertices[i].y * scale, mesh.mVertices[i].z * scale),
+				*reinterpret_cast<DirectX::XMFLOAT3*>(&mesh.mNormals[i]),
+				*reinterpret_cast<DirectX::XMFLOAT3*>(&mesh.mTangents[i]),
+				*reinterpret_cast<DirectX::XMFLOAT3*>(&mesh.mBitangents[i]),
+				*reinterpret_cast<DirectX::XMFLOAT2*>(&mesh.mTextureCoords[0][i])
+			);
+		}
+
+		// 获取索引数据
+		std::vector<unsigned short> indices;
+		indices.reserve(mesh.mNumFaces * 3);
+		for (unsigned int i = 0; i < mesh.mNumFaces; i++)
+		{
+			const auto& face = mesh.mFaces[i];
+			assert(face.mNumIndices == 3);
+			indices.push_back(face.mIndices[0]);
+			indices.push_back(face.mIndices[1]);
+			indices.push_back(face.mIndices[2]);
+		}
+
+		// 顶点缓存
+		bindablePtrs.emplace_back(VertexBuffer::Resolve(gfx, meshTag, vBuf));
+		// 索引缓存
+		bindablePtrs.emplace_back(IndexBuffer::Resolve(gfx, meshTag, indices));
+
+		// 顶点着色器
+		auto pVertexShader = VertexShader::Resolve(gfx, "PhongVSNormalMap.cso");
+		auto pVertexShaderByteCode = pVertexShader->GetByteCode();
+		bindablePtrs.emplace_back(std::move(pVertexShader));
+		// 像素着色器
+		bindablePtrs.emplace_back(PixelShader::Resolve(gfx, "PhongPSNormalMap.cso")); // 有高光纹理的像素着色器
+
+		// 输入布局
+		bindablePtrs.emplace_back(InputLayout::Resolve(gfx, vBuf.GetVertexLayout(), pVertexShaderByteCode));
+
+		struct PSMaterialConstantDiffNorm
+		{
+			float specularIntensity = 0.18f;
+			float specularPower = 18;
+			BOOL  normalMapEnabled = TRUE; // 是否使用法线纹理
 			float padding[1];
-		} psMaterialConst;
-		psMaterialConst.specularPower = shininess;
-		bindablePtrs.emplace_back(PixelConstantBuffer<PSMaterialConstant>::Resolve(gfx, psMaterialConst, 1u));
+		} pmc;
+		pmc.specularPower = shininess;
+
+		bindablePtrs.emplace_back(PixelConstantBuffer<PSMaterialConstantDiffNorm>::Resolve(gfx, pmc, 1u));
+	}
+	else if (hasDiffuseMap)
+	{
+		DynamicData::VerticesBuffer vBuf{
+			DynamicData::VertexLayout{}
+			.Append(DynamicData::VertexLayout::Position3D)
+			.Append(DynamicData::VertexLayout::Normal)
+			.Append(DynamicData::VertexLayout::Texture2D)
+		};
+
+		// 获取顶点数据
+		for (unsigned int i = 0u; i < mesh.mNumVertices; ++i)
+		{
+			auto test = mesh.mVertices[i];
+			vBuf.EmplaceBack(
+				DirectX::XMFLOAT3(mesh.mVertices[i].x * scale, mesh.mVertices[i].y * scale, mesh.mVertices[i].z * scale),
+				*reinterpret_cast<DirectX::XMFLOAT3*>(&mesh.mNormals[i]),
+				*reinterpret_cast<DirectX::XMFLOAT2*>(&mesh.mTextureCoords[0][i])
+			);
+		}
+
+		// 获取索引数据
+		std::vector<unsigned short> indices;
+		indices.reserve(mesh.mNumFaces * 3);
+		for (unsigned int i = 0; i < mesh.mNumFaces; i++)
+		{
+			const auto& face = mesh.mFaces[i];
+			assert(face.mNumIndices == 3);
+			indices.push_back(face.mIndices[0]);
+			indices.push_back(face.mIndices[1]);
+			indices.push_back(face.mIndices[2]);
+		}
+
+		// 顶点缓存
+		bindablePtrs.emplace_back(VertexBuffer::Resolve(gfx, meshTag, vBuf));
+		// 索引缓存
+		bindablePtrs.emplace_back(IndexBuffer::Resolve(gfx, meshTag, indices));
+
+		// 顶点着色器
+		auto pVertexShader = VertexShader::Resolve(gfx, "PhongVS.cso");
+		auto pVertexShaderByteCode = pVertexShader->GetByteCode();
+		bindablePtrs.emplace_back(std::move(pVertexShader));
+		// 像素着色器
+		bindablePtrs.emplace_back(PixelShader::Resolve(gfx, "PhongPS.cso")); // 有高光纹理的像素着色器
+
+		// 输入布局
+		bindablePtrs.emplace_back(InputLayout::Resolve(gfx, vBuf.GetVertexLayout(), pVertexShaderByteCode));
+
+		struct PSMaterialConstantDiffuse
+		{
+			float specularIntensity = 0.18f;
+			float specularPower = 18;
+			float padding[1];
+		} pmc;
+		pmc.specularPower = shininess;
+
+		bindablePtrs.emplace_back(PixelConstantBuffer<PSMaterialConstantDiffuse>::Resolve(gfx, pmc, 1u));
+	}
+	else if (!hasDiffuseMap && !hasNormalMap && !hasSpecularMap)
+	{
+		DynamicData::VerticesBuffer vBuf{
+			DynamicData::VertexLayout{}
+			.Append(DynamicData::VertexLayout::Position3D)
+			.Append(DynamicData::VertexLayout::Normal)
+		};
+
+		// 获取顶点数据
+		for (unsigned int i = 0u; i < mesh.mNumVertices; ++i)
+		{
+			auto test = mesh.mVertices[i];
+			vBuf.EmplaceBack(
+				DirectX::XMFLOAT3(mesh.mVertices[i].x * scale, mesh.mVertices[i].y * scale, mesh.mVertices[i].z * scale),
+				*reinterpret_cast<DirectX::XMFLOAT3*>(&mesh.mNormals[i])
+			);
+		}
+
+		// 获取索引数据
+		std::vector<unsigned short> indices;
+		indices.reserve(mesh.mNumFaces * 3);
+		for (unsigned int i = 0; i < mesh.mNumFaces; i++)
+		{
+			const auto& face = mesh.mFaces[i];
+			assert(face.mNumIndices == 3);
+			indices.push_back(face.mIndices[0]);
+			indices.push_back(face.mIndices[1]);
+			indices.push_back(face.mIndices[2]);
+		}
+
+		// 顶点缓存
+		bindablePtrs.emplace_back(VertexBuffer::Resolve(gfx, meshTag, vBuf));
+		// 索引缓存
+		bindablePtrs.emplace_back(IndexBuffer::Resolve(gfx, meshTag, indices));
+
+		// 顶点着色器
+		auto pVertexShader = VertexShader::Resolve(gfx, "PhongVSNotex.cso");
+		auto pVertexShaderByteCode = pVertexShader->GetByteCode();
+		bindablePtrs.emplace_back(std::move(pVertexShader));
+		// 像素着色器
+		bindablePtrs.emplace_back(PixelShader::Resolve(gfx, "PhongPSNotex.cso")); // 有高光纹理的像素着色器
+
+		// 输入布局
+		bindablePtrs.emplace_back(InputLayout::Resolve(gfx, vBuf.GetVertexLayout(), pVertexShaderByteCode));
+
+		struct PSMaterialConstantNotex
+		{
+			DirectX::XMFLOAT4 materialColor = { 0.65f,0.65f,0.85f,1.0f };
+			float specularIntensity = 0.18f;
+			float specularPower = 18;
+			float padding[2];
+		} pmc;
+		pmc.specularPower = shininess;
+
+		bindablePtrs.emplace_back(PixelConstantBuffer<PSMaterialConstantNotex>::Resolve(gfx, pmc, 1u));
+	}
+	else
+	{
+		//throw std::runtime_error("没有正常的纹理组合");
+		if (1)
+		{
+		}
 	}
 
 	return std::make_unique<Mesh>(gfx, std::move(bindablePtrs));

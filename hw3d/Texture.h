@@ -13,7 +13,11 @@ namespace Bind
 		static std::shared_ptr<Texture> Resolve(Graphics& gfx, const std::string& path, UINT slot = 0u);
 		static std::string GenerateUID(const std::string& path, UINT slot = 0u);
 		std::string GetUID() const noexcept;
+
+		bool HasAlpha() const noexcept;
 	protected:
+
+		bool m_hasAlpha = false;
 		std::string m_path; // ÎÆÀíÂ·¾¶
 		Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> m_pTextureView;
 	private:

@@ -117,7 +117,7 @@ XYHApp::XYHApp()
 
 	m_testCube.SetPos({ 0.0f, 0.0f, 0.0f });
 
-	m_TestCube1.SetModelRootTransform(DirectX::XMMatrixTranslation(-5.0f, 0.0f, 0.0f));
+	//m_TestCube1.SetModelRootTransform(DirectX::XMMatrixTranslation(-5.0f, 0.0f, 0.0f));
 
 	// 给Graphic设置投影矩阵
 	m_wnd.GetGfx().SetProjection(DirectX::XMMatrixPerspectiveLH(1.f, 9.f / 16.f, 0.5f, 100.f));
@@ -166,22 +166,18 @@ void XYHApp::DoFrame()
 
 	// 绘制模型
 	m_model.Draw(m_wnd.GetGfx());
-	//m_modelTest.Draw(m_wnd.GetGfx());
 
 	// 绘制用model加载的模型
 	m_TestCube1.Draw(m_wnd.GetGfx());
 
 	//
-	m_testPlane.Draw(m_wnd.GetGfx());
-	m_testCube.Draw(m_wnd.GetGfx());
+	//m_testPlane.Draw(m_wnd.GetGfx());
+	//m_testCube.Draw(m_wnd.GetGfx());
+
+	// 绘制哥布林
+	m_gobber.Draw(m_wnd.GetGfx());
 
 	auto delta = m_timer.Mark();
-
-	//for (auto& boxRef : m_drawables)
-	//{
-	//	boxRef->Update(delta);
-	//	boxRef->Draw(m_wnd.GetGfx());
-	//}
 
 	// 绘制点光源
 	m_pointLight.Draw(m_wnd.GetGfx());
@@ -271,13 +267,14 @@ void XYHApp::DoFrame()
 	// 控制灯的UI
 	m_pointLight.SpawnControlWindow();
 
-	m_model.ShowWindow();
-	//m_modelTest.ShowWindow();
-	m_TestCube1.ShowWindow();
+	m_gobber.ShowWindow();
 
-	m_testPlane.SpawnControlWindow(m_wnd.GetGfx());
+	//m_model.ShowWindow();
+	//m_TestCube1.ShowWindow();
 
-	m_testCube.SpawnControlWindow(m_wnd.GetGfx());
+	//m_testPlane.SpawnControlWindow(m_wnd.GetGfx());
+
+	//m_testCube.SpawnControlWindow(m_wnd.GetGfx());
 
 	ShowRawInputWindow(); // 显示鼠标偏移
 

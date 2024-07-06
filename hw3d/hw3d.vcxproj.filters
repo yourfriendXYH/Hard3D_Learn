@@ -462,5 +462,11 @@
     <FxCompile Include="PhongVSNormalMap.hlsl">
       <Filter>Code\HLSL</Filter>
     </FxCompile>
+    <FxCompile Include="HLSL\PhongVSNotex.hlsl">
+      <Filter>Code\HLSL</Filter>
+    </FxCompile>
+    <FxCompile Include="HLSL\PhongPSNotex.hlsl">
+      <Filter>Code\HLSL</Filter>
+    </FxCompile>
   </ItemGroup>
 </Project>
