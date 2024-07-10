@@ -34,11 +34,12 @@ Surface::Surface(Surface&& source) noexcept
 {
 }
 
-Surface::Surface(unsigned int width, unsigned int height, std::unique_ptr<Color[]> pBufferParam) noexcept
+Surface::Surface(unsigned int width, unsigned int height, std::unique_ptr<Color[]> pBufferParam, bool alphaLoaded) noexcept
 	:
 	m_width(width),
 	m_height(height),
-	m_pBuffer(std::move(pBufferParam))
+	m_pBuffer(std::move(pBufferParam)),
+	m_alphaLoaded(alphaLoaded)
 {
 }
 
@@ -109,6 +110,7 @@ Surface Surface::FromFile(const std::string& name)
 	unsigned int width = 0u;
 	unsigned int height = 0u;
 	std::unique_ptr<Color[]> pBuffer;
+	bool alphaLoaded = false;
 	{
 		wchar_t wideName[512];
 		mbstowcs_s(nullptr, wideName, name.c_str(), _TRUNCATE);
@@ -132,54 +134,58 @@ Surface Surface::FromFile(const std::string& name)
 				bitmap.GetPixel(x, y, &color);
 				auto colorValue = color.GetValue();
 				pBuffer[y * width + x] = color.GetValue();
+				if (color.GetAlpha() != 255)
+				{
+					alphaLoaded = true;
+				}
 			}
 		}
 	}
 
-	return Surface(width, height, std::move(pBuffer));
+	return Surface(width, height, std::move(pBuffer), alphaLoaded);
 }
 
 void Surface::Save(const std::string& filename) const
 {
 	auto GetEncoderClsid = [&filename](const WCHAR* format, CLSID* pClsid) -> void
-	{
-		UINT num = 0; // number of image encoders
-		UINT size = 0; // size of the image encoder array in bytes
-
-		Gdiplus::ImageCodecInfo* pImageCodecInfo = nullptr;
-
-		Gdiplus::GetImageEncodersSize(&num, &size);
-		if (0 == size)
 		{
-			std::stringstream ss;
-			ss << "Saving surface to [" << filename << "]: failed to get encoder; size == 0.";
-			// exception
-		}
+			UINT num = 0; // number of image encoders
+			UINT size = 0; // size of the image encoder array in bytes
 
-		pImageCodecInfo = (Gdiplus::ImageCodecInfo*)(malloc(size));
-		if (pImageCodecInfo == nullptr)
-		{
-			std::stringstream ss;
-			ss << "Saving surface to [" << filename << "]: failed to get encoder; failed to allocate memory.";
-		}
+			Gdiplus::ImageCodecInfo* pImageCodecInfo = nullptr;
 
-		GetImageEncoders(num, size, pImageCodecInfo);
-
-		for (UINT j = 0; j < num; ++j)
-		{
-			if (wcscmp(pImageCodecInfo[j].MimeType, format) == 0)
+			Gdiplus::GetImageEncodersSize(&num, &size);
+			if (0 == size)
 			{
-				*pClsid = pImageCodecInfo[j].Clsid;
-				free(pImageCodecInfo);
-				return;
+				std::stringstream ss;
+				ss << "Saving surface to [" << filename << "]: failed to get encoder; size == 0.";
+				// exception
 			}
-		}
 
-		free(pImageCodecInfo);
-		std::stringstream ss;
-		ss << "Saving surface to [" << filename <<
-			"]: failed to get encoder; failed to find matching encoder.";
-	};
+			pImageCodecInfo = (Gdiplus::ImageCodecInfo*)(malloc(size));
+			if (pImageCodecInfo == nullptr)
+			{
+				std::stringstream ss;
+				ss << "Saving surface to [" << filename << "]: failed to get encoder; failed to allocate memory.";
+			}
+
+			GetImageEncoders(num, size, pImageCodecInfo);
+
+			for (UINT j = 0; j < num; ++j)
+			{
+				if (wcscmp(pImageCodecInfo[j].MimeType, format) == 0)
+				{
+					*pClsid = pImageCodecInfo[j].Clsid;
+					free(pImageCodecInfo);
+					return;
+				}
+			}
+
+			free(pImageCodecInfo);
+			std::stringstream ss;
+			ss << "Saving surface to [" << filename <<
+				"]: failed to get encoder; failed to find matching encoder.";
+		};
 
 	CLSID bmpID;
 	GetEncoderClsid(L"image/bmp", &bmpID);
@@ -201,4 +207,9 @@ void Surface::Copy(const Surface& src)
 	assert(m_width == src.m_width);
 	assert(m_height == src.m_height);
 	memcpy(m_pBuffer.get(), src.m_pBuffer.get(), m_height * m_width * sizeof(Color));
+}
+
+bool Surface::AlphaLoaded() const noexcept
+{
+	return m_alphaLoaded;
 }

@@ -42,14 +42,14 @@ void PointLight::SpawnControlWindow()
 
 void PointLight::Reset() noexcept
 {
-	m_cbufData = { 
-		{ 1.5f,14.0f,-4.5f },
+	m_cbufData = {
+		{ 2.0f,9.0f,-17.0f },
 		{ 0.05f,0.05f,0.05f },
 		{ 1.0f,1.0f,1.0f },
 		1.0f,
 		0.0075f,
 		0.045f,
-		1.0f, 
+		1.0f,
 	};
 }
 

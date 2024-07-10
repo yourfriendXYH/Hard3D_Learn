@@ -12,7 +12,7 @@ namespace Bind
 		// 获取纹理数据
 		const auto surface = Surface::FromFile(path);
 
-		//m_hasAlpha = surface.AlphaLoaded();
+		m_hasAlpha = surface.AlphaLoaded();
 
 		// 2d纹理的描述
 		D3D11_TEXTURE2D_DESC texture2dDesc = {};
