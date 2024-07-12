@@ -12,7 +12,11 @@ cbuffer LightCBuf
 cbuffer ObjectCBuf
 {
     bool normalMapEnabled;
-    float padding[3];
+    bool specularMapEnabled;
+    bool hasGloss;
+    float specularPowerConst;
+    float3 specularColor;
+    float specularMapWeight;
 };
 
 Texture2D tex; // 漫反射贴图
@@ -56,9 +60,26 @@ float4 main(float3 viewPos : Position, float3 normal : Normal, float3 tangent : 
     const float3 r = 2.0f * w - vectorToLight; // 反射光R的计算
 	// 镜面高光公式
 	//const float3 specular = att * (diffuseColor * diffuseIntensity) * specularIntensity * pow(max(0.0f, dot(normalize(-r), normalize(worldPos))), specularPower);
-    const float4 specularSample = specTex.Sample(splr, tc);
-    const float3 specularReflectionColor = specularSample.rgb; // 高光强度
-    const float specularPower = pow(2.0f, specularSample.a * 13.0f);
+
+    float3 specularReflectionColor;
+    float specularPower = specularPowerConst;
+    if (specularMapEnabled)
+    {
+        // 高光贴图采样
+        const float4 specularSample = specTex.Sample(splr, tc);
+        specularReflectionColor = specularSample.rgb * specularMapWeight; // 高光强度
+        
+        if (hasGloss)
+        {
+            specularPower = pow(2.0f, specularSample.a * 13.0f);
+        }
+    }
+    else
+    {
+        // 没有高光贴图则用颜色常量
+        specularReflectionColor = specularColor;
+    }
+    
     const float3 specular = att * (diffuseColor * diffuseIntensity) * pow(max(0.0f, dot(normalize(-r), normalize(viewPos))), specularPower);
 
 	// 最终颜色 漫反射+环境光

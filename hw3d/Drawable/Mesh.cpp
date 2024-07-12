@@ -219,6 +219,7 @@ std::unique_ptr<Mesh> Model::ParseMesh(Graphics& gfx, const aiMesh& mesh, const 
 	const auto basePath = "Models\\gobber\\"s;
 
 	bool hasDiffuseMap = false; // 是否有漫反射纹理
+	bool hasAlphaGloss = false;
 	bool hasNormalMap = false;
 	bool hasSpecularMap = false;
 	float shininess = 35.f;
@@ -240,11 +241,13 @@ std::unique_ptr<Mesh> Model::ParseMesh(Graphics& gfx, const aiMesh& mesh, const 
 		// 获取高光纹理
 		if (material.GetTexture(aiTextureType_SPECULAR, 0, &textureFileName) == aiReturn_SUCCESS) // 如果有高光贴图
 		{
-			// 添加纹理资源（像素着色器）
-			bindablePtrs.push_back(Texture::Resolve(gfx, basePath + textureFileName.C_Str(), 1));
+			// 添加纹理资源（像素着色器
+			auto spTextureBind = Texture::Resolve(gfx, basePath + textureFileName.C_Str(), 1);
+			hasAlphaGloss = spTextureBind->HasAlpha();
+			bindablePtrs.push_back(spTextureBind);
 			hasSpecularMap = true;
 		}
-		else
+		if (!hasAlphaGloss)
 		{
 			material.Get(AI_MATKEY_SHININESS, shininess);
 		}
@@ -252,7 +255,9 @@ std::unique_ptr<Mesh> Model::ParseMesh(Graphics& gfx, const aiMesh& mesh, const 
 		// 获取法线纹理
 		if (material.GetTexture(aiTextureType_NORMALS, 0, &textureFileName) == aiReturn_SUCCESS)
 		{
-			bindablePtrs.push_back(Texture::Resolve(gfx, basePath + textureFileName.C_Str(), 2u));
+			auto spTextureBind = Texture::Resolve(gfx, basePath + textureFileName.C_Str(), 2u);
+			hasAlphaGloss = spTextureBind->HasAlpha();
+			bindablePtrs.push_back(spTextureBind);
 			hasNormalMap = true;
 		}
 
@@ -320,9 +325,15 @@ std::unique_ptr<Mesh> Model::ParseMesh(Graphics& gfx, const aiMesh& mesh, const 
 
 		struct PSMaterialConstantFullmonte
 		{
-			BOOL  normalMapEnabled = TRUE; // 是否使用法线纹理
-			float padding[3];
+			BOOL normalMapEnabled = TRUE; // 是否使用法线纹理
+			BOOL specularMapEnabled = TRUE;
+			BOOL hasGlossMap;
+			float specularPower;
+			DirectX::XMFLOAT3 specularColor = { 1.0f, 1.0f, 1.0f };
+			float specularMapWeight = 1.0f;
 		} pmc;
+		pmc.specularPower = shininess;
+		pmc.hasGlossMap = hasAlphaGloss ? TRUE : FALSE;
 
 		bindablePtrs.emplace_back(PixelConstantBuffer<PSMaterialConstantFullmonte>::Resolve(gfx, pmc, 1u));
 	}
@@ -492,7 +503,7 @@ std::unique_ptr<Mesh> Model::ParseMesh(Graphics& gfx, const aiMesh& mesh, const 
 
 		struct PSMaterialConstantNotex
 		{
-			DirectX::XMFLOAT4 materialColor = { 0.65f,0.65f,0.85f,1.0f };
+			DirectX::XMFLOAT4 materialColor = { 0.45f,0.45f,0.85f,1.0f };
 			float specularIntensity = 0.18f;
 			float specularPower = 18;
 			float padding[2];
