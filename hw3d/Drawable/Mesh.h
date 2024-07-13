@@ -15,6 +15,8 @@
 #include "..\InputLayout.h"
 #include "..\Texture.h"
 #include "..\Sampler.h"
+#include "../imgui/imgui.h"
+#include <type_traits>
 
 // 模型异常类
 class ModelException
@@ -45,6 +47,25 @@ class Node
 {
 	friend class Model;
 public:
+	struct PSMaterialConstantFullmonte
+	{
+		BOOL normalMapEnabled = TRUE; // 是否使用法线纹理
+		BOOL specularMapEnabled = TRUE;
+		BOOL hasGlossMap = FALSE;
+		float specularPower = 3.1f;
+		DirectX::XMFLOAT3 specularColor = { 0.75f, 0.75f, 0.75f };
+		float specularMapWeight = 0.671f;
+	};
+
+	struct PSMaterialConstantNotex
+	{
+		DirectX::XMFLOAT4 materialColor = { 0.447970f,0.327254f,0.176283f,1.0f };
+		float specularIntensity = 0.65f;
+		float specularPower = 120.0f;
+		float padding[2];
+	};
+
+public:
 	Node(int id, const std::string& name, std::vector<Mesh*> meshPtrs, const DirectX::XMMATRIX& transform) noexcept;
 
 	// 递归绘制Mesh
@@ -55,6 +76,62 @@ public:
 	int GetId() const noexcept;
 
 	void ShowTree(Node*& pSelectedNode) const noexcept;
+
+	// 控制节点的材质效果
+	template<class T>
+	bool ControlNode(Graphics& gfx, T& constant)
+	{
+		if (m_meshPtrs.empty())
+		{
+			return false;
+		}
+
+		if constexpr (std::is_same<T, PSMaterialConstantFullmonte>::value)
+		{
+			if (auto pcb = m_meshPtrs.front()->QueryBindable<Bind::PixelConstantBuffer<T>>())
+			{
+				ImGui::Text("Material");
+
+				bool normalMapEnabled = (bool)constant.normalMapEnabled;
+				ImGui::Checkbox("Norm Map", &normalMapEnabled);
+				constant.normalMapEnabled = normalMapEnabled ? TRUE : FALSE;
+
+				bool specularMapEnabled = (bool)constant.specularMapEnabled;
+				ImGui::Checkbox("Spec Map", &specularMapEnabled);
+				constant.specularMapEnabled = specularMapEnabled ? TRUE : FALSE;
+
+				bool hasGlossMap = (bool)constant.hasGlossMap;
+				ImGui::Checkbox("Gloss Alpha", &hasGlossMap);
+				constant.hasGlossMap = hasGlossMap ? TRUE : FALSE;
+
+				ImGui::SliderFloat("Spec Weight", &constant.specularMapWeight, 0.0f, 2.0f);
+
+				ImGui::SliderFloat("Spec Pow", &constant.specularPower, 0.0f, 1000.0f, "%f");
+
+				ImGui::ColorPicker3("Spec Color", reinterpret_cast<float*>(&constant.specularColor));
+
+				pcb->Update(gfx, constant);
+				return true;
+			}
+		}
+		else if constexpr (std::is_same<T, PSMaterialConstantNotex>::value)
+		{
+			if (auto pcb = m_meshPtrs.front()->QueryBindable<Bind::PixelConstantBuffer<T>>())
+			{
+				ImGui::Text("Material");
+
+				ImGui::SliderFloat("Spec Inten.", &constant.specularIntensity, 0.0f, 1.0f);
+
+				ImGui::SliderFloat("Spec Pow", &constant.specularPower, 0.0f, 1000.0f, "%f");
+
+				ImGui::ColorPicker3("Diff Color", reinterpret_cast<float*>(&constant.materialColor));
+
+				pcb->Update(gfx, constant);
+				return true;
+			}
+		}
+		return false;
+	}
 
 private:
 	// 给Model使用
@@ -79,7 +156,7 @@ public:
 public:
 	void Draw(Graphics& gfx) const;
 
-	void ShowWindow(const char* windowName = nullptr) noexcept;
+	void ShowWindow(Graphics& gfx, const char* windowName = nullptr) noexcept;
 	void SetModelRootTransform(DirectX::FXMMATRIX transform);
 
 private:

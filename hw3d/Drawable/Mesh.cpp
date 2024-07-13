@@ -99,7 +99,7 @@ void Node::AddChild(std::unique_ptr<Node> pChild)
 class ModelWindow
 {
 public:
-	void Show(const char* windowName /*= nullptr*/, const Node& rootNode) noexcept
+	void Show(Graphics& gfx, const char* windowName /*= nullptr*/, const Node& rootNode) noexcept
 	{
 		windowName = nullptr != windowName ? windowName : "Model";
 		// 节点索引追踪
@@ -122,6 +122,11 @@ public:
 				ImGui::SliderFloat("X", &transform.x, -20.f, 20.f);
 				ImGui::SliderFloat("Y", &transform.y, -20.f, 20.f);
 				ImGui::SliderFloat("Z", &transform.z, -20.f, 20.f);
+
+				if (!m_pSelectedNode->ControlNode(gfx, m_skinMaterialConstant))
+				{
+					m_pSelectedNode->ControlNode(gfx, m_ringMaterialConstant);
+				}
 			}
 		}
 		ImGui::End();
@@ -146,6 +151,9 @@ public:
 private:
 
 	Node* m_pSelectedNode = nullptr;
+
+	Node::PSMaterialConstantFullmonte m_skinMaterialConstant;
+	Node::PSMaterialConstantNotex m_ringMaterialConstant;
 
 	struct TransformParameters
 	{
@@ -200,9 +208,9 @@ void Model::Draw(Graphics& gfx) const
 	m_pRootNode->Draw(gfx, DirectX::XMMatrixIdentity());
 }
 
-void Model::ShowWindow(const char* windowName /*= nullptr*/) noexcept
+void Model::ShowWindow(Graphics& gfx, const char* windowName /*= nullptr*/) noexcept
 {
-	m_pModelWindow->Show(windowName, *m_pRootNode);
+	m_pModelWindow->Show(gfx, windowName, *m_pRootNode);
 }
 
 void Model::SetModelRootTransform(DirectX::FXMMATRIX transform)
@@ -223,6 +231,8 @@ std::unique_ptr<Mesh> Model::ParseMesh(Graphics& gfx, const aiMesh& mesh, const 
 	bool hasNormalMap = false;
 	bool hasSpecularMap = false;
 	float shininess = 35.f;
+	DirectX::XMFLOAT4 specularColor = { 0.18f, 0.18f, 0.18f, 1.0f };
+	DirectX::XMFLOAT4 diffuseColor = { 0.45f, 0.45f, 0.85f, 1.0f };
 
 	// 获取网格模型的纹理
 	if (mesh.mMaterialIndex >= 0)
@@ -237,6 +247,10 @@ std::unique_ptr<Mesh> Model::ParseMesh(Graphics& gfx, const aiMesh& mesh, const 
 			bindablePtrs.push_back(Texture::Resolve(gfx, basePath + textureFileName.C_Str()));
 			hasDiffuseMap = true;
 		}
+		else
+		{
+			material.Get(AI_MATKEY_COLOR_DIFFUSE, reinterpret_cast<aiColor3D&>(diffuseColor));
+		}
 
 		// 获取高光纹理
 		if (material.GetTexture(aiTextureType_SPECULAR, 0, &textureFileName) == aiReturn_SUCCESS) // 如果有高光贴图
@@ -247,6 +261,11 @@ std::unique_ptr<Mesh> Model::ParseMesh(Graphics& gfx, const aiMesh& mesh, const 
 			bindablePtrs.push_back(spTextureBind);
 			hasSpecularMap = true;
 		}
+		else
+		{
+			material.Get(AI_MATKEY_COLOR_SPECULAR, reinterpret_cast<aiColor3D&>(specularColor));
+		}
+
 		if (!hasAlphaGloss)
 		{
 			material.Get(AI_MATKEY_SHININESS, shininess);
@@ -323,19 +342,11 @@ std::unique_ptr<Mesh> Model::ParseMesh(Graphics& gfx, const aiMesh& mesh, const 
 		// 输入布局
 		bindablePtrs.emplace_back(InputLayout::Resolve(gfx, vBuf.GetVertexLayout(), pVertexShaderByteCode));
 
-		struct PSMaterialConstantFullmonte
-		{
-			BOOL normalMapEnabled = TRUE; // 是否使用法线纹理
-			BOOL specularMapEnabled = TRUE;
-			BOOL hasGlossMap;
-			float specularPower;
-			DirectX::XMFLOAT3 specularColor = { 1.0f, 1.0f, 1.0f };
-			float specularMapWeight = 1.0f;
-		} pmc;
+		Node::PSMaterialConstantFullmonte pmc;
 		pmc.specularPower = shininess;
 		pmc.hasGlossMap = hasAlphaGloss ? TRUE : FALSE;
 
-		bindablePtrs.emplace_back(PixelConstantBuffer<PSMaterialConstantFullmonte>::Resolve(gfx, pmc, 1u));
+		bindablePtrs.emplace_back(PixelConstantBuffer<Node::PSMaterialConstantFullmonte>::Resolve(gfx, pmc, 1u));
 	}
 	else if (hasDiffuseMap && hasNormalMap) // 没有高光纹理
 	{
@@ -390,12 +401,13 @@ std::unique_ptr<Mesh> Model::ParseMesh(Graphics& gfx, const aiMesh& mesh, const 
 
 		struct PSMaterialConstantDiffNorm
 		{
-			float specularIntensity = 0.18f;
+			float specularIntensity;
 			float specularPower = 18;
 			BOOL  normalMapEnabled = TRUE; // 是否使用法线纹理
 			float padding[1];
 		} pmc;
 		pmc.specularPower = shininess;
+		pmc.specularIntensity = (specularColor.x + specularColor.y + specularColor.z) / 3.0f;
 
 		bindablePtrs.emplace_back(PixelConstantBuffer<PSMaterialConstantDiffNorm>::Resolve(gfx, pmc, 1u));
 	}
@@ -448,11 +460,12 @@ std::unique_ptr<Mesh> Model::ParseMesh(Graphics& gfx, const aiMesh& mesh, const 
 
 		struct PSMaterialConstantDiffuse
 		{
-			float specularIntensity = 0.18f;
+			float specularIntensity;
 			float specularPower = 18;
 			float padding[1];
 		} pmc;
 		pmc.specularPower = shininess;
+		pmc.specularIntensity = (specularColor.x + specularColor.y + specularColor.z) / 3.0f;
 
 		bindablePtrs.emplace_back(PixelConstantBuffer<PSMaterialConstantDiffuse>::Resolve(gfx, pmc, 1u));
 	}
@@ -501,16 +514,12 @@ std::unique_ptr<Mesh> Model::ParseMesh(Graphics& gfx, const aiMesh& mesh, const 
 		// 输入布局
 		bindablePtrs.emplace_back(InputLayout::Resolve(gfx, vBuf.GetVertexLayout(), pVertexShaderByteCode));
 
-		struct PSMaterialConstantNotex
-		{
-			DirectX::XMFLOAT4 materialColor = { 0.45f,0.45f,0.85f,1.0f };
-			float specularIntensity = 0.18f;
-			float specularPower = 18;
-			float padding[2];
-		} pmc;
+		Node::PSMaterialConstantNotex pmc;
 		pmc.specularPower = shininess;
+		pmc.specularIntensity = (specularColor.x + specularColor.y + specularColor.z) / 3.0f;
+		pmc.materialColor = diffuseColor;
 
-		bindablePtrs.emplace_back(PixelConstantBuffer<PSMaterialConstantNotex>::Resolve(gfx, pmc, 1u));
+		bindablePtrs.emplace_back(PixelConstantBuffer<Node::PSMaterialConstantNotex>::Resolve(gfx, pmc, 1u));
 	}
 	else
 	{
