@@ -23,12 +23,12 @@ namespace Bind
 		GetContext(gfx)->IASetInputLayout(m_pInputLayout.Get());
 	}
 
-	std::shared_ptr<InputLayout> InputLayout::Resolve(Graphics& gfx, DynamicData::VertexLayout layout, ID3DBlob* pVextexShaderBytecode)
+	std::shared_ptr<InputLayout> InputLayout::Resolve(Graphics& gfx, const DynamicData::VertexLayout& layout, ID3DBlob* pVextexShaderBytecode)
 	{
 		return BindCodex::Resolve<InputLayout>(gfx, layout, pVextexShaderBytecode);
 	}
 
-	std::string InputLayout::GenerateUID(DynamicData::VertexLayout layout, ID3DBlob* pVextexShaderBytecode)
+	std::string InputLayout::GenerateUID(const DynamicData::VertexLayout& layout, ID3DBlob* pVextexShaderBytecode)
 	{
 		using namespace std::string_literals;
 		return typeid(InputLayout).name() + "#"s + layout.GetCode(); // GetCode是模板Map中的字符串
