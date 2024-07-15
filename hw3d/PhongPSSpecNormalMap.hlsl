@@ -25,7 +25,7 @@ Texture2D normalMap; // 法线贴图
 
 SamplerState splr; // 采样器
 
-float4 main(float3 viewPos : Position, float3 normal : Normal, float3 tangent : Tangent, float3 bitangent : Bitangent, float2 tc : Texcoord) : SV_TARGET
+float4 main(float3 viewPos : Position, float3 viewNormal : Normal, float3 tangent : Tangent, float3 bitangent : Bitangent, float2 tc : Texcoord) : SV_TARGET
 {
     if (normalMapEnabled)
     {
@@ -33,15 +33,15 @@ float4 main(float3 viewPos : Position, float3 normal : Normal, float3 tangent : 
         const float3x3 tanToView = float3x3(
             normalize(tangent),
             normalize(bitangent),
-            normalize(normal)
+            normalize(viewNormal)
         );
         // unpack normal data
         const float3 normalSample = normalMap.Sample(splr, tc).xyz;
-        normal.x = normalSample.x * 2.0f - 1.0f;
-        normal.y = -normalSample.y * 2.0f + 1.0f;
-        normal.z = normalSample.z;
+        viewNormal.x = normalSample.x * 2.0f - 1.0f;
+        viewNormal.y = -normalSample.y * 2.0f + 1.0f;
+        viewNormal.z = normalSample.z;
         // bring normal from tanspace into view space
-        normal = mul(normal, tanToView);
+        viewNormal = mul(viewNormal, tanToView);
     }
     
 	// 顶点到点光源的向量
@@ -53,10 +53,10 @@ float4 main(float3 viewPos : Position, float3 normal : Normal, float3 tangent : 
 	// 漫反射衰减公式 diffuse attenuation
     const float att = 1 / (attQuad * (distVectorToLight * distVectorToLight) + attLin * distVectorToLight + attConst);
 	// 漫反射颜色
-    const float3 diffuse = diffuseColor * diffuseIntensity * att * max(0.0f, dot(directionToLight, normal));
+    const float3 diffuse = diffuseColor * diffuseIntensity * att * max(0.0f, dot(directionToLight, viewNormal));
 
 	// 镜面高光计算
-    const float3 w = normal * dot(vectorToLight, normal);
+    const float3 w = viewNormal * dot(vectorToLight, viewNormal);
     const float3 r = 2.0f * w - vectorToLight; // 反射光R的计算
 	// 镜面高光公式
 	//const float3 specular = att * (diffuseColor * diffuseIntensity) * specularIntensity * pow(max(0.0f, dot(normalize(-r), normalize(worldPos))), specularPower);

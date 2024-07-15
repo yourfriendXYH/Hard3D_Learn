@@ -20,7 +20,7 @@ cbuffer ObjectCbuf
 Texture2D tex;
 SamplerState splr;
 
-float4 main(float3 viewPos : Position, float3 normal : Normal, float2 tc : Texcoord) : SV_TARGET
+float4 main(float3 viewPos : Position, float3 viewNormal : Normal, float2 tc : Texcoord) : SV_TARGET
 {
 	// 顶点到点光源的向量
     const float3 vectorToLight = lightPos - viewPos;
@@ -31,10 +31,10 @@ float4 main(float3 viewPos : Position, float3 normal : Normal, float2 tc : Texco
 	// 漫反射衰减公式 diffuse attenuation
     const float att = 1 / (attQuad * (distVectorToLight * distVectorToLight) + attLin * distVectorToLight + attConst);
 	// 漫反射颜色
-    const float3 diffuse = diffuseColor * diffuseIntensity * att * max(0.0f, dot(directionToLight, normal));
+    const float3 diffuse = diffuseColor * diffuseIntensity * att * max(0.0f, dot(directionToLight, viewNormal));
 
 	// 镜面高光计算
-    const float3 w = normal * dot(vectorToLight, normal);
+    const float3 w = viewNormal * dot(vectorToLight, viewNormal);
     const float3 r = 2.0f * w - vectorToLight; // 反射光R的计算
 	// 镜面高光公式
     const float3 specular = att * (diffuseColor * diffuseIntensity) * specularIntensity * pow(max(0.0f, dot(normalize(-r), normalize(viewPos))), specularPower);
