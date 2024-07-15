@@ -22,6 +22,9 @@ SamplerState splr;
 
 float4 main(float3 viewPos : Position, float3 viewNormal : Normal, float2 tc : Texcoord) : SV_TARGET
 {
+    // 法线方向必须规范化
+    viewNormal = normalize(viewNormal);
+    
 	// 顶点到点光源的向量
     const float3 vectorToLight = lightPos - viewPos;
     const float distVectorToLight = length(vectorToLight);

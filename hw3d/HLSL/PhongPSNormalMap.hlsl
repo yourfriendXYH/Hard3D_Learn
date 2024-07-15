@@ -41,7 +41,8 @@ float4 main(float3 viewPos : Position, float3 viewNormal : Normal, float3 tan : 
         tanNormal = normalSample * 2.0f - 1.0f;
         tanNormal.y = -normalSample.y;
 
-        viewNormal = mul(tanNormal, tanToView);
+        // 采样后的法线方向需要规范化
+        viewNormal = normalize(mul(tanNormal, tanToView));
 
     }
 	// fragment to light vector data

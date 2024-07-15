@@ -40,8 +40,9 @@ float4 main(float3 viewPos : Position, float3 viewNormal : Normal, float3 tangen
         viewNormal.x = normalSample.x * 2.0f - 1.0f;
         viewNormal.y = -normalSample.y * 2.0f + 1.0f;
         viewNormal.z = normalSample.z;
+        
         // bring normal from tanspace into view space
-        viewNormal = mul(viewNormal, tanToView);
+        viewNormal = normalize(mul(viewNormal, tanToView));
     }
     
 	// 顶点到点光源的向量
