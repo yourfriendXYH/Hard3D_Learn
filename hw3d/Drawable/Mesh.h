@@ -17,6 +17,7 @@
 #include "..\Sampler.h"
 #include "../imgui/imgui.h"
 #include <type_traits>
+#include <filesystem>
 
 // 模型异常类
 class ModelException
@@ -150,7 +151,7 @@ private:
 class Model
 {
 public:
-	Model(Graphics& gfx, const std::string fileName, std::string texBasePath = "");
+	Model(Graphics& gfx, const std::string& pathString, float scale = 1.0f);
 	~Model();
 
 public:
@@ -161,12 +162,11 @@ public:
 
 private:
 	// 创建网格模型
-	static std::unique_ptr<Mesh> ParseMesh(Graphics& gfx, const aiMesh& mesh, const aiMaterial* const* pMaterials);
+	static std::unique_ptr<Mesh> ParseMesh(Graphics& gfx, const aiMesh& mesh, const aiMaterial* const* pMaterials, const std::filesystem::path& path, float scale = 1.0f);
 	std::unique_ptr<Node> ParseNode(int& nextId, const aiNode& node);
 
 private:
 	std::unique_ptr<Node> m_pRootNode; // 模型根节点
 	std::vector<std::unique_ptr<Mesh>> m_meshPtrs;
 	std::unique_ptr<class ModelWindow> m_pModelWindow;
-	std::string m_textureBasePath = "";
 };

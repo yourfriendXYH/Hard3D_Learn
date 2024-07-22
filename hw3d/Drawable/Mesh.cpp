@@ -168,13 +168,12 @@ private:
 	std::unordered_map<int, TransformParameters> m_transformsMap;
 };
 
-Model::Model(Graphics& gfx, const std::string fileName, std::string texBasePath)
+Model::Model(Graphics& gfx, const std::string& pathString, float scale)
 	:
-	m_pModelWindow(std::make_unique<ModelWindow>()),
-	m_textureBasePath(texBasePath)
+	m_pModelWindow(std::make_unique<ModelWindow>())
 {
 	Assimp::Importer importer;
-	const auto pScene = importer.ReadFile(fileName,
+	const auto pScene = importer.ReadFile(pathString,
 		aiProcess_Triangulate |
 		aiProcess_JoinIdenticalVertices |
 		aiProcess_ConvertToLeftHanded |
@@ -184,7 +183,7 @@ Model::Model(Graphics& gfx, const std::string fileName, std::string texBasePath)
 	for (size_t i = 0u; i < pScene->mNumMeshes; ++i)
 	{
 		//auto test = pScene->mMeshes[i];
-		this->m_meshPtrs.emplace_back(std::move(ParseMesh(gfx, *pScene->mMeshes[i], pScene->mMaterials)));
+		this->m_meshPtrs.emplace_back(std::move(ParseMesh(gfx, *pScene->mMeshes[i], pScene->mMaterials, pathString, scale)));
 	}
 	int nextId = 0;
 	this->m_pRootNode = ParseNode(nextId, *pScene->mRootNode);
@@ -218,13 +217,14 @@ void Model::SetModelRootTransform(DirectX::FXMMATRIX transform)
 	m_pRootNode->SetAppliedTransform(transform);
 }
 
-std::unique_ptr<Mesh> Model::ParseMesh(Graphics& gfx, const aiMesh& mesh, const aiMaterial* const* pMaterials)
+std::unique_ptr<Mesh> Model::ParseMesh(Graphics& gfx, const aiMesh& mesh, const aiMaterial* const* pMaterials, const std::filesystem::path& path, float scale)
 {
 	using namespace std::string_literals;
 	using namespace Bind;
 
+	const auto rootPath = path.parent_path().string() + "\\";
+
 	std::vector<std::shared_ptr<Bindable>> bindablePtrs;
-	const auto basePath = "Models\\gobber\\"s;
 
 	bool hasDiffuseMap = false; // 是否有漫反射纹理
 	bool hasAlphaGloss = false;
@@ -244,7 +244,7 @@ std::unique_ptr<Mesh> Model::ParseMesh(Graphics& gfx, const aiMesh& mesh, const 
 		if (material.GetTexture(aiTextureType_DIFFUSE, 0, &textureFileName) == aiReturn_SUCCESS)
 		{
 			// 添加纹理资源（像素着色器）
-			bindablePtrs.push_back(Texture::Resolve(gfx, basePath + textureFileName.C_Str()));
+			bindablePtrs.push_back(Texture::Resolve(gfx, rootPath + textureFileName.C_Str()));
 			hasDiffuseMap = true;
 		}
 		else
@@ -256,7 +256,7 @@ std::unique_ptr<Mesh> Model::ParseMesh(Graphics& gfx, const aiMesh& mesh, const 
 		if (material.GetTexture(aiTextureType_SPECULAR, 0, &textureFileName) == aiReturn_SUCCESS) // 如果有高光贴图
 		{
 			// 添加纹理资源（像素着色器
-			auto spTextureBind = Texture::Resolve(gfx, basePath + textureFileName.C_Str(), 1);
+			auto spTextureBind = Texture::Resolve(gfx, rootPath + textureFileName.C_Str(), 1);
 			hasAlphaGloss = spTextureBind->HasAlpha();
 			bindablePtrs.push_back(spTextureBind);
 			hasSpecularMap = true;
@@ -274,7 +274,7 @@ std::unique_ptr<Mesh> Model::ParseMesh(Graphics& gfx, const aiMesh& mesh, const 
 		// 获取法线纹理
 		if (material.GetTexture(aiTextureType_NORMALS, 0, &textureFileName) == aiReturn_SUCCESS)
 		{
-			auto spTextureBind = Texture::Resolve(gfx, basePath + textureFileName.C_Str(), 2u);
+			auto spTextureBind = Texture::Resolve(gfx, rootPath + textureFileName.C_Str(), 2u);
 			hasAlphaGloss = spTextureBind->HasAlpha();
 			bindablePtrs.push_back(spTextureBind);
 			hasNormalMap = true;
@@ -287,8 +287,7 @@ std::unique_ptr<Mesh> Model::ParseMesh(Graphics& gfx, const aiMesh& mesh, const 
 		}
 	}
 
-	const auto meshTag = basePath + "%" + mesh.mName.C_Str();
-	const float scale = 6.0f;
+	const auto meshTag = rootPath + "%" + mesh.mName.C_Str();
 
 	if (hasDiffuseMap && hasSpecularMap && hasNormalMap)
 	{

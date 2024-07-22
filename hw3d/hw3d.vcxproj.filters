@@ -397,6 +397,12 @@
     <ClInclude Include="Drawable\TestCube.h">
       <Filter>Code\Drawable</Filter>
     </ClInclude>
+    <ClInclude Include="PointLight.hlsl">
+      <Filter>Code\HLSL</Filter>
+    </ClInclude>
+    <ClInclude Include="HLSL\ShaderOps.hlsl">
+      <Filter>Code\HLSL</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="hw3d.rc">
