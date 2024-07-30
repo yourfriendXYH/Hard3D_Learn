@@ -11,7 +11,7 @@
 class XYHApp
 {
 public:
-	XYHApp();
+	XYHApp(const std::string& commandLine = "");
 
 	int Go();
 
@@ -22,6 +22,8 @@ private:
 	void ShowRawInputWindow();
 
 private:
+
+	std::string m_commandLine;
 
 	int m_rawInputX = 0, m_rawInputY = 0;
 

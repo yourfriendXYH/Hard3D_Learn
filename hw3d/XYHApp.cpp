@@ -8,10 +8,12 @@
 #include "Drawable/AssimpTest.h"
 #include "GDIPlusManager.h"
 #include "DynamicData/DynamicVertex.h"
+#include "Utils/NormalMapTwerker.h"
 
 #include "imgui/imgui.h"
 #include "imgui/imgui_impl_dx11.h"
 #include "imgui/imgui_impl_win32.h"
+#include <shellapi.h>
 
 //#include "assimp/include/assimp/Importer.hpp"
 //#include "assimp/include/assimp/scene.h"
@@ -39,12 +41,13 @@ void TestFun()
 	}
 }
 
-XYHApp::XYHApp()
+XYHApp::XYHApp(const std::string& commandLine)
 	:
 	m_wnd(1280, 720, "XYH"),
 	m_pointLight(m_wnd.GetGfx()),
 	m_testPlane(m_wnd.GetGfx(), 3.0f),
-	m_testCube(m_wnd.GetGfx(), 4.0f)
+	m_testCube(m_wnd.GetGfx(), 4.0f),
+	m_commandLine(commandLine)
 {
 	// 测试资源导入
 	// asset import
@@ -112,6 +115,24 @@ XYHApp::XYHApp()
 	//std::generate_n(std::back_inserter(m_drawables), m_drawablesNum, factory);
 
 	//const auto surface = Surface::FromFile("pix_1.png");
+
+	// 用命令行扭转法线贴图
+	if (this->m_commandLine != "")
+	{
+		int nArgs;
+		const auto pLineW = GetCommandLineW();
+		const auto pArgs = CommandLineToArgvW(pLineW, &nArgs);
+		if (nArgs >= 4 && std::wstring(pArgs[1]) == L"--ntwerk-rotx180")
+		{
+			const std::wstring pathInWide = pArgs[2];
+			const std::wstring pathOutWide = pArgs[3];
+			NormalMapTwerker::RotateXAxis180(
+				std::string(pathInWide.begin(), pathInWide.end()),
+				std::string(pathOutWide.begin(), pathOutWide.end())
+			);
+			throw std::runtime_error("Normal map processed successfully. Just kidding about that whole runtime error thing.");
+		}
+	}
 
 	m_testPlane.SetPos({ 1.0f, 17.0f, -1.0f });
 

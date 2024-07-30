@@ -57,7 +57,7 @@ int CALLBACK WinMain(
 
 	try
 	{
-		return XYHApp{}.Go();
+		return XYHApp{ lpCmdLine }.Go();
 		//Window XYHWindow(640, 480, "XYH");
 
 		//MSG msg;

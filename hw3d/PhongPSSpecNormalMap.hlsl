@@ -1,5 +1,6 @@
 #include "ShaderOps.hlsl"
 #include "PointLight.hlsl"
+#include "HLSL/LightVectorData.hlsl"
 
 cbuffer ObjectCBuf
 {
@@ -26,11 +27,13 @@ float4 main(float3 viewPos : Position, float3 viewNormal : Normal, float3 viewTa
         viewNormal = MapNormalViewSpace(normalize(viewTangent), normalize(viewBitangent), viewNormal, tc, normalMap, splr);
     }
     
-	// 顶点到点光源的向量
-    const float3 viewFragToLight = viewLightPos - viewPos;
-    const float distFragToLight = length(viewFragToLight);
-	// 顶点到点光源的方向
-    const float3 directionToLight = viewFragToLight / distFragToLight;
+    const LightVectorData lightVectorData = CalculateLightVectorData(viewLightPos, viewPos);
+    
+	//// 顶点到点光源的向量
+ //   const float3 viewFragToLight = viewLightPos - viewPos;
+ //   const float distFragToLight = length(viewFragToLight);
+	//// 顶点到点光源的方向
+ //   const float3 directionToLight = viewFragToLight / distFragToLight;
 
     float3 specularReflectionColor;
     float specularPower = specularPowerConst;
@@ -52,11 +55,11 @@ float4 main(float3 viewPos : Position, float3 viewNormal : Normal, float3 viewTa
     }
     
     // 漫反射衰减公式 diffuse attenuation
-    const float att = Attenuate(attConst, attLin, attQuad, distFragToLight);
+    const float att = Attenuate(attConst, attLin, attQuad, lightVectorData.distFragToLight);
 	// 漫反射颜色
-    const float3 diffuse = Diffuse(diffuseColor, diffuseIntensity, att, directionToLight, viewNormal);
+    const float3 diffuse = Diffuse(diffuseColor, diffuseIntensity, att, lightVectorData.directionToLight, viewNormal);
     
-    const float3 specularReflected = Speculate(specularReflectionColor, 1.0f, viewNormal, viewFragToLight, viewPos, att, specularPower);
+    const float3 specularReflected = Speculate(specularReflectionColor, 1.0f, viewNormal, lightVectorData.viewFragToLight, viewPos, att, specularPower);
 
 	// 最终颜色 漫反射+环境光
     return float4(saturate((diffuse + ambient) * tex.Sample(splr, tc).rgb + specularReflected), 1.0f);

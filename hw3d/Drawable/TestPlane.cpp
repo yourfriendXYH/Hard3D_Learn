@@ -25,7 +25,7 @@ TestPlane::TestPlane(Graphics& gfx, float size)
 	AddBind(IndexBuffer::Resolve(gfx, geometryTag, model.m_indices));
 	// 纹理资源
 	AddBind(Texture::Resolve(gfx, "Resources/Wall/brickwall.jpg"));
-	AddBind(Texture::Resolve(gfx, "Resources/Wall/brickwall_normal.jpg", 1u));
+	AddBind(Texture::Resolve(gfx, "Resources/Wall/brickwall_normal.jpg", 2u));
 
 	// 顶点着色器
 	auto spVertexShader = VertexShader::Resolve(gfx, "PhongVS.cso");

@@ -72,6 +72,9 @@
     <Filter Include="Code\Bindable">
       <UniqueIdentifier>{dd5b5ef1-e49f-40e8-a59b-a6f8330aecd1}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Utils">
+      <UniqueIdentifier>{c2154ded-2696-4f77-8532-b3852bf5ba1a}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="dxerr.cpp">
@@ -402,6 +405,15 @@
     </ClInclude>
     <ClInclude Include="HLSL\ShaderOps.hlsl">
       <Filter>Code\HLSL</Filter>
+    </ClInclude>
+    <ClInclude Include="HLSL\Transform.hlsl">
+      <Filter>Code\HLSL</Filter>
+    </ClInclude>
+    <ClInclude Include="HLSL\LightVectorData.hlsl">
+      <Filter>Code\HLSL</Filter>
+    </ClInclude>
+    <ClInclude Include="Utils\NormalMapTwerker.h">
+      <Filter>Utils</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

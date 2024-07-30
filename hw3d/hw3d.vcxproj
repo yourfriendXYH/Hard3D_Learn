@@ -245,6 +245,7 @@
     <ClInclude Include="Texture.h" />
     <ClInclude Include="Topology.h" />
     <ClInclude Include="TransformCBuf.h" />
+    <ClInclude Include="Utils\NormalMapTwerker.h" />
     <ClInclude Include="VertexBuffer.h" />
     <ClInclude Include="VertexShader.h" />
     <ClInclude Include="WindowsThrowMacros.h" />
@@ -276,6 +277,9 @@
     <None Include="DXTrace.inl" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="HLSL\LightVectorData.hlsl">
+      <FileType>Document</FileType>
+    </ClInclude>
     <FxCompile Include="HLSL\PhongPSNormalMap.hlsl">
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Pixel</ShaderType>
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Pixel</ShaderType>
@@ -295,6 +299,9 @@
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Vertex</ShaderType>
     </FxCompile>
     <ClInclude Include="HLSL\ShaderOps.hlsl">
+      <FileType>Document</FileType>
+    </ClInclude>
+    <ClInclude Include="HLSL\Transform.hlsl">
       <FileType>Document</FileType>
     </ClInclude>
     <FxCompile Include="PhongPS.hlsl">

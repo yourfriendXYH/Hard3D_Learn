@@ -410,6 +410,15 @@ std::unique_ptr<Mesh> Model::ParseMesh(Graphics& gfx, const aiMesh& mesh, const 
 
 		bindablePtrs.emplace_back(PixelConstantBuffer<PSMaterialConstantDiffNorm>::Resolve(gfx, pmc, 1u));
 	}
+	else if (hasDiffuseMap && !hasNormalMap && hasSpecularMap) // 没有法线纹理
+	{
+		DynamicData::VerticesBuffer verticesBuffer{ std::move(
+			DynamicData::VertexLayout{}
+			.Append(DynamicData::VertexLayout::Position3D)
+			.Append(DynamicData::VertexLayout::Normal)
+			.Append(DynamicData::VertexLayout::Texture2D)
+		) };
+	}
 	else if (hasDiffuseMap)
 	{
 		DynamicData::VerticesBuffer vBuf{

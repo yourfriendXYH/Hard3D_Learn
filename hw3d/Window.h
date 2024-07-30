@@ -102,7 +102,7 @@ private:
 	HWND hWnd; // 主窗口句柄
 	bool m_cursorEnabled = true; // 鼠标是否启用
 	std::unique_ptr<Graphics> m_upGraphics; // 图形类
-
+	std::string m_commandLine;
 	std::vector<BYTE> m_rawBuffer; // ???
 };
 
