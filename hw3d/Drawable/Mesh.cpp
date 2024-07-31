@@ -418,6 +418,55 @@ std::unique_ptr<Mesh> Model::ParseMesh(Graphics& gfx, const aiMesh& mesh, const 
 			.Append(DynamicData::VertexLayout::Normal)
 			.Append(DynamicData::VertexLayout::Texture2D)
 		) };
+
+		// 顶点数据
+		for (unsigned int i = 0; i < mesh.mNumVertices; ++i)
+		{
+			verticesBuffer.EmplaceBack(
+				DirectX::XMFLOAT3(mesh.mVertices[i].x * scale, mesh.mVertices[i].y * scale, mesh.mVertices[i].z * scale),
+				*reinterpret_cast<DirectX::XMFLOAT3*>(&mesh.mNormals[i]),
+				*reinterpret_cast<DirectX::XMFLOAT3*>(&mesh.mTextureCoords[0][i])
+			);
+		}
+
+		// 索引数据
+		std::vector<unsigned short> indices;
+		indices.reserve(mesh.mNumFaces * 3);
+		for (unsigned int i = 0; i < mesh.mNumFaces; ++i)
+		{
+			const auto& face = mesh.mFaces[i];
+			assert(face.mNumIndices == 3);
+			indices.emplace_back(face.mIndices[0]);
+			indices.emplace_back(face.mIndices[1]);
+			indices.emplace_back(face.mIndices[2]);
+		}
+
+		// 顶点缓存
+		bindablePtrs.emplace_back(VertexBuffer::Resolve(gfx, meshTag, verticesBuffer));
+		// 索引缓存
+		bindablePtrs.emplace_back(IndexBuffer::Resolve(gfx, meshTag, indices));
+		// 顶点着色器
+		auto pVertexShader = VertexShader::Resolve(gfx, "PhongVS.cso");
+		auto pVertexShaderByteCode = pVertexShader->GetByteCode();
+		bindablePtrs.emplace_back(std::move(pVertexShader));
+		// 像素着色器
+		bindablePtrs.emplace_back(PixelShader::Resolve(gfx, "PhongPSSpec.cso"));
+		// 输入布局
+		bindablePtrs.emplace_back(InputLayout::Resolve(gfx, verticesBuffer.GetVertexLayout(), pVertexShaderByteCode));
+
+		struct PSMaterialConstantDiffuseSpec
+		{
+			float specularPowerConst;
+			BOOL hasGloss;
+			float specularMapWeight;
+			float padding;
+		} pmc;
+
+		pmc.specularPowerConst = shininess;
+		pmc.hasGloss = hasAlphaGloss ? TRUE : FALSE;
+		pmc.specularMapWeight = 1.0f;
+
+		bindablePtrs.emplace_back(PixelConstantBuffer<PSMaterialConstantDiffuseSpec>::Resolve(gfx, pmc, 1u));
 	}
 	else if (hasDiffuseMap)
 	{
