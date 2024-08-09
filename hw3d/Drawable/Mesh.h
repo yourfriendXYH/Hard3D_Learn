@@ -74,6 +74,8 @@ public:
 
 	void SetAppliedTransform(DirectX::FXMMATRIX transform) noexcept;
 
+	const DirectX::XMFLOAT4X4& GetAppliedTransfrom() const noexcept;
+
 	int GetId() const noexcept;
 
 	void ShowTree(Node*& pSelectedNode) const noexcept;

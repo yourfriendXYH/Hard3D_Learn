@@ -224,6 +224,9 @@
     <ClCompile Include="Drawable\TestCube.cpp">
       <Filter>Code\Drawable</Filter>
     </ClCompile>
+    <ClCompile Include="Utils\CommonDirectXMath.cpp">
+      <Filter>Utils</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Window.h">
@@ -413,6 +416,9 @@
       <Filter>Code\HLSL</Filter>
     </ClInclude>
     <ClInclude Include="Utils\NormalMapTwerker.h">
+      <Filter>Utils</Filter>
+    </ClInclude>
+    <ClInclude Include="Utils\CommonDirectXMath.h">
       <Filter>Utils</Filter>
     </ClInclude>
   </ItemGroup>

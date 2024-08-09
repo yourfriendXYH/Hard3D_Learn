@@ -192,6 +192,7 @@
     <ClCompile Include="Texture.cpp" />
     <ClCompile Include="Topology.cpp" />
     <ClCompile Include="TransformCBuf.cpp" />
+    <ClCompile Include="Utils\CommonDirectXMath.cpp" />
     <ClCompile Include="VertexBuffer.cpp" />
     <ClCompile Include="VertexShader.cpp" />
     <ClCompile Include="Window.cpp" />
@@ -245,6 +246,7 @@
     <ClInclude Include="Texture.h" />
     <ClInclude Include="Topology.h" />
     <ClInclude Include="TransformCBuf.h" />
+    <ClInclude Include="Utils\CommonDirectXMath.h" />
     <ClInclude Include="Utils\NormalMapTwerker.h" />
     <ClInclude Include="VertexBuffer.h" />
     <ClInclude Include="VertexShader.h" />

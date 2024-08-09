@@ -3,6 +3,7 @@
 #include <unordered_map>
 #include "../Surface.h"
 #include <stdexcept>
+//#include "../Utils/CommonDirectXMath.h"
 
 Mesh::Mesh(Graphics& gfx, std::vector<std::shared_ptr<Bindable>> bindPtrs)
 {
@@ -60,6 +61,11 @@ void Node::SetAppliedTransform(DirectX::FXMMATRIX transform) noexcept
 	DirectX::XMStoreFloat4x4(&m_appliedTransform, transform);
 }
 
+const DirectX::XMFLOAT4X4& Node::GetAppliedTransfrom() const noexcept
+{
+	return m_appliedTransform;
+}
+
 int Node::GetId() const noexcept
 {
 	return m_id;
@@ -112,7 +118,26 @@ public:
 			ImGui::NextColumn();
 			if (nullptr != m_pSelectedNode)
 			{
-				auto& transform = m_transformsMap[m_pSelectedNode->GetId()];
+				const auto id = m_pSelectedNode->GetId();
+				auto iter = m_transformsMap.find(id);
+				if (iter == m_transformsMap.end())
+				{
+					const auto& applied = m_pSelectedNode->GetAppliedTransfrom();
+					//const auto angles = ExtractEulerAngles(applied);
+					//const auto translation = ExtractTranslation(applied);
+					TransformParameters transParams;
+					//transParams.roll = angles.z;
+					//transParams.pitch = angles.x;
+					//transParams.yaw = angles.y;
+					//transParams.x = translation.x;
+					//transParams.y = translation.y;
+					//transParams.z = translation.z;
+
+					std::tie(iter, std::ignore) = m_transformsMap.insert({ id, transParams });
+
+				}
+				auto& transform = iter->second;
+				//auto& transform = m_transformsMap[m_pSelectedNode->GetId()];
 
 				ImGui::Text("Orientation");
 				ImGui::SliderAngle("Roll", &transform.roll, -180.f, 180.f);
