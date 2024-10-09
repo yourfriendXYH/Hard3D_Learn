@@ -141,7 +141,7 @@ XYHApp::XYHApp(const std::string& commandLine)
 	//m_TestCube1.SetModelRootTransform(DirectX::XMMatrixTranslation(-5.0f, 0.0f, 0.0f));
 
 	// 给Graphic设置投影矩阵
-	m_wnd.GetGfx().SetProjection(DirectX::XMMatrixPerspectiveLH(1.f, 9.f / 16.f, 0.5f, 100.f));
+	m_wnd.GetGfx().SetProjection(DirectX::XMMatrixPerspectiveLH(1.f, 9.f / 16.f, 0.5f, 400.f));
 	//m_wnd.GetGfx().SetProjection(DirectX::XMMatrixPerspectiveFovRH(PI / 2.f, 4.f / 3.f, 0.5f, 100.f));
 
 }
@@ -186,17 +186,19 @@ void XYHApp::DoFrame()
 	m_pointLight.Bind(m_wnd.GetGfx(), m_camera.GetMatrix());
 
 	// 绘制模型
-	m_model.Draw(m_wnd.GetGfx());
+	//m_model.Draw(m_wnd.GetGfx());
 
 	// 绘制用model加载的模型
-	m_TestCube1.Draw(m_wnd.GetGfx());
+	//m_TestCube1.Draw(m_wnd.GetGfx());
 
 	//
 	//m_testPlane.Draw(m_wnd.GetGfx());
 	//m_testCube.Draw(m_wnd.GetGfx());
 
 	// 绘制哥布林
-	m_gobber.Draw(m_wnd.GetGfx());
+	//m_gobber.Draw(m_wnd.GetGfx());
+
+	m_testSponza.Draw(m_wnd.GetGfx());
 
 	auto delta = m_timer.Mark();
 
@@ -288,10 +290,13 @@ void XYHApp::DoFrame()
 	// 控制灯的UI
 	m_pointLight.SpawnControlWindow();
 
-	m_gobber.ShowWindow(m_wnd.GetGfx(), "gobber");
+	// 测试场景
+	m_testSponza.ShowWindow(m_wnd.GetGfx(), "Sponza");
 
-	m_model.ShowWindow(m_wnd.GetGfx());
-	m_TestCube1.ShowWindow(m_wnd.GetGfx());
+	//m_gobber.ShowWindow(m_wnd.GetGfx(), "gobber");
+
+	//m_model.ShowWindow(m_wnd.GetGfx());
+	//m_TestCube1.ShowWindow(m_wnd.GetGfx());
 
 	//m_testPlane.SpawnControlWindow(m_wnd.GetGfx());
 
