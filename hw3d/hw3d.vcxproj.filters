@@ -227,6 +227,9 @@
     <ClCompile Include="Utils\CommonDirectXMath.cpp">
       <Filter>Utils</Filter>
     </ClCompile>
+    <ClCompile Include="Utils\TexturePreprocessor.cpp">
+      <Filter>Utils</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Window.h">
@@ -419,6 +422,9 @@
       <Filter>Utils</Filter>
     </ClInclude>
     <ClInclude Include="Utils\CommonDirectXMath.h">
+      <Filter>Utils</Filter>
+    </ClInclude>
+    <ClInclude Include="Utils\TexturePreprocessor.h">
       <Filter>Utils</Filter>
     </ClInclude>
   </ItemGroup>

@@ -49,6 +49,21 @@ XYHApp::XYHApp(const std::string& commandLine)
 	m_testCube(m_wnd.GetGfx(), 4.0f),
 	m_commandLine(commandLine)
 {
+	// 处理命令行
+	if (this->m_commandLine != "")
+	{
+		int nArgs;
+		const auto pLineW = GetCommandLineW(); // 获取WinMain的命令行字符
+		const auto pArgs = CommandLineToArgvW(pLineW, &nArgs); // 解析命令行字符串
+		// 扭转法线贴图的方向
+		if (nArgs >= 3 && std::wstring(pArgs[1]) == L"--twerk-objnorm")
+		{
+			const std::wstring pathInWide = pArgs[2];
+
+			throw std::runtime_error("Normal map processed successfully. Just kidding about that whole runtime error thing.");
+		}
+	}
+
 	// 测试资源导入
 	// asset import
 	//Assimp::Importer imp;
