@@ -9,6 +9,7 @@
 #include "GDIPlusManager.h"
 #include "DynamicData/DynamicVertex.h"
 #include "Utils/NormalMapTwerker.h"
+#include "Utils/TexturePreprocessor.h"
 
 #include "imgui/imgui.h"
 #include "imgui/imgui_impl_dx11.h"
@@ -60,8 +61,20 @@ XYHApp::XYHApp(const std::string& commandLine)
 		{
 			const std::wstring pathInWide = pArgs[2];
 
+			// 处理法线纹理（处理所有的）
+			TexturePreprocessor::FlipYAllNormalMapsInObj(std::string(pathInWide.begin(), pathInWide.end()));
+
 			throw std::runtime_error("Normal map processed successfully. Just kidding about that whole runtime error thing.");
 		}
+		else if (nArgs >= 3 && std::wstring(pArgs[1]) == L"--twerk-flipy")
+		{
+			const std::wstring pathInWide = pArgs[2];
+			const std::wstring pathOutWide = pArgs[3];
+
+			// 处理单个法线纹理
+			TexturePreprocessor::FlipYNormalMap(std::string(pathInWide.begin(), pathInWide.end()), std::string(pathOutWide.begin(), pathOutWide.end()));
+		}
+
 	}
 
 	// 测试资源导入

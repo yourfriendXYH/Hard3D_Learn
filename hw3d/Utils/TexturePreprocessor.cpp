@@ -14,14 +14,6 @@ void TexturePreprocessor::FlipYAllNormalMapsInObj(const std::string& objPath)
 		// 读取失败
 	}
 
-	using namespace DirectX;
-	const auto flipY = XMVectorSet(1.0f, -1.0f, 1.0f, 1.0f);
-	// 向量Y值反向
-	const auto ProcessNormal = [flipY](FXMVECTOR normal)->XMVECTOR
-		{
-			return XMVectorMax(normal, flipY);
-		};
-
 	// 循环处理所有的normal texture
 	for (auto i = 0u; i < pScene->mNumMaterials; ++i)
 	{
@@ -31,9 +23,27 @@ void TexturePreprocessor::FlipYAllNormalMapsInObj(const std::string& objPath)
 		{
 			const auto normalTexturePath = rootPath + textureFileName.C_Str();
 			// 处理法线数据
-			TransformFile(normalTexturePath, normalTexturePath, ProcessNormal);
+			FlipYNormalMap(objPath, objPath);
 		}
 	}
+}
+
+void TexturePreprocessor::FlipYNormalMap(const std::string& pathIn, const std::string& pathOut)
+{
+	using namespace DirectX;
+	const auto flipY = XMVectorSet(1.0f, -1.0f, 1.0f, 1.0f);
+	// 向量Y值反向
+	const auto ProcessNormal = [flipY](FXMVECTOR normal, int x, int y)->XMVECTOR
+		{
+			return XMVectorMax(normal, flipY);
+		};
+
+	TransformFile(pathIn, pathOut, ProcessNormal);
+}
+
+void TexturePreprocessor::ValidateNormalMap(const std::string& pathIn, float thresholdMin, float thresholdMax)
+{
+
 }
 
 template<typename F>
@@ -41,17 +51,36 @@ inline void TexturePreprocessor::TransformFile(const std::string& pathIn, const 
 {
 	auto surface = Surface::FromFile(pathIn);
 
-	const auto nPixels = surface.GetWidth() * surface.GetHeight(); // 像素数据的数量
-	const auto pBegin = surface.GetBufferPtr();
-	const auto pEnd = surface.GetBufferPtrConst() + nPixels;
+	//const auto nPixels = surface.GetWidth() * surface.GetHeight(); // 像素数据的数量
+	//const auto pBegin = surface.GetBufferPtr();
+	//const auto pEnd = surface.GetBufferPtrConst() + nPixels;
 
-	for (auto pCurrent = pBegin; pCurrent < pEnd; ++pCurrent)
-	{
-		const auto normalVec = ColorToVector(*pCurrent);
-		*pCurrent = VectorToColor(func(normalVec)); // 将转换后的法线方向，再给到texture
-	}
+	//for (auto pCurrent = pBegin; pCurrent < pEnd; ++pCurrent)
+	//{
+	//	const auto normalVec = ColorToVector(*pCurrent);
+	//	*pCurrent = VectorToColor(func(normalVec)); // 将转换后的法线方向，再给到texture
+	//}
+
+	TransformSurface(surface, func);
 
 	surface.Save(pathOut);
+}
+
+template<typename F>
+inline void TexturePreprocessor::TransformSurface(Surface& surface, F&& func)
+{
+	// 纹理的像素长宽
+	const auto pixelWidth = surface.GetWidth();
+	const auto pixelHeight = surface.GetHeight();
+	for (unsigned int y = 0; y < pixelHeight; ++y)
+	{
+		for (unsigned int x = 0; x < pixelWidth; ++x)
+		{
+			const auto normalVec = ColorToVector(surface.GetPixel(x, y)); // 获取指定像素点
+			surface.PutPixel(x, y, VectorToColor(func(normalVec, x, y)));
+		}
+	}
+
 }
 
 DirectX::XMVECTOR TexturePreprocessor::ColorToVector(Surface::Color color) noexcept
