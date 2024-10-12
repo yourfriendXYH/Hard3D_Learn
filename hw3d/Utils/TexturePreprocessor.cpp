@@ -33,7 +33,7 @@ void TexturePreprocessor::FlipYNormalMap(const std::string& pathIn, const std::s
 	using namespace DirectX;
 	const auto flipY = XMVectorSet(1.0f, -1.0f, 1.0f, 1.0f);
 	// 向量Y值反向
-	const auto ProcessNormal = [flipY](FXMVECTOR normal, int x, int y)->XMVECTOR
+	const auto ProcessNormal = [flipY](FXMVECTOR normal, int x, int y) -> XMVECTOR
 		{
 			return XMVectorMax(normal, flipY);
 		};
@@ -43,7 +43,49 @@ void TexturePreprocessor::FlipYNormalMap(const std::string& pathIn, const std::s
 
 void TexturePreprocessor::ValidateNormalMap(const std::string& pathIn, float thresholdMin, float thresholdMax)
 {
+	OutputDebugStringA(("Validating normal map [" + pathIn + "]\n").c_str());
 
+	using namespace DirectX;
+	auto sum = XMVectorZero();
+
+	// 验证法线贴图的函数
+	// 如果出错则指出哪个像素的法线出错
+	const auto ProcessNormal = [thresholdMin, thresholdMax, &sum](FXMVECTOR normal, int x, int y)->XMVECTOR
+		{
+			const auto len = XMVectorGetX(XMVector3Length(normal)); // 法线长度
+			const auto z = XMVectorGetZ(normal);
+			// 法线长度出错
+			if (len < thresholdMin || len > thresholdMax)
+			{
+				XMFLOAT3 vec;
+				XMStoreFloat3(&vec, normal);
+				std::ostringstream oss;
+
+				oss << "Bad normal length: " << len << " at: (" << x << "," << y << ") normal: (" << vec.x << "," << vec.y << "," << vec.z << ")\n";
+				OutputDebugStringA(oss.str().c_str());
+			}
+			if (z < 0.0f) // 法线的z值方向出错
+			{
+				XMFLOAT3 vec;
+				XMStoreFloat3(&vec, normal);
+				std::ostringstream oss;
+				oss << "Bad normal Z direction at: (" << x << "," << y << ") normal: (" << vec.x << "," << vec.y << "," << vec.z << ")\n";
+				OutputDebugStringA(oss.str().c_str());
+			}
+			sum = XMVectorAdd(sum, normal);
+			return normal;
+		};
+
+	auto surface = Surface::FromFile(pathIn);
+	TransformSurface(surface, ProcessNormal);
+
+	// 输出处理后的法线贴图的信息
+	XMFLOAT2 sumv;
+	XMStoreFloat2(&sumv, sum);
+	std::ostringstream oss;
+	// 法线贴图偏差？？？
+	oss << "Normal map biases: (" << sumv.x << "," << sumv.y << ")\n";
+	OutputDebugStringA(oss.str().c_str());
 }
 
 template<typename F>

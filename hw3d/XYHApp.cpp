@@ -74,7 +74,17 @@ XYHApp::XYHApp(const std::string& commandLine)
 			// 处理单个法线纹理
 			TexturePreprocessor::FlipYNormalMap(std::string(pathInWide.begin(), pathInWide.end()), std::string(pathOutWide.begin(), pathOutWide.end()));
 		}
+		// 验证法线贴图的有效性（处理单个）
+		else if (nArgs >= 4 && std::wstring(pArgs[1]) == L"--twerk-validate")
+		{
+			const std::wstring minWide = pArgs[2];
+			const std::wstring maxWide = pArgs[3];
+			const std::wstring pathWide = pArgs[4];
 
+			TexturePreprocessor::ValidateNormalMap(std::string(pathWide.begin(), pathWide.end()), std::stof(minWide), std::stof(maxWide));
+
+			throw std::runtime_error("Normal map validated successfully. Just kidding about that whole runtime error thing.");
+		}
 	}
 
 	// 测试资源导入
