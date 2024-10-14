@@ -18,15 +18,15 @@ namespace Bind
 		D3D11_TEXTURE2D_DESC texture2dDesc = {};
 		texture2dDesc.Width = surface.GetWidth();
 		texture2dDesc.Height = surface.GetHeight();
-		texture2dDesc.MipLevels = 1;
+		texture2dDesc.MipLevels = 1; // ???
 		texture2dDesc.ArraySize = 1;
 		texture2dDesc.Format = DXGI_FORMAT_B8G8R8A8_UNORM;
 		texture2dDesc.SampleDesc.Count = 1;
 		texture2dDesc.SampleDesc.Quality = 0;
 		texture2dDesc.Usage = D3D11_USAGE_DEFAULT;
-		texture2dDesc.BindFlags = D3D11_BIND_SHADER_RESOURCE;
+		texture2dDesc.BindFlags = D3D11_BIND_SHADER_RESOURCE/* | D3D11_BIND_RENDER_TARGET*/; // 使用mipmap必须要加上 D3D11_BIND_RENDER_TARGET
 		texture2dDesc.CPUAccessFlags = 0;
-		texture2dDesc.MiscFlags = 0;
+		texture2dDesc.MiscFlags = 0/*D3D11_RESOURCE_MISC_GENERATE_MIPS*/; // ???
 
 		D3D11_SUBRESOURCE_DATA sd = {};
 		sd.pSysMem = surface.GetBufferPtr();
@@ -39,9 +39,13 @@ namespace Bind
 		srcViewDesc.Format = texture2dDesc.Format;
 		srcViewDesc.ViewDimension = D3D11_SRV_DIMENSION_TEXTURE2D;
 		srcViewDesc.Texture2D.MostDetailedMip = 0;
-		srcViewDesc.Texture2D.MipLevels = 1;
+		srcViewDesc.Texture2D.MipLevels = 1; // ???
 		GetDevice(gfx)->CreateShaderResourceView(pTexture2d.Get(), &srcViewDesc, &m_pTextureView);
 
+		if (nullptr != m_pTextureView)
+		{
+			GetContext(gfx)->GenerateMips(m_pTextureView.Get()); // ???
+		}
 	}
 
 	void Texture::Bind(Graphics& gfx) noexcept

@@ -46,8 +46,8 @@ XYHApp::XYHApp(const std::string& commandLine)
 	:
 	m_wnd(1280, 720, "XYH"),
 	m_pointLight(m_wnd.GetGfx()),
-	m_testPlane(m_wnd.GetGfx(), 3.0f),
-	m_testCube(m_wnd.GetGfx(), 4.0f),
+	//m_testPlane(m_wnd.GetGfx(), 3.0f),
+	//m_testCube(m_wnd.GetGfx(), 4.0f),
 	m_commandLine(commandLine)
 {
 	// 处理命令行
@@ -172,9 +172,11 @@ XYHApp::XYHApp(const std::string& commandLine)
 		}
 	}
 
-	m_testPlane.SetPos({ 1.0f, 17.0f, -1.0f });
+	//m_testPlane.SetPos({ 1.0f, 17.0f, -1.0f });
 
-	m_testCube.SetPos({ 0.0f, 0.0f, 0.0f });
+	//m_testCube.SetPos({ 0.0f, 0.0f, 0.0f });
+
+	m_testStripey.SetModelRootTransform(DirectX::XMMatrixTranslation(-13.5f, 6.0f, 3.5f));
 
 	//m_TestCube1.SetModelRootTransform(DirectX::XMMatrixTranslation(-5.0f, 0.0f, 0.0f));
 
@@ -236,12 +238,18 @@ void XYHApp::DoFrame()
 	// 绘制哥布林
 	//m_gobber.Draw(m_wnd.GetGfx());
 
-	m_testSponza.Draw(m_wnd.GetGfx());
+
 
 	auto delta = m_timer.Mark();
 
 	// 绘制点光源
 	m_pointLight.Draw(m_wnd.GetGfx());
+
+	// 测试场景
+	m_testSponza.Draw(m_wnd.GetGfx());
+
+	// mipmap的测试条纹
+	m_testStripey.Draw(m_wnd.GetGfx());
 
 	while (const auto keyEvent = m_wnd.kbd.ReadKey())
 	{
@@ -330,6 +338,8 @@ void XYHApp::DoFrame()
 
 	// 测试场景
 	m_testSponza.ShowWindow(m_wnd.GetGfx(), "Sponza");
+
+	m_testStripey.ShowWindow(m_wnd.GetGfx(), "Stripey");
 
 	//m_gobber.ShowWindow(m_wnd.GetGfx(), "gobber");
 

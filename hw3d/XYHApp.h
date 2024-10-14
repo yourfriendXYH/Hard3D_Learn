@@ -42,14 +42,17 @@ private:
 	static constexpr size_t m_drawablesNum = 180;
 
 	//Model m_model{ m_wnd.GetGfx(), "Models\\nano_textured\\nanosuit.obj", 2.0f };
-	TestPlane m_testPlane;
+	//TestPlane m_testPlane;
 
-	TestCube m_testCube;
+	//TestCube m_testCube;
 
 	//Model m_TestCube1{ m_wnd.GetGfx(), "Models\\brick_wall\\brick_wall.obj", 6.0f };
 
 	// 哥布林
 	//Model m_gobber{ m_wnd.GetGfx(), "Models\\gobber\\GoblinX.obj", 6.0f };
+
+	// 条纹
+	Model m_testStripey{ m_wnd.GetGfx(), "Models\\stripey\\stripey.obj", 2.0f };
 
 	// Sponza场景
 	Model m_testSponza{ m_wnd.GetGfx(), "Models\\Sponza\\sponza.obj", 1.0f / 20.0f };
