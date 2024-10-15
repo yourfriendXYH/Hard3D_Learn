@@ -253,6 +253,7 @@ std::unique_ptr<Mesh> Model::ParseMesh(Graphics& gfx, const aiMesh& mesh, const 
 
 	bool hasDiffuseMap = false; // 是否有漫反射纹理
 	bool hasAlphaGloss = false;
+	bool hasAlphaDiffuse = false; // 漫反射纹理是否有透明度
 	bool hasNormalMap = false;
 	bool hasSpecularMap = false;
 	float shininess = 2.0f;
@@ -269,7 +270,10 @@ std::unique_ptr<Mesh> Model::ParseMesh(Graphics& gfx, const aiMesh& mesh, const 
 		if (material.GetTexture(aiTextureType_DIFFUSE, 0, &textureFileName) == aiReturn_SUCCESS)
 		{
 			// 添加纹理资源（像素着色器）
-			bindablePtrs.push_back(Texture::Resolve(gfx, rootPath + textureFileName.C_Str()));
+			auto spTexture = Texture::Resolve(gfx, rootPath + textureFileName.C_Str());
+			hasAlphaDiffuse = spTexture->HasAlpha(); // 是否有透明度，是通过Surface判断的
+			bindablePtrs.push_back(std::move(spTexture));
+
 			hasDiffuseMap = true;
 		}
 		else

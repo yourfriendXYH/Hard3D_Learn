@@ -230,6 +230,9 @@
     <ClCompile Include="Utils\TexturePreprocessor.cpp">
       <Filter>Utils</Filter>
     </ClCompile>
+    <ClCompile Include="Bindable\Blender.cpp">
+      <Filter>Code\Bindable</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Window.h">
@@ -426,6 +429,9 @@
     </ClInclude>
     <ClInclude Include="Utils\TexturePreprocessor.h">
       <Filter>Utils</Filter>
+    </ClInclude>
+    <ClInclude Include="Bindable\Blender.h">
+      <Filter>Code\Bindable</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
