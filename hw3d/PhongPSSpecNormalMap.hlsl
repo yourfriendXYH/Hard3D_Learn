@@ -21,6 +21,10 @@ SamplerState splr; // 采样器
 
 float4 main(float3 viewPos : Position, float3 viewNormal : Normal, float3 viewTangent : Tangent, float3 viewBitangent : Bitangent, float2 tc : Texcoord) : SV_TARGET
 {
+    // do alpha test    
+    float4 dtex = tex.Sample(splr, tc);
+    clip(dtex.a < 0.1f ? -1 : 1);
+    
     viewNormal = normalize(viewNormal);
     if (normalMapEnabled)
     {
@@ -62,5 +66,5 @@ float4 main(float3 viewPos : Position, float3 viewNormal : Normal, float3 viewTa
     const float3 specularReflected = Speculate(specularReflectionColor, 1.0f, viewNormal, lightVectorData.viewFragToLight, viewPos, att, specularPower);
 
 	// 最终颜色 漫反射+环境光
-    return float4(saturate((diffuse + ambient) * tex.Sample(splr, tc).rgb + specularReflected), 1.0f);
+    return float4(saturate((diffuse + ambient) * dtex.rgb + specularReflected), dtex.a);
 }

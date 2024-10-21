@@ -3,6 +3,7 @@
 #include <unordered_map>
 #include "../Surface.h"
 #include <stdexcept>
+#include "../Bindable/Blender.h"
 //#include "../Utils/CommonDirectXMath.h"
 
 Mesh::Mesh(Graphics& gfx, std::vector<std::shared_ptr<Bindable>> bindPtrs)
@@ -273,6 +274,13 @@ std::unique_ptr<Mesh> Model::ParseMesh(Graphics& gfx, const aiMesh& mesh, const 
 			auto spTexture = Texture::Resolve(gfx, rootPath + textureFileName.C_Str());
 			hasAlphaDiffuse = spTexture->HasAlpha(); // 是否有透明度，是通过Surface判断的
 			bindablePtrs.push_back(std::move(spTexture));
+
+			if (hasAlphaDiffuse)
+			{
+				if (1)
+				{
+				}
+			}
 
 			hasDiffuseMap = true;
 		}
@@ -614,6 +622,9 @@ std::unique_ptr<Mesh> Model::ParseMesh(Graphics& gfx, const aiMesh& mesh, const 
 		{
 		}
 	}
+
+	// 所有的材质都需要混合模式
+	// bindablePtrs.emplace_back(Blender::Resolve(gfx, hasAlphaDiffuse)); // 材质是否有透明度
 
 	return std::make_unique<Mesh>(gfx, std::move(bindablePtrs));
 }
