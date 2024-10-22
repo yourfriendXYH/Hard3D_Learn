@@ -25,11 +25,19 @@ float4 main(float3 viewPos : Position, float3 viewNormal : Normal, float3 viewTa
     float4 dtex = tex.Sample(splr, tc);
     clip(dtex.a < 0.1f ? -1 : 1);
     
+#ifdef MASK_BOI
+    // 反转背面三角的法线方向
+    if (dot(viewPos, viewNormal) >= 0.0f)
+    {
+        viewNormal = -viewNormal;
+    }
+    
     viewNormal = normalize(viewNormal);
     if (normalMapEnabled)
     {
         viewNormal = MapNormalViewSpace(normalize(viewTangent), normalize(viewBitangent), viewNormal, tc, normalMap, splr);
     }
+#endif
     
     const LightVectorData lightVectorData = CalculateLightVectorData(viewLightPos, viewPos);
     

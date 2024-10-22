@@ -7,7 +7,7 @@ namespace Bind
 	Blender::Blender(Graphics& gfx, bool blending)
 		: m_blending(blending)
 	{
-		D3D11_BLEND_DESC blendDesc = {};
+		D3D11_BLEND_DESC blendDesc = CD3D11_BLEND_DESC(CD3D11_DEFAULT{});
 		auto& blendRenderTarget = blendDesc.RenderTarget[0];
 		if (m_blending)
 		{
@@ -18,11 +18,6 @@ namespace Bind
 			blendRenderTarget.SrcBlendAlpha = D3D11_BLEND_ZERO;
 			blendRenderTarget.DestBlendAlpha = D3D11_BLEND_ZERO;
 			blendRenderTarget.BlendOpAlpha = D3D11_BLEND_OP_ADD;
-			blendRenderTarget.RenderTargetWriteMask = D3D11_COLOR_WRITE_ENABLE_ALL;
-		}
-		else
-		{
-			blendRenderTarget.BlendEnable = FALSE;
 			blendRenderTarget.RenderTargetWriteMask = D3D11_COLOR_WRITE_ENABLE_ALL;
 		}
 		// ´´½¨»ìºÏ×´Ì¬

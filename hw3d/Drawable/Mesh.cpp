@@ -374,7 +374,7 @@ std::unique_ptr<Mesh> Model::ParseMesh(Graphics& gfx, const aiMesh& mesh, const 
 		auto pVertexShaderByteCode = pVertexShader->GetByteCode();
 		bindablePtrs.emplace_back(std::move(pVertexShader));
 		// 像素着色器
-		bindablePtrs.emplace_back(PixelShader::Resolve(gfx, "PhongPSSpecNormalMap.cso")); // 有高光纹理的像素着色器
+		bindablePtrs.emplace_back(PixelShader::Resolve(gfx, hasDiffuseMap ? "PhongPSSpecNormalMask.cso" : "PhongPSSpecNormalMap.cso")); // 有高光纹理的像素着色器
 
 		// 输入布局
 		bindablePtrs.emplace_back(InputLayout::Resolve(gfx, vBuf.GetVertexLayout(), pVertexShaderByteCode));

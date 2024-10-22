@@ -510,5 +510,8 @@
     <FxCompile Include="HLSL\PhongPSNotex.hlsl">
       <Filter>Code\HLSL</Filter>
     </FxCompile>
+    <FxCompile Include="PhongPSSpecNormalMask.hlsl">
+      <Filter>Code\HLSL</Filter>
+    </FxCompile>
   </ItemGroup>
 </Project>
