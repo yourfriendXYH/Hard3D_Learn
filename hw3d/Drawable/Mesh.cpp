@@ -627,6 +627,8 @@ std::unique_ptr<Mesh> Model::ParseMesh(Graphics& gfx, const aiMesh& mesh, const 
 	// 所有的材质都需要混合模式
 	// bindablePtrs.emplace_back(Blender::Resolve(gfx, hasAlphaDiffuse)); // 材质是否有透明度
 
+	bindablePtrs.emplace_back(Blender::Resolve(gfx, false));
+
 	bindablePtrs.emplace_back(Rasterizer::Resolve(gfx, hasAlphaDiffuse));
 
 	return std::make_unique<Mesh>(gfx, std::move(bindablePtrs));

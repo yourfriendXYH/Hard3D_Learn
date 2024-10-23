@@ -180,6 +180,10 @@ XYHApp::XYHApp(const std::string& commandLine)
 
 	//m_TestCube1.SetModelRootTransform(DirectX::XMMatrixTranslation(-5.0f, 0.0f, 0.0f));
 
+	m_testBluePlane.SetPos(m_camera.GetPos());
+
+	m_testRedPlane.SetPos(m_camera.GetPos());
+
 	// 给Graphic设置投影矩阵
 	m_wnd.GetGfx().SetProjection(DirectX::XMMatrixPerspectiveLH(1.f, 9.f / 16.f, 0.5f, 400.f));
 	//m_wnd.GetGfx().SetProjection(DirectX::XMMatrixPerspectiveFovRH(PI / 2.f, 4.f / 3.f, 0.5f, 100.f));
@@ -238,8 +242,6 @@ void XYHApp::DoFrame()
 	// 绘制哥布林
 	//m_gobber.Draw(m_wnd.GetGfx());
 
-
-
 	auto delta = m_timer.Mark();
 
 	// 绘制点光源
@@ -250,6 +252,11 @@ void XYHApp::DoFrame()
 
 	// mipmap的测试条纹
 	m_testStripey.Draw(m_wnd.GetGfx());
+
+	// 蓝色面片
+	m_testBluePlane.Draw(m_wnd.GetGfx());
+	// 红色面片
+	m_testRedPlane.Draw(m_wnd.GetGfx());
 
 	while (const auto keyEvent = m_wnd.kbd.ReadKey())
 	{
@@ -340,6 +347,9 @@ void XYHApp::DoFrame()
 	m_testSponza.ShowWindow(m_wnd.GetGfx(), "Sponza");
 
 	m_testStripey.ShowWindow(m_wnd.GetGfx(), "Stripey");
+
+	m_testBluePlane.SpawnControlWindow(m_wnd.GetGfx(), "Blue Plane");
+	m_testRedPlane.SpawnControlWindow(m_wnd.GetGfx(), "Red Plane");
 
 	//m_gobber.ShowWindow(m_wnd.GetGfx(), "gobber");
 

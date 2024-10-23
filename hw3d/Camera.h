@@ -19,6 +19,8 @@ public:
 	// 平移
 	void Translate(DirectX::XMFLOAT3 translation) noexcept;
 
+	DirectX::XMFLOAT3 GetPos() const noexcept;
+
 private:
 	DirectX::XMFLOAT3 m_pos; // 位置
 	float m_pitch; // 上下旋转

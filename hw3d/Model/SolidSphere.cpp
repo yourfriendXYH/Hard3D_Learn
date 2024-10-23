@@ -8,6 +8,8 @@
 #include "../Topology.h"
 #include "../TransformCBuf.h"
 #include "../IndexBuffer.h"
+#include "../Bindable/Blender.h"
+#include "../Bindable/Rasterizer.h"
 
 SolidSphere::SolidSphere(Graphics& gfx, float radius)
 {
@@ -18,7 +20,7 @@ SolidSphere::SolidSphere(Graphics& gfx, float radius)
 	model.Transform(DirectX::XMMatrixScaling(radius, radius, radius));
 	// ¶¥µã»º´æ
 	const auto geometryTag = "$sphere." + std::to_string(radius);
-	AddBind(VertexBuffer::Resolve(gfx, geometryTag ,model.m_vertices)); 
+	AddBind(VertexBuffer::Resolve(gfx, geometryTag, model.m_vertices));
 	// Ë÷Òý»º´æ
 	AddBind(IndexBuffer::Resolve(gfx, geometryTag, model.m_indices));
 
@@ -45,6 +47,9 @@ SolidSphere::SolidSphere(Graphics& gfx, float radius)
 
 	// ¶¥µã±ä»»
 	AddBind(std::make_shared<TransformCBuf>(gfx, *this));
+
+	AddBind(Blender::Resolve(gfx, false));
+	AddBind(Rasterizer::Resolve(gfx, false));
 }
 
 DirectX::XMMATRIX SolidSphere::GetTransformXM() const noexcept

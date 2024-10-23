@@ -57,4 +57,8 @@ private:
 	// Sponza≥°æ∞
 	Model m_testSponza{ m_wnd.GetGfx(), "Models\\Sponza\\sponza.obj", 1.0f / 20.0f };
 
+	// AlphaªÏ∫œ≤‚ ‘Model
+	TestPlane m_testBluePlane{ m_wnd.GetGfx(), 6.0f, {0.3f, 0.3f, 1.0f, 0.0f} };
+	TestPlane m_testRedPlane{ m_wnd.GetGfx(), 6.0f, {1.0f, 0.3f, 0.3f, 0.0f} };
+
 };

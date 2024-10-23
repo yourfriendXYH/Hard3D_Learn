@@ -4,12 +4,12 @@
 class TestPlane : public Drawable
 {
 public:
-	TestPlane(Graphics& gfx, float size);
+	TestPlane(Graphics& gfx, float size, DirectX::XMFLOAT4 color);
 	void SetPos(DirectX::XMFLOAT3 pos) noexcept;
 	void SetRotation(float roll, float pitch, float yaw) noexcept;
 	DirectX::XMMATRIX GetTransformXM() const noexcept override;
 
-	void SpawnControlWindow(Graphics& gfx) noexcept;
+	void SpawnControlWindow(Graphics& gfx, const std::string& titleName) noexcept;
 
 private:
 	DirectX::XMFLOAT3 m_pos = { 0.0f, 0.0f, 0.0f };
@@ -20,10 +20,7 @@ private:
 	// 着色器常量
 	struct PSMaterialConstant
 	{
-		float m_specularIntensity = 0.18f;
-		float m_specularPower = 18.0f;
-		BOOL m_normalMappingEnabled = TRUE;
-		float padding[1]; // 内存对齐（四字节对齐）
+		DirectX::XMFLOAT4 color;
 	} m_pmc;
 };
 

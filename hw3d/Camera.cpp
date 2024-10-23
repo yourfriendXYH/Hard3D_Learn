@@ -70,3 +70,8 @@ void Camera::Translate(DirectX::XMFLOAT3 translation) noexcept
 		m_pos.z + translation.z
 	};
 }
+
+DirectX::XMFLOAT3 Camera::GetPos() const noexcept
+{
+	return m_pos;
+}
