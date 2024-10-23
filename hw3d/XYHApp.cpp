@@ -14,6 +14,9 @@
 #include "imgui/imgui.h"
 #include "imgui/imgui_impl_dx11.h"
 #include "imgui/imgui_impl_win32.h"
+
+#include "dxtex/include/dxtex/DirectXTex.h"
+
 #include <shellapi.h>
 
 //#include "assimp/include/assimp/Importer.hpp"
@@ -50,6 +53,8 @@ XYHApp::XYHApp(const std::string& commandLine)
 	//m_testCube(m_wnd.GetGfx(), 4.0f),
 	m_commandLine(commandLine)
 {
+	auto scratch = DirectX::ScratchImage{};
+
 	// ´¦ÀíÃüÁîÐÐ
 	if (this->m_commandLine != "")
 	{
