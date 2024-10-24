@@ -4,6 +4,7 @@
 #include <string>
 #include <memory>
 #include <assert.h>
+#include "dxtex/include/dxtex/DirectXTex.h"
 
 // 处理图片的像素数据
 class Surface
@@ -28,7 +29,7 @@ public:
 		{}
 		constexpr Color(unsigned int r, unsigned int g, unsigned int b) noexcept
 			:
-			m_dWord((r << 16u) | (g << 8u) | b)
+			m_dWord((255u << 24) | (r << 16u) | (g << 8u) | b)
 		{}
 		constexpr Color(const Color& color, unsigned int x) noexcept
 			:
@@ -95,12 +96,12 @@ public:
 	// 异常
 
 public:
-	Surface(unsigned int width, unsigned int height) noexcept;
-	Surface(Surface&& source) noexcept;
+	Surface(unsigned int width, unsigned int height);
+	Surface(Surface&& source) noexcept = default;
 	Surface(Surface&) = delete;
-	Surface& operator=(Surface&& donor) noexcept;
+	Surface& operator=(Surface&& donor) noexcept = default;
 	Surface& operator=(const Surface&) = delete;
-	~Surface();
+	~Surface() = default;
 
 	void Clear(Color fillValue) noexcept;
 	void PutPixel(unsigned int x, unsigned int y, Color color);
@@ -114,16 +115,14 @@ public:
 
 	static Surface FromFile(const std::string& name);
 	void Save(const std::string& filename) const;
-	void Copy(const Surface& src);
 
 	bool AlphaLoaded() const noexcept;
 
 private:
-	Surface(unsigned int width, unsigned int height, std::unique_ptr<Color[]> pBufferParam, bool alphaLoaded = false) noexcept;
+	Surface(DirectX::ScratchImage scratch) noexcept;
 
 private:
-	std::unique_ptr<Color[]> m_pBuffer;
-	unsigned int m_width;
-	unsigned int m_height;
-	bool m_alphaLoaded = false;
+	static constexpr DXGI_FORMAT s_format = DXGI_FORMAT::DXGI_FORMAT_B8G8R8A8_UNORM;
+
+	DirectX::ScratchImage m_scratch;
 };

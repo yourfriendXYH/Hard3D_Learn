@@ -75,6 +75,9 @@
     <Filter Include="Utils">
       <UniqueIdentifier>{c2154ded-2696-4f77-8532-b3852bf5ba1a}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Code\Utils">
+      <UniqueIdentifier>{eda79a7b-ed77-49c3-ad56-0282ef3c3f79}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="dxerr.cpp">
@@ -212,9 +215,6 @@
     <ClCompile Include="XyhTimer.cpp">
       <Filter>Source</Filter>
     </ClCompile>
-    <ClCompile Include="XyhUtil.cpp">
-      <Filter>Source</Filter>
-    </ClCompile>
     <ClCompile Include="Drawable\TestPlane.cpp">
       <Filter>Code\Drawable</Filter>
     </ClCompile>
@@ -235,6 +235,9 @@
     </ClCompile>
     <ClCompile Include="Bindable\Rasterizer.cpp">
       <Filter>Code\Bindable</Filter>
+    </ClCompile>
+    <ClCompile Include="Utils\XYHUtil.cpp">
+      <Filter>Code\Utils</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -309,9 +312,6 @@
     </ClInclude>
     <ClInclude Include="PixelShader.h">
       <Filter>头文件\Bindable</Filter>
-    </ClInclude>
-    <ClInclude Include="XyhUtil.h">
-      <Filter>头文件\Util</Filter>
     </ClInclude>
     <ClInclude Include="CommonType.h">
       <Filter>头文件\Common</Filter>
@@ -438,6 +438,9 @@
     </ClInclude>
     <ClInclude Include="Bindable\Rasterizer.h">
       <Filter>Code\Bindable</Filter>
+    </ClInclude>
+    <ClInclude Include="Utils\XYHUtil.h">
+      <Filter>Code\Utils</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

@@ -196,6 +196,7 @@
     <ClCompile Include="TransformCBuf.cpp" />
     <ClCompile Include="Utils\CommonDirectXMath.cpp" />
     <ClCompile Include="Utils\TexturePreprocessor.cpp" />
+    <ClCompile Include="Utils\XYHUtil.cpp" />
     <ClCompile Include="VertexBuffer.cpp" />
     <ClCompile Include="VertexShader.cpp" />
     <ClCompile Include="Window.cpp" />
@@ -203,7 +204,6 @@
     <ClCompile Include="XuYuHaoException.cpp" />
     <ClCompile Include="XYHApp.cpp" />
     <ClCompile Include="XyhTimer.cpp" />
-    <ClCompile Include="XyhUtil.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Bindable.h" />
@@ -254,6 +254,7 @@
     <ClInclude Include="Utils\CommonDirectXMath.h" />
     <ClInclude Include="Utils\NormalMapTwerker.h" />
     <ClInclude Include="Utils\TexturePreprocessor.h" />
+    <ClInclude Include="Utils\XYHUtil.h" />
     <ClInclude Include="VertexBuffer.h" />
     <ClInclude Include="VertexShader.h" />
     <ClInclude Include="WindowsThrowMacros.h" />
@@ -266,7 +267,6 @@
     <ClInclude Include="XYHApp.h" />
     <ClInclude Include="XYHMath.h" />
     <ClInclude Include="XyhTimer.h" />
-    <ClInclude Include="XyhUtil.h" />
     <ClInclude Include="XYHWin.h" />
     <ClInclude Include="XYHWRL.h" />
   </ItemGroup>

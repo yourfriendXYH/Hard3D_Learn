@@ -22,9 +22,6 @@
 //#include "assimp/include/assimp/Importer.hpp"
 //#include "assimp/include/assimp/scene.h"
 //#include "assimp/include/assimp/postprocess.h"
-
-GDIPlusManager gdipManager;
-
 using namespace DynamicData;
 
 // 动态顶点测试
@@ -54,6 +51,12 @@ XYHApp::XYHApp(const std::string& commandLine)
 	m_commandLine(commandLine)
 {
 	auto scratch = DirectX::ScratchImage{};
+	DirectX::LoadFromWICFile(L"Resources\\Wall\\brickwall.jpg", DirectX::WIC_FLAGS_NONE, nullptr, scratch);
+	auto testImage = scratch.GetImage(0, 0, 0);
+	auto a = testImage->pixels[0];
+	auto b = testImage->pixels[1];
+	auto c = testImage->pixels[2];
+	auto d = testImage->pixels[3];
 
 	// 处理命令行
 	if (this->m_commandLine != "")
