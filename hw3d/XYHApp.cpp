@@ -18,6 +18,7 @@
 #include "dxtex/include/dxtex/DirectXTex.h"
 
 #include <shellapi.h>
+#include "Utils/XYHUtil.h"
 
 //#include "assimp/include/assimp/Importer.hpp"
 //#include "assimp/include/assimp/scene.h"
@@ -48,6 +49,7 @@ XYHApp::XYHApp(const std::string& commandLine)
 	m_pointLight(m_wnd.GetGfx()),
 	//m_testPlane(m_wnd.GetGfx(), 3.0f),
 	//m_testCube(m_wnd.GetGfx(), 4.0f),
+	m_scriptCommander(TokenizeQuoted(m_commandLine)),
 	m_commandLine(commandLine)
 {
 	auto scratch = DirectX::ScratchImage{};

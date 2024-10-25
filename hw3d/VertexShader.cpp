@@ -2,7 +2,6 @@
 #include <d3dcompiler.h>
 #include <typeinfo>
 #include "BindableCodex.h"
-#include "XyhUtil.h"
 
 namespace Bind
 {

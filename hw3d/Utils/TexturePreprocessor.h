@@ -11,8 +11,10 @@ public:
 	static void FlipYAllNormalMapsInObj(const std::string& objPath);
 	// 法线纹理Y值反向（处理单个纹理）
 	static void FlipYNormalMap(const std::string& pathIn, const std::string& pathOut);
-	// 
+	// 验证法线贴图有效性
 	static void ValidateNormalMap(const std::string& pathIn, float thresholdMin, float thresholdMax);
+
+	static void MakeStripes(const std::string& pathOut, int size, int stripeWidth);
 
 private:
 	template<typename F>

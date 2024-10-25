@@ -195,6 +195,7 @@
     <ClCompile Include="Topology.cpp" />
     <ClCompile Include="TransformCBuf.cpp" />
     <ClCompile Include="Utils\CommonDirectXMath.cpp" />
+    <ClCompile Include="Utils\ScriptCommander.cpp" />
     <ClCompile Include="Utils\TexturePreprocessor.cpp" />
     <ClCompile Include="Utils\XYHUtil.cpp" />
     <ClCompile Include="VertexBuffer.cpp" />
@@ -240,6 +241,7 @@
     <ClInclude Include="IndexBuffer.h" />
     <ClInclude Include="IndexedTriangleList.h" />
     <ClInclude Include="InputLayout.h" />
+    <ClInclude Include="json.hpp" />
     <ClInclude Include="Light\PointLight.h" />
     <ClInclude Include="Model\SolidSphere.h" />
     <ClInclude Include="PixelShader.h" />
@@ -253,6 +255,7 @@
     <ClInclude Include="TransformCBuf.h" />
     <ClInclude Include="Utils\CommonDirectXMath.h" />
     <ClInclude Include="Utils\NormalMapTwerker.h" />
+    <ClInclude Include="Utils\ScriptCommander.h" />
     <ClInclude Include="Utils\TexturePreprocessor.h" />
     <ClInclude Include="Utils\XYHUtil.h" />
     <ClInclude Include="VertexBuffer.h" />

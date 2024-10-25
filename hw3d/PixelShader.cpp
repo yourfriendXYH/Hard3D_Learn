@@ -1,6 +1,5 @@
 #include "PixelShader.h"
 #include <d3dcompiler.h>
-#include "XyhUtil.h"
 #include "BindableCodex.h"
 
 namespace Bind
@@ -10,7 +9,7 @@ namespace Bind
 		m_path(path)
 	{
 		Microsoft::WRL::ComPtr<ID3DBlob> pBlob;
-		D3DReadFileToBlob(std::wstring{path.begin(), path.end()}.c_str(), &pBlob);
+		D3DReadFileToBlob(std::wstring{ path.begin(), path.end() }.c_str(), &pBlob);
 		GetDevice(gfx)->CreatePixelShader(pBlob->GetBufferPointer(), pBlob->GetBufferSize(), nullptr, &m_pPixelShader);
 	}
 

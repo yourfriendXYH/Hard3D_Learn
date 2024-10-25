@@ -7,6 +7,7 @@
 #include "Drawable/Mesh.h"
 #include "Drawable/TestPlane.h"
 #include "Drawable/TestCube.h"
+#include "Utils/ScriptCommander.h"
 
 class XYHApp
 {
@@ -36,6 +37,8 @@ private:
 
 	// 点光源对象
 	PointLight m_pointLight;
+
+	ScriptCommander m_scriptCommander;
 
 	std::vector<std::unique_ptr<class Drawable>> m_drawables;
 
