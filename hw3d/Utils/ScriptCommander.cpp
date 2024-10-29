@@ -50,7 +50,7 @@ ScriptCommander::ScriptCommander(const std::vector<std::string>& args)
 				}
 				else if (commandName == "make-stripes")
 				{
-
+					TexturePreprocessor::MakeStripes(params.at("dest"), params.at("size"), params.at("s"));
 					abort = true;
 				}
 				else
