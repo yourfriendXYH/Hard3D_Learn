@@ -3,7 +3,14 @@
 #include <unordered_map>
 #include <string>
 #include <memory>
-#include "../dxtex/include/dxtex/DirectXTex.h"
+
+#define RESOLVE_BASE(elementType) \
+virtual size_t Resolve ## elementType() const noexcept \
+{ \
+	assert(false); \
+	return 0; \
+}
+
 
 namespace DynamicData
 {
@@ -32,11 +39,7 @@ namespace DynamicData
 		}
 		virtual size_t GetOffsetEnd() const noexcept = 0;
 
-		virtual size_t ResolveFloat3() const noexcept
-		{
-			assert(false && "Cannot resolve LayoutElement type");
-			return 0;
-		}
+		RESOLVE_BASE(Float3);
 
 	private:
 		size_t m_offset;
