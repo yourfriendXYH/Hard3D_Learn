@@ -8,6 +8,7 @@
 #include "Drawable/AssimpTest.h"
 #include "GDIPlusManager.h"
 #include "DynamicData/DynamicVertex.h"
+#include "DynamicData/DynamicConstant.h"
 #include "Utils/NormalMapTwerker.h"
 #include "Utils/TexturePreprocessor.h"
 
@@ -52,6 +53,7 @@ XYHApp::XYHApp(const std::string& commandLine)
 	m_scriptCommander(TokenizeQuoted(m_commandLine)),
 	m_commandLine(commandLine)
 {
+	// 新的纹理读取测试
 	auto scratch = DirectX::ScratchImage{};
 	DirectX::LoadFromWICFile(L"Resources\\Wall\\brickwall.jpg", DirectX::WIC_FLAGS_NONE, nullptr, scratch);
 	auto testImage = scratch.GetImage(0, 0, 0);
@@ -59,6 +61,19 @@ XYHApp::XYHApp(const std::string& commandLine)
 	auto b = testImage->pixels[1];
 	auto c = testImage->pixels[2];
 	auto d = testImage->pixels[3];
+
+	// 动态常数缓存测试
+	using namespace DynamicData;
+	Struct layout(0);
+	layout.Add<Struct>("butts");
+	static_cast<Struct&>(layout["butts"]).Add<Float3>("pubes");
+	Buffer testBuffer(layout);
+	testBuffer["butts"]["pubes"] = DirectX::XMFLOAT3{ 69.0f, 0.0f, 0.0f };
+	DirectX::XMFLOAT3 saveValue = testBuffer["butts"]["pubes"];
+
+	if (1)
+	{
+	}
 
 	// 处理命令行
 	if (this->m_commandLine != "")

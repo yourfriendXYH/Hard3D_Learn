@@ -32,14 +32,36 @@ namespace DynamicData
 		}
 		virtual size_t GetOffsetEnd() const noexcept = 0;
 
+		virtual size_t ResolveFloat3() const noexcept
+		{
+			assert(false && "Cannot resolve LayoutElement type");
+			return 0;
+		}
+
 	private:
 		size_t m_offset;
+	};
+
+	class Float3 : public LayoutElement
+	{
+	public:
+		using LayoutElement::LayoutElement;
+		size_t ResolveFloat3() const noexcept override
+		{
+			return GetOffsetBegin();
+		}
+
+		size_t GetOffsetEnd() const noexcept override
+		{
+			return GetOffsetBegin() + sizeof(DirectX::XMFLOAT3);
+		}
 	};
 
 	// 结构体布局
 	class Struct : public LayoutElement
 	{
 	public:
+		using LayoutElement::LayoutElement; // 使用基类的构造函数
 		LayoutElement& operator[](const char* key) override final
 		{
 			return *m_map.at(key);
@@ -60,7 +82,7 @@ namespace DynamicData
 		void Add(const std::string& name)
 		{
 			m_elements.emplace_back(std::make_unique<T>(GetOffsetEnd()));
-			if (nullptr != m_map.emplace(name, m_elements.back().get()).second)
+			if (!m_map.emplace(name, m_elements.back().get()).second)
 			{
 				assert(false);
 			}
@@ -85,6 +107,22 @@ namespace DynamicData
 		{
 			return { &(*m_pLayout)[key], m_pBytes };
 		}
+
+		// 类型转换运算符重写
+		operator DirectX::XMFLOAT3& () noexcept
+		{
+			return *reinterpret_cast<DirectX::XMFLOAT3*>(m_pBytes + m_pLayout->ResolveFloat3());
+		}
+
+		// 赋值运算符重写
+		DirectX::XMFLOAT3& operator=(const DirectX::XMFLOAT3& rhs) noexcept
+		{
+			// 根据布局拿到对应的Bytes数据的引用
+			auto& ref = *reinterpret_cast<DirectX::XMFLOAT3*>(m_pBytes + m_pLayout->GetOffsetBegin());
+			ref = rhs;
+			return ref;
+		}
+
 	private:
 		const class LayoutElement* m_pLayout;
 		char* m_pBytes;

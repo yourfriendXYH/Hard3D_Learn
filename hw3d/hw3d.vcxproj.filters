@@ -451,6 +451,9 @@
     <ClInclude Include="json.hpp">
       <Filter>Utils</Filter>
     </ClInclude>
+    <ClInclude Include="DynamicData\DynamicConstant.h">
+      <Filter>DynamicData</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="hw3d.rc">
