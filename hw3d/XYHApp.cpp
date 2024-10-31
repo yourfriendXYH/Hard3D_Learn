@@ -66,10 +66,14 @@ XYHApp::XYHApp(const std::string& commandLine)
 	using namespace DynamicData;
 	Struct layout(0);
 	layout.Add<Struct>("butts");
-	static_cast<Struct&>(layout["butts"]).Add<Float3>("pubes");
+	layout["butts"].AsStruct().Add<Float3>("pubes").Add<Float>("dank");
+	//layout["butts"].AsStruct().Add<Float>("dank");
+
 	Buffer testBuffer(layout);
 	testBuffer["butts"]["pubes"] = DirectX::XMFLOAT3{ 69.0f, 0.0f, 0.0f };
+	testBuffer["butts"]["dank"] = 250.0f;
 	DirectX::XMFLOAT3 saveValue = testBuffer["butts"]["pubes"];
+	float saveFloat = testBuffer["butts"]["dank"];
 
 	if (1)
 	{

@@ -11,6 +11,32 @@ virtual size_t Resolve ## elementType() const noexcept \
 	return 0; \
 }
 
+// 布局元素宏
+#define LEAF_ELEMENT(elementType, sysType) \
+class elementType : public LayoutElement \
+{ \
+public: \
+	using LayoutElement::LayoutElement; \
+	size_t Resolve ## elementType() const noexcept override final \
+	{ \
+		return GetOffsetBegin(); \
+	} \
+	size_t GetOffsetEnd() const noexcept override final \
+	{ \
+		return GetOffsetBegin() + sizeof(sysType); \
+	} \
+};
+
+// 类型转换运算符 和 赋值运算符 的重写
+#define REF_CONVERSION(elementType, sysType) \
+operator sysType& () noexcept \
+{ \
+	return *reinterpret_cast<sysType*>(m_pBytes + m_pLayout->Resolve ## elementType()); \
+} \
+sysType& operator=(const sysType& rhs) noexcept \
+{ \
+	return static_cast<sysType&>(*this) = rhs; \
+}
 
 namespace DynamicData
 {
@@ -39,26 +65,17 @@ namespace DynamicData
 		}
 		virtual size_t GetOffsetEnd() const noexcept = 0;
 
+		class Struct& AsStruct() noexcept;
+
 		RESOLVE_BASE(Float3);
+		RESOLVE_BASE(Float);
 
 	private:
 		size_t m_offset;
 	};
 
-	class Float3 : public LayoutElement
-	{
-	public:
-		using LayoutElement::LayoutElement;
-		size_t ResolveFloat3() const noexcept override
-		{
-			return GetOffsetBegin();
-		}
-
-		size_t GetOffsetEnd() const noexcept override
-		{
-			return GetOffsetBegin() + sizeof(DirectX::XMFLOAT3);
-		}
-	};
+	LEAF_ELEMENT(Float3, DirectX::XMFLOAT3);
+	LEAF_ELEMENT(Float, float);
 
 	// 结构体布局
 	class Struct : public LayoutElement
@@ -82,19 +99,27 @@ namespace DynamicData
 
 		// 添加元素布局
 		template<typename T>
-		void Add(const std::string& name)
+		Struct& Add(const std::string& name)
 		{
 			m_elements.emplace_back(std::make_unique<T>(GetOffsetEnd()));
 			if (!m_map.emplace(name, m_elements.back().get()).second)
 			{
 				assert(false);
 			}
+			return *this;
 		}
 
 	private:
 		std::unordered_map<std::string, LayoutElement*> m_map; // 成员名对应的布局
 		std::vector<std::unique_ptr<LayoutElement>> m_elements; // 成员布局
 	};
+
+	Struct& LayoutElement::AsStruct() noexcept
+	{
+		auto pStruct = dynamic_cast<Struct*>(this);
+		assert(nullptr != pStruct);
+		return *pStruct;
+	}
 
 	class ElementRef
 	{
@@ -111,20 +136,23 @@ namespace DynamicData
 			return { &(*m_pLayout)[key], m_pBytes };
 		}
 
-		// 类型转换运算符重写
-		operator DirectX::XMFLOAT3& () noexcept
-		{
-			return *reinterpret_cast<DirectX::XMFLOAT3*>(m_pBytes + m_pLayout->ResolveFloat3());
-		}
+		//// 类型转换运算符重写
+		//operator DirectX::XMFLOAT3& () noexcept
+		//{
+		//	return *reinterpret_cast<DirectX::XMFLOAT3*>(m_pBytes + m_pLayout->ResolveFloat3());
+		//}
 
-		// 赋值运算符重写
-		DirectX::XMFLOAT3& operator=(const DirectX::XMFLOAT3& rhs) noexcept
-		{
-			// 根据布局拿到对应的Bytes数据的引用
-			auto& ref = *reinterpret_cast<DirectX::XMFLOAT3*>(m_pBytes + m_pLayout->GetOffsetBegin());
-			ref = rhs;
-			return ref;
-		}
+		//// 赋值运算符重写
+		//DirectX::XMFLOAT3& operator=(const DirectX::XMFLOAT3& rhs) noexcept
+		//{
+		//	// 根据布局拿到对应的Bytes数据的引用
+		//	auto& ref = *reinterpret_cast<DirectX::XMFLOAT3*>(m_pBytes + m_pLayout->GetOffsetBegin());
+		//	ref = rhs;
+		//	return ref;
+		//}
+
+		REF_CONVERSION(Float3, DirectX::XMFLOAT3);
+		REF_CONVERSION(Float, float);
 
 	private:
 		const class LayoutElement* m_pLayout;
