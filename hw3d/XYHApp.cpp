@@ -66,14 +66,32 @@ XYHApp::XYHApp(const std::string& commandLine)
 	using namespace DynamicData;
 	Struct layout(0);
 	layout.Add<Struct>("butts");
-	layout["butts"].AsStruct().Add<Float3>("pubes").Add<Float>("dank");
+	layout["butts"].Add<Float3>("pubes").Add<Float>("dank");
 	//layout["butts"].AsStruct().Add<Float>("dank");
+
+	layout.Add<Float>("woot");
+	layout.Add<Array>("arr");
+	layout["arr"].Set<Struct>(4);
+	layout["arr"].LayoutEle().Add<Float3>("twerk");
+	layout["arr"].LayoutEle().Add<Array>("werk");
+	layout["arr"].LayoutEle()["werk"].Set<Float>(6);
+	layout["arr"].LayoutEle().Add<Array>("meta");
+	layout["arr"].LayoutEle()["meta"].Set<Array>(6);
+	layout["arr"].LayoutEle()["meta"].LayoutEle().Set<Float>(4);
 
 	Buffer testBuffer(layout);
 	testBuffer["butts"]["pubes"] = DirectX::XMFLOAT3{ 69.0f, 0.0f, 0.0f };
 	testBuffer["butts"]["dank"] = 250.0f;
 	DirectX::XMFLOAT3 saveValue = testBuffer["butts"]["pubes"];
 	float saveFloat = testBuffer["butts"]["dank"];
+
+	testBuffer["woot"] = 42.0f;
+	testBuffer["arr"][2]["werk"][5] = 111.0f;
+	testBuffer["arr"][2]["meta"][5][3] = 222.0f;
+	float k = testBuffer["woot"];
+
+	float er = testBuffer["arr"][2]["werk"][5];
+	float eq = testBuffer["arr"][2]["meta"][5][3];
 
 	if (1)
 	{

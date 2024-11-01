@@ -40,6 +40,8 @@ sysType& operator=(const sysType& rhs) noexcept \
 
 namespace DynamicData
 {
+	class Struct;
+	class Array;
 	// 单个元素布局
 	class LayoutElement
 	{
@@ -59,13 +61,36 @@ namespace DynamicData
 			assert(false);
 			return *this;
 		}
+
+		// Array需要使用，用于返回自身
+		virtual LayoutElement& LayoutEle()
+		{
+			assert(false);
+			return *this;
+		}
+		virtual const LayoutElement& LayoutEle() const
+		{
+			assert(false);
+			return *this;
+		}
+
 		size_t GetOffsetBegin() const noexcept
 		{
 			return m_offset;
 		}
 		virtual size_t GetOffsetEnd() const noexcept = 0;
 
-		class Struct& AsStruct() noexcept;
+		// 获取布局元素的大小
+		size_t GetSizeInBytes() const noexcept
+		{
+			return GetOffsetEnd() - GetOffsetBegin();
+		}
+
+		template<typename T>
+		Struct& Add(const std::string& key) noexcept;
+
+		template<typename T>
+		Array& Set(size_t size_in) noexcept;
 
 		RESOLVE_BASE(Float3);
 		RESOLVE_BASE(Float);
@@ -114,26 +139,76 @@ namespace DynamicData
 		std::vector<std::unique_ptr<LayoutElement>> m_elements; // 成员布局
 	};
 
-	Struct& LayoutElement::AsStruct() noexcept
+	class Array : public LayoutElement
+	{
+	public:
+		using LayoutElement::LayoutElement;
+		size_t GetOffsetEnd() const noexcept override
+		{
+			assert(nullptr != m_upElement);
+			return GetOffsetBegin() + m_upElement->GetSizeInBytes() * m_size;
+		}
+
+		template<typename T>
+		Array& Set(size_t size_in) noexcept
+		{
+			assert(nullptr == m_upElement);
+			m_upElement = std::make_unique<T>(GetOffsetBegin());
+			m_size = size_in;
+			return *this;
+		}
+
+		// 拿到数组的元素布局
+		LayoutElement& LayoutEle() override final
+		{
+			return *m_upElement;
+		}
+		const LayoutElement& LayoutEle() const override final
+		{
+			return *m_upElement;
+		}
+
+	private:
+		size_t m_size = 0u; // 数组大小
+		std::unique_ptr<LayoutElement> m_upElement; // 单个元素的布局
+	};
+
+	template<typename T>
+	Struct& LayoutElement::Add(const std::string& key) noexcept
 	{
 		auto pStruct = dynamic_cast<Struct*>(this);
 		assert(nullptr != pStruct);
-		return *pStruct;
+		return pStruct->Add<T>(key);
+	}
+
+	template<typename T>
+	Array& LayoutElement::Set(size_t size_in) noexcept
+	{
+		auto pArray = dynamic_cast<Array*>(this);
+		assert(nullptr != pArray);
+		return pArray->Set<T>(size_in);
 	}
 
 	class ElementRef
 	{
 	public:
-		ElementRef(const LayoutElement* pLayout, char* pBytes)
+		ElementRef(const LayoutElement* pLayout, char* pBytes, size_t offset)
 			:
 			m_pLayout(pLayout),
-			m_pBytes(pBytes)
+			m_pBytes(pBytes),
+			m_offset(offset)
 		{
 		}
 
 		ElementRef operator[](const char* key) noexcept
 		{
-			return { &(*m_pLayout)[key], m_pBytes };
+			return { &(*m_pLayout)[key], m_pBytes, m_offset };
+		}
+
+		ElementRef operator[](size_t index) noexcept
+		{
+			const auto& t = m_pLayout->LayoutEle();
+			return { &t, m_pBytes, m_offset + t.GetSizeInBytes() * index };
 		}
 
 		//// 类型转换运算符重写
@@ -157,6 +232,7 @@ namespace DynamicData
 	private:
 		const class LayoutElement* m_pLayout;
 		char* m_pBytes;
+		size_t m_offset;
 	};
 
 	class Buffer
@@ -170,7 +246,7 @@ namespace DynamicData
 		}
 		ElementRef operator[](const char* key)
 		{
-			return { &(*m_pLayout)[key], m_bytes.data() };
+			return { &(*m_pLayout)[key], m_bytes.data(), 0u };
 		}
 
 	private:
