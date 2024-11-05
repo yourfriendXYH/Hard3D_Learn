@@ -77,7 +77,7 @@ XYHApp::XYHApp(const std::string& commandLine)
 	layout["arr"].LayoutEle()["werk"].Set<Float>(6);
 	layout["arr"].LayoutEle().Add<Array>("meta");
 	layout["arr"].LayoutEle()["meta"].Set<Array>(6);
-	layout["arr"].LayoutEle()["meta"].LayoutEle().Set<Float>(4);
+	layout["arr"].LayoutEle()["meta"].LayoutEle().Set<Matrix>(4);
 
 	Buffer testBuffer(layout);
 	testBuffer["butts"]["pubes"] = DirectX::XMFLOAT3{ 69.0f, 0.0f, 0.0f };
@@ -87,11 +87,15 @@ XYHApp::XYHApp(const std::string& commandLine)
 
 	testBuffer["woot"] = 42.0f;
 	testBuffer["arr"][2]["werk"][5] = 111.0f;
-	testBuffer["arr"][2]["meta"][5][3] = 222.0f;
+	//testBuffer["arr"][2]["meta"][5][3] = 222.0f;
+	// 给二维数组矩阵赋一个单位矩阵
+	DirectX::XMStoreFloat4x4(&(DirectX::XMFLOAT4X4&)testBuffer["arr"][2]["meta"][5][3], DirectX::XMMatrixIdentity());
 	float k = testBuffer["woot"];
 
 	float er = testBuffer["arr"][2]["werk"][5];
-	float eq = testBuffer["arr"][2]["meta"][5][3];
+	//float eq = testBuffer["arr"][2]["meta"][5][3];
+
+	DirectX::XMFLOAT4X4 matrixValue = testBuffer["arr"][2]["meta"][5][3];
 
 	if (1)
 	{

@@ -16,6 +16,7 @@ virtual size_t Resolve ## elementType() const noexcept \
 class elementType : public LayoutElement \
 { \
 public: \
+	using SystemType = sysType; \
 	using LayoutElement::LayoutElement; \
 	size_t Resolve ## elementType() const noexcept override final \
 	{ \
@@ -28,14 +29,14 @@ public: \
 };
 
 // 类型转换运算符 和 赋值运算符 的重写
-#define REF_CONVERSION(elementType, sysType) \
-operator sysType& () noexcept \
+#define REF_CONVERSION(elementType) \
+operator elementType::SystemType& () noexcept \
 { \
-	return *reinterpret_cast<sysType*>(m_pBytes + m_pLayout->Resolve ## elementType()); \
+	return *reinterpret_cast<elementType::SystemType*>(m_pBytes + m_pLayout->Resolve ## elementType()); \
 } \
-sysType& operator=(const sysType& rhs) noexcept \
+elementType::SystemType& operator=(const elementType::SystemType& rhs) noexcept \
 { \
-	return static_cast<sysType&>(*this) = rhs; \
+	return static_cast<elementType::SystemType&>(*this) = rhs; \
 }
 
 namespace DynamicData
@@ -92,15 +93,23 @@ namespace DynamicData
 		template<typename T>
 		Array& Set(size_t size_in) noexcept;
 
+		RESOLVE_BASE(Matrix);
+		RESOLVE_BASE(Float4);
 		RESOLVE_BASE(Float3);
+		RESOLVE_BASE(Float2);
 		RESOLVE_BASE(Float);
+		RESOLVE_BASE(Bool);
 
 	private:
 		size_t m_offset;
 	};
 
+	LEAF_ELEMENT(Matrix, DirectX::XMFLOAT4X4);
+	LEAF_ELEMENT(Float4, DirectX::XMFLOAT4);
 	LEAF_ELEMENT(Float3, DirectX::XMFLOAT3);
+	LEAF_ELEMENT(Float2, DirectX::XMFLOAT2);
 	LEAF_ELEMENT(Float, float);
+	LEAF_ELEMENT(Bool, bool);
 
 	// 结构体布局
 	class Struct : public LayoutElement
@@ -226,8 +235,12 @@ namespace DynamicData
 		//	return ref;
 		//}
 
-		REF_CONVERSION(Float3, DirectX::XMFLOAT3);
-		REF_CONVERSION(Float, float);
+		REF_CONVERSION(Matrix);
+		REF_CONVERSION(Float4);
+		REF_CONVERSION(Float3);
+		REF_CONVERSION(Float2);
+		REF_CONVERSION(Float);
+		REF_CONVERSION(Bool);
 
 	private:
 		const class LayoutElement* m_pLayout;
