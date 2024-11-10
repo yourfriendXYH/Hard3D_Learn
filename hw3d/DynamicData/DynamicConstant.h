@@ -277,6 +277,11 @@ namespace DynamicData
 			return *m_pLayout;
 		}
 
+		std::shared_ptr<LayoutElement> CloneLayout() const
+		{
+			return m_pLayout;
+		}
+
 	private:
 		std::shared_ptr<Struct> m_pLayout; // 常数缓存的布局
 		std::vector<char> m_bytes; // 常数缓存的数据
