@@ -109,7 +109,7 @@ namespace DynamicData
 	LEAF_ELEMENT(Float3, DirectX::XMFLOAT3);
 	LEAF_ELEMENT(Float2, DirectX::XMFLOAT2);
 	LEAF_ELEMENT(Float, float);
-	LEAF_ELEMENT(Bool, bool);
+	LEAF_ELEMENT(Bool, BOOL);
 
 	// 结构体布局
 	class Struct : public LayoutElement
@@ -251,10 +251,10 @@ namespace DynamicData
 	class Buffer
 	{
 	public:
-		Buffer(const Struct& layout)
+		Buffer(std::shared_ptr<Struct> layout)
 			:
-			m_pLayout(&layout),
-			m_bytes(layout.GetOffsetEnd()) // 根据布局初始化缓存大小
+			m_pLayout(layout),
+			m_bytes(layout->GetOffsetEnd()) // 根据布局初始化缓存大小
 		{
 		}
 		ElementRef operator[](const char* key)
@@ -262,8 +262,23 @@ namespace DynamicData
 			return { &(*m_pLayout)[key], m_bytes.data(), 0u };
 		}
 
+		const char* GetData() const noexcept
+		{
+			return m_bytes.data();
+		}
+
+		size_t GetSizeInByte() const noexcept
+		{
+			return m_bytes.size();
+		}
+
+		const LayoutElement& GetLayout() const noexcept
+		{
+			return *m_pLayout;
+		}
+
 	private:
-		const class LayoutElement* m_pLayout; // 常数缓存的布局
+		std::shared_ptr<Struct> m_pLayout; // 常数缓存的布局
 		std::vector<char> m_bytes; // 常数缓存的数据
 	};
 }

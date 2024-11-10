@@ -210,6 +210,7 @@
     <ClInclude Include="Bindable.h" />
     <ClInclude Include="BindableCodex.h" />
     <ClInclude Include="Bindable\Blender.h" />
+    <ClInclude Include="Bindable\ConstantBuffersEx.h" />
     <ClInclude Include="Bindable\Rasterizer.h" />
     <ClInclude Include="Bindable\TransformCBufDoubleboi.h" />
     <ClInclude Include="Camera.h" />

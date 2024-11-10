@@ -454,6 +454,9 @@
     <ClInclude Include="DynamicData\DynamicConstant.h">
       <Filter>DynamicData</Filter>
     </ClInclude>
+    <ClInclude Include="Bindable\ConstantBuffersEx.h">
+      <Filter>Code\Bindable</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="hw3d.rc">

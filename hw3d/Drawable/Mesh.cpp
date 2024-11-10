@@ -5,7 +5,8 @@
 #include <stdexcept>
 #include "../Bindable/Blender.h"
 #include "../Bindable/Rasterizer.h"
-//#include "../Utils/CommonDirectXMath.h"
+#include "../Bindable/ConstantBuffersEx.h"
+#include "../DynamicData/DynamicConstant.h"
 
 Mesh::Mesh(Graphics& gfx, std::vector<std::shared_ptr<Bindable>> bindPtrs)
 {
@@ -436,17 +437,29 @@ std::unique_ptr<Mesh> Model::ParseMesh(Graphics& gfx, const aiMesh& mesh, const 
 		// 输入布局
 		bindablePtrs.emplace_back(InputLayout::Resolve(gfx, vBuf.GetVertexLayout(), pVertexShaderByteCode));
 
-		struct PSMaterialConstantDiffNorm
-		{
-			float specularIntensity;
-			float specularPower = 18;
-			BOOL  normalMapEnabled = TRUE; // 是否使用法线纹理
-			float padding[1];
-		} pmc;
-		pmc.specularPower = shininess;
-		pmc.specularIntensity = (specularColor.x + specularColor.y + specularColor.z) / 3.0f;
+		//struct PSMaterialConstantDiffNorm
+		//{
+		//	float specularIntensity;
+		//	float specularPower = 18;
+		//	BOOL  normalMapEnabled = TRUE; // 是否使用法线纹理
+		//	float padding[1];
+		//} pmc;
+		//pmc.specularPower = shininess;
+		//pmc.specularIntensity = (specularColor.x + specularColor.y + specularColor.z) / 3.0f;
 
-		bindablePtrs.emplace_back(PixelConstantBuffer<PSMaterialConstantDiffNorm>::Resolve(gfx, pmc, 1u));
+		//bindablePtrs.emplace_back(PixelConstantBuffer<PSMaterialConstantDiffNorm>::Resolve(gfx, pmc, 1u));
+
+		auto layout = std::make_shared<DynamicData::Struct>(0u);
+		layout->Add<DynamicData::Float>("specularIntensity");
+		layout->Add<DynamicData::Float>("specularPower");
+		layout->Add<DynamicData::Bool>("normalMapEnabled");
+		layout->Add<DynamicData::Float>("padding");
+
+		DynamicData::Buffer cbuf{ std::move(layout) };
+		cbuf["specularIntensity"] = (specularColor.x + specularColor.y + specularColor.z) / 3.0f;
+		cbuf["specularPower"] = shininess;
+		cbuf["normalMapEnabled"] = TRUE;
+		bindablePtrs.emplace_back(std::make_shared<PixelContantBufferEx>(gfx, cbuf, 1u));
 	}
 	else if (hasDiffuseMap && !hasNormalMap && hasSpecularMap) // 没有法线纹理
 	{
