@@ -39,6 +39,12 @@ elementType::SystemType& operator=(const elementType::SystemType& rhs) noexcept 
 	return static_cast<elementType::SystemType&>(*this) = rhs; \
 }
 
+#define PTR_CONVERSION(elementType) \
+operator elementType::SystemType*() noexcept \
+{ \
+	return &static_cast<elementType::SystemType&>(m_ref); \
+}
+
 namespace DynamicData
 {
 	class Struct;
@@ -52,6 +58,11 @@ namespace DynamicData
 			m_offset(offset)
 		{
 		}
+
+		virtual ~LayoutElement()
+		{
+		}
+
 		virtual LayoutElement& operator[](const char* key)
 		{
 			assert(false);
@@ -198,8 +209,66 @@ namespace DynamicData
 		return pArray->Set<T>(size_in);
 	}
 
+	// 缓存布局的封装类
+	class Layout
+	{
+	public:
+		Layout()
+			:
+			m_pLayout(std::make_shared<Struct>(0))
+		{
+		}
+
+		LayoutElement& operator[](const char* key)
+		{
+			return (*m_pLayout)[key];
+		}
+
+		size_t GetSizeInByte() const noexcept
+		{
+			return m_pLayout->GetSizeInBytes();
+		}
+
+		template<typename T>
+		LayoutElement& Add(const std::string& key) noexcept
+		{
+			return m_pLayout->Add<T>(key);
+		}
+
+		std::shared_ptr<LayoutElement> Finalize()
+		{
+			m_finalized = true;
+			return m_pLayout;
+		}
+
+	private:
+		bool m_finalized = false;
+		std::shared_ptr<LayoutElement> m_pLayout;
+	};
+
 	class ElementRef
 	{
+	public:
+		class Ptr
+		{
+		public:
+			Ptr(ElementRef& ref)
+				:
+				m_ref(ref)
+			{
+			}
+
+			PTR_CONVERSION(Matrix);
+			PTR_CONVERSION(Float4);
+			PTR_CONVERSION(Float3);
+			PTR_CONVERSION(Float2);
+			PTR_CONVERSION(Float);
+			PTR_CONVERSION(Bool);
+
+		private:
+			ElementRef& m_ref;
+		};
+
 	public:
 		ElementRef(const LayoutElement* pLayout, char* pBytes, size_t offset)
 			:
@@ -220,20 +289,10 @@ namespace DynamicData
 			return { &t, m_pBytes, m_offset + t.GetSizeInBytes() * index };
 		}
 
-		//// 类型转换运算符重写
-		//operator DirectX::XMFLOAT3& () noexcept
-		//{
-		//	return *reinterpret_cast<DirectX::XMFLOAT3*>(m_pBytes + m_pLayout->ResolveFloat3());
-		//}
-
-		//// 赋值运算符重写
-		//DirectX::XMFLOAT3& operator=(const DirectX::XMFLOAT3& rhs) noexcept
-		//{
-		//	// 根据布局拿到对应的Bytes数据的引用
-		//	auto& ref = *reinterpret_cast<DirectX::XMFLOAT3*>(m_pBytes + m_pLayout->GetOffsetBegin());
-		//	ref = rhs;
-		//	return ref;
-		//}
+		Ptr operator&() noexcept
+		{
+			return { *this };
+		}
 
 		REF_CONVERSION(Matrix);
 		REF_CONVERSION(Float4);
@@ -251,10 +310,10 @@ namespace DynamicData
 	class Buffer
 	{
 	public:
-		Buffer(std::shared_ptr<Struct> layout)
+		Buffer(Layout& layout)
 			:
-			m_pLayout(layout),
-			m_bytes(layout->GetOffsetEnd()) // 根据布局初始化缓存大小
+			m_pLayout(static_pointer_cast<Struct>(layout.Finalize())),
+			m_bytes(m_pLayout->GetOffsetEnd()) // 根据布局初始化缓存大小
 		{
 		}
 		ElementRef operator[](const char* key)
