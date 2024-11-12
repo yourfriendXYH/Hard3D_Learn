@@ -17,7 +17,6 @@ class elementType : public LayoutElement \
 { \
 public: \
 	using SystemType = sysType; \
-	using LayoutElement::LayoutElement; \
 	size_t Resolve ## elementType() const noexcept override final \
 	{ \
 		return GetOffsetBegin(); \
@@ -25,6 +24,12 @@ public: \
 	size_t GetOffsetEnd() const noexcept override final \
 	{ \
 		return GetOffsetBegin() + sizeof(sysType); \
+	} \
+protected: \
+	size_t Finalize(size_t offset) override \
+	{ \
+		m_offset = offset; \
+		return offset + sizeof(sysType); \
 	} \
 };
 
@@ -49,16 +54,14 @@ namespace DynamicData
 {
 	class Struct;
 	class Array;
+	class Layout;
 	// 单个元素布局
 	class LayoutElement
 	{
+		friend class Struct;
+		friend class Array;
+		friend class Layout;
 	public:
-		LayoutElement(size_t offset)
-			:
-			m_offset(offset)
-		{
-		}
-
 		virtual ~LayoutElement()
 		{
 		}
@@ -111,8 +114,11 @@ namespace DynamicData
 		RESOLVE_BASE(Float);
 		RESOLVE_BASE(Bool);
 
-	private:
-		size_t m_offset;
+	protected:
+		virtual size_t Finalize(size_t offset) = 0;
+
+	protected:
+		size_t m_offset = 0u;
 	};
 
 	LEAF_ELEMENT(Matrix, DirectX::XMFLOAT4X4);
@@ -126,7 +132,7 @@ namespace DynamicData
 	class Struct : public LayoutElement
 	{
 	public:
-		using LayoutElement::LayoutElement; // 使用基类的构造函数
+		//using LayoutElement::LayoutElement; // 使用基类的构造函数
 		LayoutElement& operator[](const char* key) override final
 		{
 			return *m_map.at(key);
@@ -146,12 +152,23 @@ namespace DynamicData
 		template<typename T>
 		Struct& Add(const std::string& name)
 		{
-			m_elements.emplace_back(std::make_unique<T>(GetOffsetEnd()));
+			m_elements.emplace_back(std::make_unique<T>());
 			if (!m_map.emplace(name, m_elements.back().get()).second)
 			{
 				assert(false);
 			}
 			return *this;
+		}
+	protected:
+		size_t Finalize(size_t offset) override
+		{
+			m_offset = offset;
+			size_t offsetNext = offset;
+			for (auto& pEle : m_elements)
+			{
+				offsetNext = (*pEle).Finalize(offsetNext); // 给结构体成员赋offset
+			}
+			return GetOffsetEnd();
 		}
 
 	private:
@@ -162,7 +179,6 @@ namespace DynamicData
 	class Array : public LayoutElement
 	{
 	public:
-		using LayoutElement::LayoutElement;
 		size_t GetOffsetEnd() const noexcept override
 		{
 			assert(nullptr != m_upElement);
@@ -173,7 +189,7 @@ namespace DynamicData
 		Array& Set(size_t size_in) noexcept
 		{
 			assert(nullptr == m_upElement);
-			m_upElement = std::make_unique<T>(GetOffsetBegin());
+			m_upElement = std::make_unique<T>();
 			m_size = size_in;
 			return *this;
 		}
@@ -186,6 +202,15 @@ namespace DynamicData
 		const LayoutElement& LayoutEle() const override final
 		{
 			return *m_upElement;
+		}
+	protected:
+		// 数组末端的offset
+		size_t Finalize(size_t offset) override
+		{
+			assert(m_size != 0u && nullptr != m_upElement);
+			m_offset = offset;
+			m_upElement->Finalize(offset);
+			return m_offset + m_upElement->GetSizeInBytes() * m_size;
 		}
 
 	private:
@@ -215,7 +240,7 @@ namespace DynamicData
 	public:
 		Layout()
 			:
-			m_pLayout(std::make_shared<Struct>(0))
+			m_pLayout(std::make_shared<Struct>())
 		{
 		}
 
@@ -237,6 +262,7 @@ namespace DynamicData
 
 		std::shared_ptr<LayoutElement> Finalize()
 		{
+			m_pLayout->Finalize(0); // 初始布局的偏移值
 			m_finalized = true;
 			return m_pLayout;
 		}
