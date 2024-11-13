@@ -7,6 +7,7 @@
 #include "../Bindable/Rasterizer.h"
 #include "../Bindable/ConstantBuffersEx.h"
 #include "../DynamicData/DynamicConstant.h"
+#include "../DynamicData/LayoutCodex.h"
 
 Mesh::Mesh(Graphics& gfx, std::vector<std::shared_ptr<Bindable>> bindPtrs)
 {
@@ -449,17 +450,33 @@ std::unique_ptr<Mesh> Model::ParseMesh(Graphics& gfx, const aiMesh& mesh, const 
 
 		//bindablePtrs.emplace_back(PixelConstantBuffer<PSMaterialConstantDiffNorm>::Resolve(gfx, pmc, 1u));
 
+
+
 		DynamicData::Layout layout;
-		layout.Add<DynamicData::Float>("specularIntensity");
-		layout.Add<DynamicData::Float>("specularPower");
-		layout.Add<DynamicData::Bool>("normalMapEnabled");
-		layout.Add<DynamicData::Float>("padding");
+		bool loaded = false;
+		auto tag = "diff&nrm";
+		if (LayoutCodex::Has(tag))
+		{
+			layout = LayoutCodex::Load(tag);
+			loaded = true;
+		}
+		else
+		{
+			layout.Add<DynamicData::Float>("specularIntensity");
+			layout.Add<DynamicData::Float>("specularPower");
+			layout.Add<DynamicData::Bool>("normalMapEnabled");
+		}
 
 		DynamicData::Buffer cbuf{ layout };
 		cbuf["specularIntensity"] = (specularColor.x + specularColor.y + specularColor.z) / 3.0f;
 		cbuf["specularPower"] = shininess;
-		cbuf["normalMapEnabled"] = TRUE;
+		cbuf["normalMapEnabled"] = true;
 		bindablePtrs.emplace_back(std::make_shared<PixelContantBufferEx>(gfx, cbuf, 1u));
+
+		if (!loaded)
+		{
+			LayoutCodex::Store(tag, layout);
+		}
 	}
 	else if (hasDiffuseMap && !hasNormalMap && hasSpecularMap) // 没有法线纹理
 	{

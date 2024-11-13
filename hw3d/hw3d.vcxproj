@@ -226,6 +226,7 @@
     <ClInclude Include="DxgiInfoManager.h" />
     <ClInclude Include="DynamicData\DynamicConstant.h" />
     <ClInclude Include="DynamicData\DynamicVertex.h" />
+    <ClInclude Include="DynamicData\LayoutCodex.h" />
     <ClInclude Include="GDIPlusManager.h" />
     <ClInclude Include="Geometry\Cube.h" />
     <ClInclude Include="Geometry\Plane.h" />

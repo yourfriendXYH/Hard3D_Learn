@@ -44,22 +44,9 @@ void TestFun()
 	}
 }
 
-XYHApp::XYHApp(const std::string& commandLine)
-	:
-	m_wnd(1280, 720, "XYH"),
-	m_pointLight(m_wnd.GetGfx()),
-	m_scriptCommander(TokenizeQuoted(m_commandLine)),
-	m_commandLine(commandLine)
+// 测试动态常数缓存
+void TestDynamicConstant()
 {
-	// 新的纹理读取测试
-	auto scratch = DirectX::ScratchImage{};
-	DirectX::LoadFromWICFile(L"Resources\\Wall\\brickwall.jpg", DirectX::WIC_FLAGS_NONE, nullptr, scratch);
-	auto testImage = scratch.GetImage(0, 0, 0);
-	auto a = testImage->pixels[0];
-	auto b = testImage->pixels[1];
-	auto c = testImage->pixels[2];
-	auto d = testImage->pixels[3];
-
 	// 动态常数缓存测试
 	using namespace DynamicData;
 	Layout layout;
@@ -93,9 +80,39 @@ XYHApp::XYHApp(const std::string& commandLine)
 
 	DirectX::XMFLOAT4X4 matrixValue = testBuffer["arr"][2]["meta"][5][3];
 
+
+	Layout testStruct;
+	testStruct.Add<Struct>("butts");
+	testStruct["butts"].Add<Float3>("pubes");
+	testStruct["butts"].Add<Float>("dank");
+	testStruct.Add<Bool>("isSB");
+
+	Buffer testBuffer1(testStruct);
+
+	testBuffer1["isSB"] = true;
+	bool isSB = testBuffer1["isSB"];
 	if (1)
 	{
 	}
+}
+
+XYHApp::XYHApp(const std::string& commandLine)
+	:
+	m_wnd(1280, 720, "XYH"),
+	m_pointLight(m_wnd.GetGfx()),
+	m_scriptCommander(TokenizeQuoted(m_commandLine)),
+	m_commandLine(commandLine)
+{
+	// 新的纹理读取测试
+	auto scratch = DirectX::ScratchImage{};
+	DirectX::LoadFromWICFile(L"Resources\\Wall\\brickwall.jpg", DirectX::WIC_FLAGS_NONE, nullptr, scratch);
+	auto testImage = scratch.GetImage(0, 0, 0);
+	auto a = testImage->pixels[0];
+	auto b = testImage->pixels[1];
+	auto c = testImage->pixels[2];
+	auto d = testImage->pixels[3];
+
+	TestDynamicConstant();
 
 	// 处理命令行
 	if (this->m_commandLine != "")

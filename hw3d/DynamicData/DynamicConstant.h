@@ -12,7 +12,7 @@ virtual size_t Resolve ## elementType() const noexcept \
 }
 
 // 布局元素宏
-#define LEAF_ELEMENT(elementType, sysType) \
+#define LEAF_ELEMENT_IMPL(elementType, sysType, hlslSize) \
 class elementType : public LayoutElement \
 { \
 public: \
@@ -23,15 +23,21 @@ public: \
 	} \
 	size_t GetOffsetEnd() const noexcept override final \
 	{ \
-		return GetOffsetBegin() + sizeof(sysType); \
+		return GetOffsetBegin() + ComputeSize(); \
 	} \
 protected: \
-	size_t Finalize(size_t offset) override \
+	size_t Finalize(size_t offset) override final \
 	{ \
 		m_offset = offset; \
-		return offset + sizeof(sysType); \
+		return offset + ComputeSize(); \
+	} \
+	size_t ComputeSize() const noexcept override final \
+	{ \
+		return hlslSize; \
 	} \
 };
+
+#define LEAF_ELEMENT(elementType, sysType) LEAF_ELEMENT_IMPL(elementType, sysType, sizeof(sysType))
 
 // 类型转换运算符 和 赋值运算符 的重写
 #define REF_CONVERSION(elementType) \
@@ -66,6 +72,7 @@ namespace DynamicData
 		{
 		}
 
+		// [] 仅适用于结构体；通过名称访问成员
 		virtual LayoutElement& operator[](const char* key)
 		{
 			assert(false);
@@ -77,7 +84,7 @@ namespace DynamicData
 			return *this;
 		}
 
-		// Array需要使用，用于返回自身
+		// LayoutEle() 仅适用于数组；获取数组类型布局对象
 		virtual LayoutElement& LayoutEle()
 		{
 			assert(false);
@@ -89,23 +96,32 @@ namespace DynamicData
 			return *this;
 		}
 
+		// 基于偏移量的函数 仅在完成后才起作用！
 		size_t GetOffsetBegin() const noexcept
 		{
 			return m_offset;
 		}
 		virtual size_t GetOffsetEnd() const noexcept = 0;
 
-		// 获取布局元素的大小
+		// 获取从偏移量得出的字节大小
 		size_t GetSizeInBytes() const noexcept
 		{
 			return GetOffsetEnd() - GetOffsetBegin();
 		}
 
+		// 仅适用于 Structs；添加 LayoutElement
 		template<typename T>
 		Struct& Add(const std::string& key) noexcept;
 
+		// 仅适用于数组；设置元素的类型和大小
 		template<typename T>
 		Array& Set(size_t size_in) noexcept;
+
+		// 返回偏移量的值，该值上升到下一个 16 字节边界（如果尚未到达边界）
+		static size_t GetNextBoundaryOffset(size_t offset)
+		{
+			return offset + (16u - offset % 16u) % 16u;
+		}
 
 		RESOLVE_BASE(Matrix);
 		RESOLVE_BASE(Float4);
@@ -115,7 +131,10 @@ namespace DynamicData
 		RESOLVE_BASE(Bool);
 
 	protected:
+		// 设置元素和子元素的所有偏移量，返回此元素之后的偏移量
 		virtual size_t Finalize(size_t offset) = 0;
+		// 计算此元素的大小（以字节为单位），考虑数组和结构上的填充
+		virtual size_t ComputeSize() const noexcept = 0;
 
 	protected:
 		size_t m_offset = 0u;
@@ -126,7 +145,7 @@ namespace DynamicData
 	LEAF_ELEMENT(Float3, DirectX::XMFLOAT3);
 	LEAF_ELEMENT(Float2, DirectX::XMFLOAT2);
 	LEAF_ELEMENT(Float, float);
-	LEAF_ELEMENT(Bool, BOOL);
+	LEAF_ELEMENT_IMPL(Bool, bool, 4u);
 
 	// 结构体布局
 	class Struct : public LayoutElement
@@ -145,7 +164,8 @@ namespace DynamicData
 
 		size_t GetOffsetEnd() const noexcept override final
 		{
-			return m_elements.empty() ? GetOffsetBegin() : m_elements.back()->GetOffsetEnd();
+			// 上升到下一个边界（因为结构的大小是 16 的倍数）
+			return LayoutElement::GetNextBoundaryOffset(m_elements.back()->GetOffsetEnd());
 		}
 
 		// 添加元素布局
@@ -160,7 +180,7 @@ namespace DynamicData
 			return *this;
 		}
 	protected:
-		size_t Finalize(size_t offset) override
+		size_t Finalize(size_t offset) override final
 		{
 			m_offset = offset;
 			size_t offsetNext = offset;
@@ -171,6 +191,32 @@ namespace DynamicData
 			return GetOffsetEnd();
 		}
 
+		size_t ComputeSize() const noexcept override final
+		{
+			// 通过对 大小 + 填充 求和来计算所有元素的偏移量
+			size_t offsetNext = 0u;
+			for (auto& ele : m_elements)
+			{
+				const auto elementSize = ele->ComputeSize(); // 结构体中单个元素的大小
+				offsetNext += CalculatePaddingBeforeElement(offsetNext, elementSize) + elementSize;
+
+			}
+			// 结构大小必须是 16 字节的倍数
+			return GetNextBoundaryOffset(offsetNext);
+		}
+
+	private:
+		static size_t CalculatePaddingBeforeElement(size_t offset, size_t size) noexcept
+		{
+			// 如果跨越 16 字节边界，则前进到下一个边界
+			if (offset / 16u != (offset + size - 1u) / 16u)
+			{
+				return GetNextBoundaryOffset(offset) - offset;
+			}
+			return 0u;
+			return offset; // 返回offset似乎是错的
+		}
+
 	private:
 		std::unordered_map<std::string, LayoutElement*> m_map; // 成员名对应的布局
 		std::vector<std::unique_ptr<LayoutElement>> m_elements; // 成员布局
@@ -179,10 +225,11 @@ namespace DynamicData
 	class Array : public LayoutElement
 	{
 	public:
-		size_t GetOffsetEnd() const noexcept override
+		size_t GetOffsetEnd() const noexcept override final
 		{
 			assert(nullptr != m_upElement);
-			return GetOffsetBegin() + m_upElement->GetSizeInBytes() * m_size;
+			// 数组未在 hlsl 中打包
+			return GetOffsetBegin() + LayoutElement::GetNextBoundaryOffset(m_upElement->GetSizeInBytes()) * m_size;
 		}
 
 		template<typename T>
@@ -205,12 +252,18 @@ namespace DynamicData
 		}
 	protected:
 		// 数组末端的offset
-		size_t Finalize(size_t offset) override
+		size_t Finalize(size_t offset) override final
 		{
 			assert(m_size != 0u && nullptr != m_upElement);
 			m_offset = offset;
 			m_upElement->Finalize(offset);
-			return m_offset + m_upElement->GetSizeInBytes() * m_size;
+			return GetOffsetEnd();
+		}
+
+		size_t ComputeSize() const noexcept override final
+		{
+			// 数组未在 hlsl 中打包
+			return LayoutElement::GetNextBoundaryOffset(m_upElement->ComputeSize()) * m_size;
 		}
 
 	private:
@@ -241,6 +294,12 @@ namespace DynamicData
 		Layout()
 			:
 			m_pLayout(std::make_shared<Struct>())
+		{
+		}
+
+		Layout(std::shared_ptr<LayoutElement> pLayout)
+			:
+			m_pLayout(std::move(pLayout))
 		{
 		}
 
@@ -311,8 +370,10 @@ namespace DynamicData
 
 		ElementRef operator[](size_t index) noexcept
 		{
+			// 数组未在 hlsl 中打包
 			const auto& t = m_pLayout->LayoutEle();
-			return { &t, m_pBytes, m_offset + t.GetSizeInBytes() * index };
+			const auto elementSize = LayoutElement::GetNextBoundaryOffset(t.GetSizeInBytes());
+			return { &t, m_pBytes, m_offset + elementSize * index };
 		}
 
 		Ptr operator&() noexcept
