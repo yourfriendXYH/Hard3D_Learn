@@ -39,21 +39,26 @@ protected: \
 
 #define LEAF_ELEMENT(elementType, sysType) LEAF_ELEMENT_IMPL(elementType, sysType, sizeof(sysType))
 
-// 类型转换运算符 和 赋值运算符 的重写
-#define REF_CONVERSION(elementType) \
-operator elementType::SystemType& () noexcept \
+// 类型转换运算符 和 赋值运算符 的重写(__VA_ARGS__多参数)
+#define REF_CONVERSION(elementType,...) \
+operator __VA_ARGS__ elementType::SystemType& () noexcept \
 { \
 	return *reinterpret_cast<elementType::SystemType*>(m_pBytes + m_pLayout->Resolve ## elementType()); \
-} \
+} 
+
+#define REF_ASSIGN(elementType) \
 elementType::SystemType& operator=(const elementType::SystemType& rhs) noexcept \
 { \
 	return static_cast<elementType::SystemType&>(*this) = rhs; \
 }
 
-#define PTR_CONVERSION(elementType) \
-operator elementType::SystemType*() noexcept \
+#define REF_NONCONST(elementType) REF_CONVERSION(elementType) REF_ASSIGN(elementType)
+#define REF_CONST(elementType) REF_CONVERSION(elementType, const)
+
+#define PTR_CONVERSION(elementType,...) \
+operator __VA_ARGS__ elementType::SystemType*() noexcept \
 { \
-	return &static_cast<elementType::SystemType&>(m_ref); \
+	return &static_cast<__VA_ARGS__ elementType::SystemType&>(m_ref); \
 }
 
 namespace DynamicData
@@ -73,12 +78,12 @@ namespace DynamicData
 		}
 
 		// [] 仅适用于结构体；通过名称访问成员
-		virtual LayoutElement& operator[](const char* key)
+		virtual LayoutElement& operator[](const std::string& key)
 		{
 			assert(false);
 			return *this;
 		}
-		virtual const LayoutElement& operator[](const char* key) const
+		virtual const LayoutElement& operator[](const std::string& key) const
 		{
 			assert(false);
 			return *this;
@@ -111,11 +116,11 @@ namespace DynamicData
 
 		// 仅适用于 Structs；添加 LayoutElement
 		template<typename T>
-		Struct& Add(const std::string& key) noexcept;
+		LayoutElement& Add(const std::string& key) noexcept;
 
 		// 仅适用于数组；设置元素的类型和大小
 		template<typename T>
-		Array& Set(size_t size_in) noexcept;
+		LayoutElement& Set(size_t size_in) noexcept;
 
 		// 返回偏移量的值，该值上升到下一个 16 字节边界（如果尚未到达边界）
 		static size_t GetNextBoundaryOffset(size_t offset)
@@ -152,12 +157,12 @@ namespace DynamicData
 	{
 	public:
 		//using LayoutElement::LayoutElement; // 使用基类的构造函数
-		LayoutElement& operator[](const char* key) override final
+		LayoutElement& operator[](const std::string& key) override final
 		{
 			return *m_map.at(key);
 		}
 
-		const LayoutElement& operator[](const char* key) const override final
+		const LayoutElement& operator[](const std::string& key) const override final
 		{
 			return *m_map.at(key);
 		}
@@ -169,16 +174,15 @@ namespace DynamicData
 		}
 
 		// 添加元素布局
-		template<typename T>
-		Struct& Add(const std::string& name)
+		void Add(const std::string& name, std::unique_ptr<LayoutElement> pElement) noexcept
 		{
-			m_elements.emplace_back(std::make_unique<T>());
+			m_elements.emplace_back(std::move(pElement));
 			if (!m_map.emplace(name, m_elements.back().get()).second)
 			{
 				assert(false);
 			}
-			return *this;
 		}
+
 	protected:
 		size_t Finalize(size_t offset) override final
 		{
@@ -232,13 +236,11 @@ namespace DynamicData
 			return GetOffsetBegin() + LayoutElement::GetNextBoundaryOffset(m_upElement->GetSizeInBytes()) * m_size;
 		}
 
-		template<typename T>
-		Array& Set(size_t size_in) noexcept
+		void Set(std::unique_ptr<LayoutElement> pElement, size_t size_in) noexcept
 		{
 			assert(nullptr == m_upElement);
-			m_upElement = std::make_unique<T>();
+			m_upElement = std::move(pElement);
 			m_size = size_in;
-			return *this;
 		}
 
 		// 拿到数组的元素布局
@@ -272,19 +274,21 @@ namespace DynamicData
 	};
 
 	template<typename T>
-	Struct& LayoutElement::Add(const std::string& key) noexcept
+	LayoutElement& LayoutElement::Add(const std::string& key) noexcept
 	{
 		auto pStruct = dynamic_cast<Struct*>(this);
 		assert(nullptr != pStruct);
-		return pStruct->Add<T>(key);
+		pStruct->Add(key, std::make_unique<T>());
+		return *this;
 	}
 
 	template<typename T>
-	Array& LayoutElement::Set(size_t size_in) noexcept
+	LayoutElement& LayoutElement::Set(size_t size_in) noexcept
 	{
 		auto pArray = dynamic_cast<Array*>(this);
 		assert(nullptr != pArray);
-		return pArray->Set<T>(size_in);
+		pArray->Set(std::make_unique<T>(), size_in);
+		return *this;
 	}
 
 	// 缓存布局的封装类
@@ -303,7 +307,7 @@ namespace DynamicData
 		{
 		}
 
-		LayoutElement& operator[](const char* key)
+		LayoutElement& operator[](const std::string& key)
 		{
 			return (*m_pLayout)[key];
 		}
@@ -329,6 +333,68 @@ namespace DynamicData
 	private:
 		bool m_finalized = false;
 		std::shared_ptr<LayoutElement> m_pLayout;
+	};
+
+	class ConstElementRef
+	{
+	public:
+		class Ptr
+		{
+		public:
+			Ptr(ConstElementRef& ref)
+				:
+				m_ref(ref)
+			{
+			}
+
+			PTR_CONVERSION(Matrix, const);
+			PTR_CONVERSION(Float4, const);
+			PTR_CONVERSION(Float3, const);
+			PTR_CONVERSION(Float2, const);
+			PTR_CONVERSION(Float, const);
+			PTR_CONVERSION(Bool, const);
+
+		private:
+			ConstElementRef& m_ref;
+		};
+	public:
+		ConstElementRef(const LayoutElement* pLayout, char* pBytes, size_t offset)
+			:
+			m_offset(offset),
+			m_pLayout(pLayout),
+			m_pBytes(pBytes)
+		{
+		}
+
+		ConstElementRef operator[](const std::string& key) noexcept
+		{
+			return { &(*m_pLayout)[key], m_pBytes, m_offset };
+		}
+
+		ConstElementRef operator[](size_t index) noexcept
+		{
+			// 数组未在 hlsl 中打包
+			const auto& t = m_pLayout->LayoutEle();
+			const auto elementSize = LayoutElement::GetNextBoundaryOffset(t.GetSizeInBytes());
+			return { &t, m_pBytes, m_offset + elementSize * index };
+		}
+
+		Ptr operator&() noexcept
+		{
+			return { *this };
+		}
+
+		REF_CONST(Matrix);
+		REF_CONST(Float4);
+		REF_CONST(Float3);
+		REF_CONST(Float2);
+		REF_CONST(Float);
+		REF_CONST(Bool);
+
+	private:
+		size_t m_offset;
+		const class LayoutElement* m_pLayout;
+		char* m_pBytes;
 	};
 
 	class ElementRef
@@ -363,7 +429,12 @@ namespace DynamicData
 		{
 		}
 
-		ElementRef operator[](const char* key) noexcept
+		operator ConstElementRef() const noexcept
+		{
+			return { m_pLayout, m_pBytes, m_offset };
+		}
+
+		ElementRef operator[](const std::string& key) noexcept
 		{
 			return { &(*m_pLayout)[key], m_pBytes, m_offset };
 		}
@@ -381,12 +452,12 @@ namespace DynamicData
 			return { *this };
 		}
 
-		REF_CONVERSION(Matrix);
-		REF_CONVERSION(Float4);
-		REF_CONVERSION(Float3);
-		REF_CONVERSION(Float2);
-		REF_CONVERSION(Float);
-		REF_CONVERSION(Bool);
+		REF_NONCONST(Matrix);
+		REF_NONCONST(Float4);
+		REF_NONCONST(Float3);
+		REF_NONCONST(Float2);
+		REF_NONCONST(Float);
+		REF_NONCONST(Bool);
 
 	private:
 		const class LayoutElement* m_pLayout;
@@ -403,9 +474,14 @@ namespace DynamicData
 			m_bytes(m_pLayout->GetOffsetEnd()) // 根据布局初始化缓存大小
 		{
 		}
-		ElementRef operator[](const char* key)
+		ElementRef operator[](const std::string& key)
 		{
 			return { &(*m_pLayout)[key], m_bytes.data(), 0u };
+		}
+
+		ConstElementRef operator[](const std::string& key) const noexcept
+		{
+			return const_cast<Buffer&>(*this)[key];
 		}
 
 		const char* GetData() const noexcept

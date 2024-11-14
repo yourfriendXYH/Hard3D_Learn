@@ -49,6 +49,8 @@ void TestDynamicConstant()
 {
 	// ¶¯Ì¬³£Êý»º´æ²âÊÔ
 	using namespace DynamicData;
+	using namespace std::string_literals;
+
 	Layout layout;
 	layout.Add<Struct>("butts");
 	layout["butts"].Add<Float3>("pubes").Add<Float>("dank");
@@ -80,12 +82,21 @@ void TestDynamicConstant()
 
 	DirectX::XMFLOAT4X4 matrixValue = testBuffer["arr"][2]["meta"][5][3];
 
+	const auto& cbuffer = testBuffer;
+	{
+		DirectX::XMFLOAT4X4 act = cbuffer["arr"][2]["meta"][5][3];
+		assert(1);
+	}
+
 
 	Layout testStruct;
 	testStruct.Add<Struct>("butts");
 	testStruct["butts"].Add<Float3>("pubes");
 	testStruct["butts"].Add<Float>("dank");
 	testStruct.Add<Bool>("isSB");
+	testStruct.Add<Array>("arr");
+	testStruct["arr"].Set<Struct>(6);
+	testStruct["arr"].LayoutEle().Add<Float3>("a"s);
 
 	Buffer testBuffer1(testStruct);
 
