@@ -166,6 +166,7 @@
     <ClCompile Include="Drawable\TestPlane.cpp" />
     <ClCompile Include="dxerr.cpp" />
     <ClCompile Include="DxgiInfoManager.cpp" />
+    <ClCompile Include="DynamicData\DynamicConstant.cpp" />
     <ClCompile Include="DynamicData\DynamicVertex.cpp" />
     <ClCompile Include="GDIPlusManager.cpp" />
     <ClCompile Include="Graphics.cpp" />
