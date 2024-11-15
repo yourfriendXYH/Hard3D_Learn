@@ -100,6 +100,20 @@ void TestDynamicConstant()
 
 	Buffer testBuffer1(testStruct);
 
+	testBuffer1["butts"]["pubes"] = DirectX::XMFLOAT3{ 250.f, 0.0f, 0.0f };
+
+	if (auto opt = testBuffer1["butts"]["pubes"].Exists())
+	{
+		auto& ref = *opt;
+		DirectX::XMFLOAT3 f = ref;
+
+		assert(1);
+
+		if (1)
+		{
+		}
+	}
+
 	testBuffer1["isSB"] = true;
 	bool isSB = testBuffer1["isSB"];
 	if (1)

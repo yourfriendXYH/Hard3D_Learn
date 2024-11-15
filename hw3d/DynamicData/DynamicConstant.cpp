@@ -101,6 +101,33 @@ namespace DynamicData
 	DCB_RESOLVE_BASE(Float);
 	DCB_RESOLVE_BASE(Bool);
 
+	// 无效的布局元素
+	class Empty : public LayoutElement
+	{
+	public:
+		size_t GetOffsetEnd() const noexcept override final
+		{
+			return 0u;
+		}
+
+		bool Exists() const noexcept override final
+		{
+			return false;
+		}
+
+	protected:
+		size_t Finalize(size_t offset) override final
+		{
+			return 0u;
+		}
+		size_t ComputeSize() const noexcept override final
+		{
+			return 0u;
+		}
+
+	private:
+	} emptyLayoutElement;
+
 	DCB_LEAF_ELEMENT(Matrix, DirectX::XMFLOAT4X4);
 	DCB_LEAF_ELEMENT(Float4, DirectX::XMFLOAT4);
 	DCB_LEAF_ELEMENT(Float3, DirectX::XMFLOAT3);
@@ -110,7 +137,12 @@ namespace DynamicData
 
 	LayoutElement& Struct::operator[](const std::string& key)
 	{
-		return *m_map.at(key);
+		auto iter = m_map.find(key);
+		if (iter == m_map.end())
+		{
+			return emptyLayoutElement;
+		}
+		return *iter->second;
 	}
 
 	const LayoutElement& Struct::operator[](const std::string& key) const
@@ -193,6 +225,11 @@ namespace DynamicData
 		return *m_upElement;
 	}
 
+	bool Array::IndexInBounds(size_t index) const noexcept
+	{
+		return index < m_size;
+	}
+
 	size_t Array::Finalize(size_t offset)
 	{
 		assert(m_size != 0u && nullptr != m_upElement);
@@ -257,6 +294,15 @@ namespace DynamicData
 	{
 	}
 
+	std::optional<ConstElementRef> ConstElementRef::Exists() const noexcept
+	{
+		if (m_pLayout->Exists())
+		{
+			return ConstElementRef{ m_pLayout, m_pBytes, m_offset };
+		}
+		return std::nullopt;
+	}
+
 	ConstElementRef ConstElementRef::operator[](const std::string& key) noexcept
 	{
 		return { &(*m_pLayout)[key], m_pBytes, m_offset };
@@ -266,6 +312,8 @@ namespace DynamicData
 	{
 		// 数组未在 hlsl 中打包
 		const auto& t = m_pLayout->LayoutEle();
+		// 上一次调用没有失败，断言意味着布局是数组
+		assert(static_cast<const Array&>(*m_pLayout).IndexInBounds(index));
 		const auto elementSize = LayoutElement::GetNextBoundaryOffset(t.GetSizeInBytes());
 		return { &t, m_pBytes, m_offset + elementSize * index };
 	}
@@ -303,6 +351,15 @@ namespace DynamicData
 	{
 	}
 
+	std::optional<ElementRef> ElementRef::Exists() const noexcept
+	{
+		if (m_pLayout->Exists())
+		{
+			return ElementRef{ m_pLayout, m_pBytes, m_offset };
+		}
+		return std::nullopt;
+	}
+
 	ElementRef::operator ConstElementRef() const noexcept
 	{
 		return { m_pLayout, m_pBytes, m_offset };
@@ -317,6 +374,8 @@ namespace DynamicData
 	{
 		// 数组未在 hlsl 中打包
 		const auto& t = m_pLayout->LayoutEle();
+		// 上一次调用没有失败，断言意味着布局是数组
+		assert(static_cast<const Array&>(*m_pLayout).IndexInBounds(index));
 		const auto elementSize = LayoutElement::GetNextBoundaryOffset(t.GetSizeInBytes());
 		return { &t, m_pBytes, m_offset + elementSize * index };
 	}

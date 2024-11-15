@@ -4,6 +4,7 @@
 #include <string>
 #include <memory>
 #include <DirectXMath.h>
+#include <optional>
 
 #define DCB_RESOLVE_BASE(elementType) \
 virtual size_t Resolve ## elementType() const noexcept;
@@ -49,6 +50,11 @@ namespace DynamicData
 		friend class Layout;
 	public:
 		virtual ~LayoutElement();
+
+		virtual bool Exists() const noexcept
+		{
+			return true;
+		}
 
 		// [] 仅适用于结构体；通过名称访问成员
 		virtual LayoutElement& operator[](const std::string& key);
@@ -142,6 +148,8 @@ namespace DynamicData
 
 		const LayoutElement& LayoutEle() const override final;
 
+		bool IndexInBounds(size_t index) const noexcept;
+
 	protected:
 		// 数组末端的offset
 		size_t Finalize(size_t offset) override final;
@@ -217,6 +225,8 @@ namespace DynamicData
 	public:
 		ConstElementRef(const LayoutElement* pLayout, char* pBytes, size_t offset);
 
+		std::optional<ConstElementRef> Exists() const noexcept;
+
 		ConstElementRef operator[](const std::string& key) noexcept;
 
 		ConstElementRef operator[](size_t index) noexcept;
@@ -257,6 +267,8 @@ namespace DynamicData
 
 	public:
 		ElementRef(const LayoutElement* pLayout, char* pBytes, size_t offset);
+
+		std::optional<ElementRef> Exists() const noexcept;
 
 		operator ConstElementRef() const noexcept;
 
