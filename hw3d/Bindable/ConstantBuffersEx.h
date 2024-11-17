@@ -16,7 +16,7 @@ namespace Bind
 
 		PixelContantBufferEx(Graphics& gfx, const DynamicData::Buffer& buf, UINT slot)
 			:
-			PixelContantBufferEx(gfx, buf.CloneLayout(), slot, &buf)
+			PixelContantBufferEx(gfx, buf.ShareLayout(), slot, &buf)
 		{
 		}
 

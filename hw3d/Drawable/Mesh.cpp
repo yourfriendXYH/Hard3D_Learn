@@ -455,28 +455,16 @@ std::unique_ptr<Mesh> Model::ParseMesh(Graphics& gfx, const aiMesh& mesh, const 
 		DynamicData::Layout layout;
 		bool loaded = false;
 		auto tag = "diff&nrm";
-		if (LayoutCodex::Has(tag))
-		{
-			layout = LayoutCodex::Load(tag);
-			loaded = true;
-		}
-		else
-		{
-			layout.Add<DynamicData::Float>("specularIntensity");
-			layout.Add<DynamicData::Float>("specularPower");
-			layout.Add<DynamicData::Bool>("normalMapEnabled");
-		}
 
-		DynamicData::Buffer cbuf{ layout };
+		layout.Add<DynamicData::Float>("specularIntensity");
+		layout.Add<DynamicData::Float>("specularPower");
+		layout.Add<DynamicData::Bool>("normalMapEnabled");
+
+		DynamicData::Buffer cbuf = DynamicData::Buffer::Make(layout);
 		cbuf["specularIntensity"] = (specularColor.x + specularColor.y + specularColor.z) / 3.0f;
 		cbuf["specularPower"] = shininess;
 		cbuf["normalMapEnabled"] = true;
 		bindablePtrs.emplace_back(std::make_shared<PixelContantBufferEx>(gfx, cbuf, 1u));
-
-		if (!loaded)
-		{
-			LayoutCodex::Store(tag, layout);
-		}
 	}
 	else if (hasDiffuseMap && !hasNormalMap && hasSpecularMap) // 没有法线纹理
 	{

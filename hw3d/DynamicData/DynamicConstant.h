@@ -42,6 +42,7 @@ namespace DynamicData
 	class Struct;
 	class Array;
 	class Layout;
+	class LayoutCodex;
 	// 单个元素布局
 	class LayoutElement
 	{
@@ -189,6 +190,8 @@ namespace DynamicData
 	// 缓存布局的封装类
 	class Layout
 	{
+		friend LayoutCodex;
+		friend class Buffer;
 	public:
 		Layout();
 
@@ -204,9 +207,14 @@ namespace DynamicData
 			return m_pLayout->Add<T>(key);
 		}
 
-		std::shared_ptr<LayoutElement> Finalize();
+		void Finalize();
+
+		bool IsFinalized() const noexcept;
 
 		std::string GetSignature() const noexcept;
+
+	private:
+		std::shared_ptr<LayoutElement> ShareRoot() const noexcept;
 
 	private:
 		bool m_finalized = false;
@@ -303,7 +311,7 @@ namespace DynamicData
 	class Buffer
 	{
 	public:
-		Buffer(Layout& layout);
+		static Buffer Make(Layout& layout) noexcept;
 
 		ElementRef operator[](const std::string& key);
 
@@ -315,12 +323,16 @@ namespace DynamicData
 
 		const LayoutElement& GetLayout() const noexcept;
 
-		std::shared_ptr<LayoutElement> CloneLayout() const;
+		std::shared_ptr<LayoutElement> ShareLayout() const;
 
 		std::string GetSignature() const noexcept;
 
 	private:
-		std::shared_ptr<Struct> m_pLayout; // 常数缓存的布局
+		Buffer(Layout& layout);
+		Buffer(Layout&& layout);
+
+	private:
+		std::shared_ptr<LayoutElement> m_pLayout; // 常数缓存的布局
 		std::vector<char> m_bytes; // 常数缓存的数据
 	};
 }

@@ -242,6 +242,10 @@
     <ClCompile Include="Utils\ScriptCommander.cpp">
       <Filter>Utils</Filter>
     </ClCompile>
+    <ClCompile Include="DynamicData\DynamicConstant.cpp" />
+    <ClCompile Include="DynamicData\LayoutCodex.cpp">
+      <Filter>DynamicData</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Window.h">
@@ -456,6 +460,9 @@
     </ClInclude>
     <ClInclude Include="Bindable\ConstantBuffersEx.h">
       <Filter>Code\Bindable</Filter>
+    </ClInclude>
+    <ClInclude Include="DynamicData\LayoutCodex.h">
+      <Filter>头文件</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

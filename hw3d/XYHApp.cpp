@@ -65,7 +65,7 @@ void TestDynamicConstant()
 	layout["arr"].LayoutEle()["meta"].Set<Array>(6);
 	layout["arr"].LayoutEle()["meta"].LayoutEle().Set<Matrix>(4);
 
-	Buffer testBuffer(layout);
+	Buffer testBuffer = Buffer::Make(layout);
 	// 缓存布局的签名
 	const auto signature = testBuffer.GetSignature();
 
@@ -101,7 +101,7 @@ void TestDynamicConstant()
 	testStruct["arr"].Set<Struct>(6);
 	testStruct["arr"].LayoutEle().Add<Float3>("a"s);
 
-	Buffer testBuffer1(testStruct);
+	Buffer testBuffer1 = Buffer::Make(testStruct);
 
 	testBuffer1["butts"]["pubes"] = DirectX::XMFLOAT3{ 250.f, 0.0f, 0.0f };
 

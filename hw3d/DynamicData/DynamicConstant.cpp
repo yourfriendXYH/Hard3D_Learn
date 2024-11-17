@@ -1,4 +1,5 @@
 #include "DynamicConstant.h"
+#include "LayoutCodex.h"
 #include <string>
 #include <cctype>
 #include <algorithm>
@@ -298,7 +299,8 @@ namespace DynamicData
 
 	Layout::Layout()
 		:
-		m_pLayout(std::make_shared<Struct>())
+		m_pLayout(std::make_shared<Struct>()),
+		m_finalized(true)
 	{
 	}
 
@@ -318,16 +320,26 @@ namespace DynamicData
 		return m_pLayout->GetSizeInBytes();
 	}
 
-	std::shared_ptr<LayoutElement> Layout::Finalize()
+	void Layout::Finalize()
 	{
-		m_pLayout->Finalize(0); // 初始布局的偏移值
+		m_pLayout->Finalize(0u); // 初始布局的偏移值
 		m_finalized = true;
-		return m_pLayout;
+	}
+
+	bool Layout::IsFinalized() const noexcept
+	{
+		return m_finalized;
 	}
 
 	std::string Layout::GetSignature() const noexcept
 	{
+		assert(m_finalized);
 		return m_pLayout->GetSignature();
+	}
+
+	std::shared_ptr<LayoutElement> Layout::ShareRoot() const noexcept
+	{
+		return m_pLayout;
 	}
 
 	ConstElementRef::Ptr::Ptr(ConstElementRef& ref)
@@ -445,9 +457,20 @@ namespace DynamicData
 
 	Buffer::Buffer(Layout& layout)
 		:
-		m_pLayout(static_pointer_cast<Struct>(layout.Finalize())),
+		m_pLayout(layout.ShareRoot()),
 		m_bytes(m_pLayout->GetOffsetEnd()) // 根据布局初始化缓存大小
 	{
+	}
+
+	Buffer::Buffer(Layout&& layout)
+		:
+		Buffer(layout)
+	{
+	}
+
+	Buffer Buffer::Make(Layout& layout) noexcept
+	{
+		return { LayoutCodex::Resolve(layout) };
 	}
 
 	ElementRef Buffer::operator[](const std::string& key)
@@ -475,7 +498,7 @@ namespace DynamicData
 		return *m_pLayout;
 	}
 
-	std::shared_ptr<LayoutElement> Buffer::CloneLayout() const
+	std::shared_ptr<LayoutElement> Buffer::ShareLayout() const
 	{
 		return m_pLayout;
 	}
