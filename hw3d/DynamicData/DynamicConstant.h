@@ -4,7 +4,6 @@
 #include <string>
 #include <memory>
 #include <DirectXMath.h>
-#include <optional>
 
 #define DCB_RESOLVE_BASE(elementType) \
 virtual size_t Resolve ## elementType() const noexcept;
@@ -17,6 +16,7 @@ public: \
 	using SystemType = sysType; \
 	size_t Resolve ## elementType() const noexcept override final; \
 	size_t GetOffsetEnd() const noexcept override final; \
+	std::string GetSignature() const noexcept override; \
 protected: \
 	size_t Finalize(size_t offset) override final; \
 	size_t ComputeSize() const noexcept override final; \
@@ -50,6 +50,9 @@ namespace DynamicData
 		friend class Layout;
 	public:
 		virtual ~LayoutElement();
+
+		// 获取此元素的字符串签名（递归）
+		virtual std::string GetSignature() const noexcept = 0;
 
 		virtual bool Exists() const noexcept
 		{
@@ -120,6 +123,8 @@ namespace DynamicData
 
 		size_t GetOffsetEnd() const noexcept override final;
 
+		std::string GetSignature() const noexcept override;
+
 		// 添加元素布局
 		void Add(const std::string& name, std::unique_ptr<LayoutElement> pElement) noexcept;
 
@@ -147,6 +152,8 @@ namespace DynamicData
 		LayoutElement& LayoutEle() override final;
 
 		const LayoutElement& LayoutEle() const override final;
+
+		std::string GetSignature() const noexcept override;
 
 		bool IndexInBounds(size_t index) const noexcept;
 
@@ -199,6 +206,8 @@ namespace DynamicData
 
 		std::shared_ptr<LayoutElement> Finalize();
 
+		std::string GetSignature() const noexcept;
+
 	private:
 		bool m_finalized = false;
 		std::shared_ptr<LayoutElement> m_pLayout;
@@ -225,7 +234,7 @@ namespace DynamicData
 	public:
 		ConstElementRef(const LayoutElement* pLayout, char* pBytes, size_t offset);
 
-		std::optional<ConstElementRef> Exists() const noexcept;
+		bool Exists() const noexcept;
 
 		ConstElementRef operator[](const std::string& key) noexcept;
 
@@ -268,7 +277,7 @@ namespace DynamicData
 	public:
 		ElementRef(const LayoutElement* pLayout, char* pBytes, size_t offset);
 
-		std::optional<ElementRef> Exists() const noexcept;
+		bool Exists() const noexcept;
 
 		operator ConstElementRef() const noexcept;
 
@@ -307,6 +316,8 @@ namespace DynamicData
 		const LayoutElement& GetLayout() const noexcept;
 
 		std::shared_ptr<LayoutElement> CloneLayout() const;
+
+		std::string GetSignature() const noexcept;
 
 	private:
 		std::shared_ptr<Struct> m_pLayout; // 常数缓存的布局

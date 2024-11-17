@@ -66,6 +66,9 @@ void TestDynamicConstant()
 	layout["arr"].LayoutEle()["meta"].LayoutEle().Set<Matrix>(4);
 
 	Buffer testBuffer(layout);
+	// 缓存布局的签名
+	const auto signature = testBuffer.GetSignature();
+
 	testBuffer["butts"]["pubes"] = DirectX::XMFLOAT3{ 69.0f, 0.0f, 0.0f };
 	testBuffer["butts"]["dank"] = 250.0f;
 	DirectX::XMFLOAT3 saveValue = testBuffer["butts"]["pubes"];
@@ -102,9 +105,8 @@ void TestDynamicConstant()
 
 	testBuffer1["butts"]["pubes"] = DirectX::XMFLOAT3{ 250.f, 0.0f, 0.0f };
 
-	if (auto opt = testBuffer1["butts"]["pubes"].Exists())
+	if (auto ref = testBuffer1["butts"]["pubes"]; ref.Exists())
 	{
-		auto& ref = *opt;
 		DirectX::XMFLOAT3 f = ref;
 
 		assert(1);

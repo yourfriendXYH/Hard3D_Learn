@@ -1,4 +1,7 @@
 #include "DynamicConstant.h"
+#include <string>
+#include <cctype>
+#include <algorithm>
 
 #define DCB_RESOLVE_BASE(elementType) \
 size_t LayoutElement::Resolve ## elementType() const noexcept \
@@ -15,6 +18,10 @@ size_t elementType::Resolve ## elementType() const noexcept \
 size_t elementType::GetOffsetEnd() const noexcept \
 { \
 	return GetOffsetBegin() + ComputeSize(); \
+} \
+std::string elementType::GetSignature() const noexcept \
+{ \
+	return #elementType; \
 } \
 size_t elementType::Finalize(size_t offset) \
 { \
@@ -115,6 +122,12 @@ namespace DynamicData
 			return false;
 		}
 
+		std::string GetSignature() const noexcept override
+		{
+			assert(false);
+			return "";
+		}
+
 	protected:
 		size_t Finalize(size_t offset) override final
 		{
@@ -156,8 +169,40 @@ namespace DynamicData
 		return LayoutElement::GetNextBoundaryOffset(m_elements.back()->GetOffsetEnd());
 	}
 
+	std::string Struct::GetSignature() const noexcept
+	{
+		using namespace std::string_literals;
+		auto sig = "Struct{"s;
+		for (const auto& pElement : m_elements)
+		{
+			auto iter = std::find_if(
+				m_map.begin(), m_map.end(),
+				[&pElement](const std::pair<std::string, LayoutElement*>& v)
+				{
+					return &*pElement == v.second;
+				}
+			);
+			sig += iter->first + ":"s + pElement->GetSignature() + ";"s;
+		}
+		sig += "}"s;
+		return sig;
+	}
+
+	bool ValidateSymbolName(const std::string& name) noexcept
+	{
+		return !name.empty() && !std::isdigit(name.front()) &&
+			std::all_of(name.begin(), name.end(), [](char c)
+				{
+					return std::isalnum(c) || c == '_';
+				}
+			);
+	}
+
 	void Struct::Add(const std::string& name, std::unique_ptr<LayoutElement> pElement) noexcept
 	{
+		// 
+		assert(ValidateSymbolName(name) && "invalid name in Struct");
+
 		m_elements.emplace_back(std::move(pElement));
 		if (!m_map.emplace(name, m_elements.back().get()).second)
 		{
@@ -222,7 +267,14 @@ namespace DynamicData
 
 	const LayoutElement& Array::LayoutEle() const
 	{
-		return *m_upElement;
+		return const_cast<Array*>(this)->LayoutEle();
+	}
+
+	// »ñÈ¡Ç©Ãû
+	std::string Array::GetSignature() const noexcept
+	{
+		using namespace std::string_literals;
+		return "Array"s + std::to_string(m_size) + "{"s + LayoutEle().GetSignature() + "}"s;
 	}
 
 	bool Array::IndexInBounds(size_t index) const noexcept
@@ -273,6 +325,11 @@ namespace DynamicData
 		return m_pLayout;
 	}
 
+	std::string Layout::GetSignature() const noexcept
+	{
+		return m_pLayout->GetSignature();
+	}
+
 	ConstElementRef::Ptr::Ptr(ConstElementRef& ref)
 		:
 		m_ref(ref)
@@ -294,13 +351,9 @@ namespace DynamicData
 	{
 	}
 
-	std::optional<ConstElementRef> ConstElementRef::Exists() const noexcept
+	bool ConstElementRef::Exists() const noexcept
 	{
-		if (m_pLayout->Exists())
-		{
-			return ConstElementRef{ m_pLayout, m_pBytes, m_offset };
-		}
-		return std::nullopt;
+		return m_pLayout->Exists();
 	}
 
 	ConstElementRef ConstElementRef::operator[](const std::string& key) noexcept
@@ -351,13 +404,9 @@ namespace DynamicData
 	{
 	}
 
-	std::optional<ElementRef> ElementRef::Exists() const noexcept
+	bool ElementRef::Exists() const noexcept
 	{
-		if (m_pLayout->Exists())
-		{
-			return ElementRef{ m_pLayout, m_pBytes, m_offset };
-		}
-		return std::nullopt;
+		return m_pLayout->Exists();
 	}
 
 	ElementRef::operator ConstElementRef() const noexcept
@@ -429,6 +478,11 @@ namespace DynamicData
 	std::shared_ptr<LayoutElement> Buffer::CloneLayout() const
 	{
 		return m_pLayout;
+	}
+
+	std::string Buffer::GetSignature() const noexcept
+	{
+		return m_pLayout->GetSignature();
 	}
 
 }
