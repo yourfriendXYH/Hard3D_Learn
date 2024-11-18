@@ -5,21 +5,28 @@
 #include <memory>
 #include <DirectXMath.h>
 
+/* 宏简化了向 LayoutElement 添加基本虚拟解析函数的过
+程，解析函数是验证多态类型访问的系统，这里的基础都提
+供了默认的断言失败行为，例如 Float1 将重载 ResolveFloat1() 并提供不会失败的实现*/
 #define DCB_RESOLVE_BASE(elementType) \
 virtual size_t Resolve ## elementType() const noexcept;
 
+/*这允许对 Float1、Bool 等叶布局类型进行元类模板化。
+使用宏，以便可以自动生成重载 ResolveXXX 本身的名称。
+请参阅 LayoutElement 基类以了解函数含义*/
 // 布局元素宏
 #define DCB_LEAF_ELEMENT_IMPL(elementType, sysType, hlslSize) \
 class elementType : public LayoutElement \
 { \
+	friend LayoutElement; \
 public: \
 	using SystemType = sysType; \
-	size_t Resolve ## elementType() const noexcept override final; \
-	size_t GetOffsetEnd() const noexcept override final; \
+	size_t Resolve ## elementType() const noexcept final; \
+	size_t GetOffsetEnd() const noexcept final; \
 	std::string GetSignature() const noexcept override; \
 protected: \
-	size_t Finalize(size_t offset) override final; \
-	size_t ComputeSize() const noexcept override final; \
+	size_t Finalize(size_t offset) noexcept final; \
+	size_t ComputeSize() const noexcept final; \
 };
 
 #define DCB_LEAF_ELEMENT(elementType, sysType) DCB_LEAF_ELEMENT_IMPL(elementType, sysType, sizeof(sysType))
@@ -42,7 +49,6 @@ namespace DynamicData
 	class Struct;
 	class Array;
 	class Layout;
-	class LayoutCodex;
 	// 单个元素布局
 	class LayoutElement
 	{
@@ -61,14 +67,14 @@ namespace DynamicData
 		}
 
 		// [] 仅适用于结构体；通过名称访问成员
-		virtual LayoutElement& operator[](const std::string& key);
+		virtual LayoutElement& operator[](const std::string& key) noexcept;
 
-		virtual const LayoutElement& operator[](const std::string& key) const;
+		virtual const LayoutElement& operator[](const std::string& key) const noexcept;
 
 		// LayoutEle() 仅适用于数组；获取数组类型布局对象
-		virtual LayoutElement& LayoutEle();
+		virtual LayoutElement& LayoutEle() noexcept;
 
-		virtual const LayoutElement& LayoutEle() const;
+		virtual const LayoutElement& LayoutEle() const noexcept;
 
 		// 基于偏移量的函数 仅在完成后才起作用！
 		size_t GetOffsetBegin() const noexcept;
@@ -98,7 +104,7 @@ namespace DynamicData
 
 	protected:
 		// 设置元素和子元素的所有偏移量，返回此元素之后的偏移量
-		virtual size_t Finalize(size_t offset) = 0;
+		virtual size_t Finalize(size_t offset) noexcept = 0;
 		// 计算此元素的大小（以字节为单位），考虑数组和结构上的填充
 		virtual size_t ComputeSize() const noexcept = 0;
 
@@ -116,11 +122,12 @@ namespace DynamicData
 	// 结构体布局
 	class Struct : public LayoutElement
 	{
+		friend LayoutElement;
 	public:
 		//using LayoutElement::LayoutElement; // 使用基类的构造函数
-		LayoutElement& operator[](const std::string& key) override final;
+		LayoutElement& operator[](const std::string& key) noexcept override final;
 
-		const LayoutElement& operator[](const std::string& key) const override final;
+		const LayoutElement& operator[](const std::string& key) const noexcept override final;
 
 		size_t GetOffsetEnd() const noexcept override final;
 
@@ -130,7 +137,9 @@ namespace DynamicData
 		void Add(const std::string& name, std::unique_ptr<LayoutElement> pElement) noexcept;
 
 	protected:
-		size_t Finalize(size_t offset) override final;
+		// Struct() = default;
+
+		size_t Finalize(size_t offset) noexcept override final;
 
 		size_t ComputeSize() const noexcept override final;
 
@@ -144,23 +153,25 @@ namespace DynamicData
 
 	class Array : public LayoutElement
 	{
+		friend LayoutElement;
 	public:
 		size_t GetOffsetEnd() const noexcept override final;
 
 		void Set(std::unique_ptr<LayoutElement> pElement, size_t size_in) noexcept;
 
 		// 拿到数组的元素布局
-		LayoutElement& LayoutEle() override final;
+		LayoutElement& LayoutEle() noexcept override final;
 
-		const LayoutElement& LayoutEle() const override final;
+		const LayoutElement& LayoutEle() const noexcept override final;
 
 		std::string GetSignature() const noexcept override;
 
 		bool IndexInBounds(size_t index) const noexcept;
 
 	protected:
+		// Array() = default;
 		// 数组末端的offset
-		size_t Finalize(size_t offset) override final;
+		size_t Finalize(size_t offset) noexcept override final;
 
 		size_t ComputeSize() const noexcept override final;
 
@@ -174,6 +185,7 @@ namespace DynamicData
 	{
 		auto pStruct = dynamic_cast<Struct*>(this);
 		assert(nullptr != pStruct);
+		struct Enabler : public T {};
 		pStruct->Add(key, std::make_unique<T>());
 		return *this;
 	}
@@ -183,19 +195,18 @@ namespace DynamicData
 	{
 		auto pArray = dynamic_cast<Array*>(this);
 		assert(nullptr != pArray);
-		pArray->Set(std::make_unique<T>(), size_in);
+		struct Enabler : public T {};
+		pArray->Set(std::make_unique<Enabler>(), size_in);
 		return *this;
 	}
 
 	// 缓存布局的封装类
 	class Layout
 	{
-		friend LayoutCodex;
+		friend class LayoutCodex;
 		friend class Buffer;
 	public:
-		Layout();
-
-		Layout(std::shared_ptr<LayoutElement> pLayout);
+		Layout() noexcept;
 
 		LayoutElement& operator[](const std::string& key);
 
@@ -207,13 +218,15 @@ namespace DynamicData
 			return m_pLayout->Add<T>(key);
 		}
 
-		void Finalize();
+		void Finalize() noexcept;
 
 		bool IsFinalized() const noexcept;
 
 		std::string GetSignature() const noexcept;
 
 	private:
+		Layout(std::shared_ptr<LayoutElement> pLayout) noexcept;
+
 		std::shared_ptr<LayoutElement> ShareRoot() const noexcept;
 
 	private:
@@ -223,12 +236,13 @@ namespace DynamicData
 
 	class ConstElementRef
 	{
+		friend class ElementRef;
+		friend class Buffer;
 	public:
 		class Ptr
 		{
+			friend ConstElementRef;
 		public:
-			Ptr(ConstElementRef& ref);
-
 			DCB_PTR_CONVERSION(Matrix, const);
 			DCB_PTR_CONVERSION(Float4, const);
 			DCB_PTR_CONVERSION(Float3, const);
@@ -237,11 +251,11 @@ namespace DynamicData
 			DCB_PTR_CONVERSION(Bool, const);
 
 		private:
+			Ptr(ConstElementRef& ref) noexcept;
+		private:
 			ConstElementRef& m_ref;
 		};
 	public:
-		ConstElementRef(const LayoutElement* pLayout, char* pBytes, size_t offset);
-
 		bool Exists() const noexcept;
 
 		ConstElementRef operator[](const std::string& key) noexcept;
@@ -256,6 +270,8 @@ namespace DynamicData
 		DCB_REF_CONST(Float2);
 		DCB_REF_CONST(Float);
 		DCB_REF_CONST(Bool);
+	private:
+		ConstElementRef(const LayoutElement* pLayout, char* pBytes, size_t offset) noexcept;
 
 	private:
 		size_t m_offset;
@@ -265,26 +281,26 @@ namespace DynamicData
 
 	class ElementRef
 	{
+		friend class Buffer;
 	public:
 		class Ptr
 		{
+			friend ElementRef;
 		public:
-			Ptr(ElementRef& ref);
-
 			DCB_PTR_CONVERSION(Matrix);
 			DCB_PTR_CONVERSION(Float4);
 			DCB_PTR_CONVERSION(Float3);
 			DCB_PTR_CONVERSION(Float2);
 			DCB_PTR_CONVERSION(Float);
 			DCB_PTR_CONVERSION(Bool);
+		private:
+			Ptr(ElementRef& ref) noexcept;
 
 		private:
 			ElementRef& m_ref;
 		};
 
 	public:
-		ElementRef(const LayoutElement* pLayout, char* pBytes, size_t offset);
-
 		bool Exists() const noexcept;
 
 		operator ConstElementRef() const noexcept;
@@ -301,6 +317,8 @@ namespace DynamicData
 		DCB_REF_NONCONST(Float2);
 		DCB_REF_NONCONST(Float);
 		DCB_REF_NONCONST(Bool);
+	private:
+		ElementRef(const LayoutElement* pLayout, char* pBytes, size_t offset) noexcept;
 
 	private:
 		const class LayoutElement* m_pLayout;
@@ -323,13 +341,13 @@ namespace DynamicData
 
 		const LayoutElement& GetLayout() const noexcept;
 
-		std::shared_ptr<LayoutElement> ShareLayout() const;
+		std::shared_ptr<LayoutElement> ShareLayout() const noexcept;
 
 		std::string GetSignature() const noexcept;
 
 	private:
-		Buffer(Layout& layout);
-		Buffer(Layout&& layout);
+		Buffer(Layout& layout) noexcept;
+		Buffer(Layout&& layout) noexcept;
 
 	private:
 		std::shared_ptr<LayoutElement> m_pLayout; // 常数缓存的布局

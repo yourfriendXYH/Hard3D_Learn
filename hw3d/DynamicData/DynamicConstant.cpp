@@ -24,7 +24,7 @@ std::string elementType::GetSignature() const noexcept \
 { \
 	return #elementType; \
 } \
-size_t elementType::Finalize(size_t offset) \
+size_t elementType::Finalize(size_t offset) noexcept \
 { \
 	m_offset = offset; \
 	return offset + ComputeSize(); \
@@ -63,25 +63,25 @@ namespace DynamicData
 	{
 	}
 
-	LayoutElement& LayoutElement::operator[](const std::string& key)
+	LayoutElement& LayoutElement::operator[](const std::string& key) noexcept
 	{
 		assert(false);
 		return *this;
 	}
 
-	const LayoutElement& LayoutElement::operator[](const std::string& key) const
+	const LayoutElement& LayoutElement::operator[](const std::string& key) const noexcept
 	{
 		assert(false);
 		return *this;
 	}
 
-	LayoutElement& LayoutElement::LayoutEle()
+	LayoutElement& LayoutElement::LayoutEle() noexcept
 	{
 		assert(false);
 		return *this;
 	}
 
-	const LayoutElement& LayoutElement::LayoutEle() const
+	const LayoutElement& LayoutElement::LayoutEle() const noexcept
 	{
 		assert(false);
 		return *this;
@@ -113,12 +113,12 @@ namespace DynamicData
 	class Empty : public LayoutElement
 	{
 	public:
-		size_t GetOffsetEnd() const noexcept override final
+		size_t GetOffsetEnd() const noexcept final
 		{
 			return 0u;
 		}
 
-		bool Exists() const noexcept override final
+		bool Exists() const noexcept final
 		{
 			return false;
 		}
@@ -130,11 +130,11 @@ namespace DynamicData
 		}
 
 	protected:
-		size_t Finalize(size_t offset) override final
+		size_t Finalize(size_t offset) noexcept final
 		{
 			return 0u;
 		}
-		size_t ComputeSize() const noexcept override final
+		size_t ComputeSize() const noexcept final
 		{
 			return 0u;
 		}
@@ -149,7 +149,7 @@ namespace DynamicData
 	DCB_LEAF_ELEMENT(Float, float);
 	DCB_LEAF_ELEMENT_IMPL(Bool, bool, 4u);
 
-	LayoutElement& Struct::operator[](const std::string& key)
+	LayoutElement& Struct::operator[](const std::string& key) noexcept
 	{
 		auto iter = m_map.find(key);
 		if (iter == m_map.end())
@@ -159,7 +159,7 @@ namespace DynamicData
 		return *iter->second;
 	}
 
-	const LayoutElement& Struct::operator[](const std::string& key) const
+	const LayoutElement& Struct::operator[](const std::string& key) const noexcept
 	{
 		return *m_map.at(key);
 	}
@@ -196,7 +196,7 @@ namespace DynamicData
 				{
 					return std::isalnum(c) || c == '_';
 				}
-			);
+		);
 	}
 
 	void Struct::Add(const std::string& name, std::unique_ptr<LayoutElement> pElement) noexcept
@@ -211,7 +211,7 @@ namespace DynamicData
 		}
 	}
 
-	size_t Struct::Finalize(size_t offset)
+	size_t Struct::Finalize(size_t offset) noexcept
 	{
 		m_offset = offset;
 		size_t offsetNext = offset;
@@ -261,12 +261,12 @@ namespace DynamicData
 		m_size = size_in;
 	}
 
-	LayoutElement& Array::LayoutEle()
+	LayoutElement& Array::LayoutEle() noexcept
 	{
 		return *m_upElement;
 	}
 
-	const LayoutElement& Array::LayoutEle() const
+	const LayoutElement& Array::LayoutEle() const noexcept
 	{
 		return const_cast<Array*>(this)->LayoutEle();
 	}
@@ -283,7 +283,7 @@ namespace DynamicData
 		return index < m_size;
 	}
 
-	size_t Array::Finalize(size_t offset)
+	size_t Array::Finalize(size_t offset) noexcept
 	{
 		assert(m_size != 0u && nullptr != m_upElement);
 		m_offset = offset;
@@ -297,16 +297,18 @@ namespace DynamicData
 		return LayoutElement::GetNextBoundaryOffset(m_upElement->ComputeSize()) * m_size;
 	}
 
-	Layout::Layout()
+	Layout::Layout() noexcept
 		:
-		m_pLayout(std::make_shared<Struct>()),
 		m_finalized(true)
 	{
+		struct Enabler : public Struct {};
+		m_pLayout = std::make_shared<Struct>();
 	}
 
-	Layout::Layout(std::shared_ptr<LayoutElement> pLayout)
+	Layout::Layout(std::shared_ptr<LayoutElement> pLayout) noexcept
 		:
-		m_pLayout(std::move(pLayout))
+		m_pLayout(std::move(pLayout)),
+		m_finalized(true)
 	{
 	}
 
@@ -320,7 +322,7 @@ namespace DynamicData
 		return m_pLayout->GetSizeInBytes();
 	}
 
-	void Layout::Finalize()
+	void Layout::Finalize() noexcept
 	{
 		m_pLayout->Finalize(0u); // 初始布局的偏移值
 		m_finalized = true;
@@ -342,7 +344,7 @@ namespace DynamicData
 		return m_pLayout;
 	}
 
-	ConstElementRef::Ptr::Ptr(ConstElementRef& ref)
+	ConstElementRef::Ptr::Ptr(ConstElementRef& ref) noexcept
 		:
 		m_ref(ref)
 	{
@@ -355,7 +357,7 @@ namespace DynamicData
 	DCB_PTR_CONVERSION(ConstElementRef::Ptr, Float, const);
 	DCB_PTR_CONVERSION(ConstElementRef::Ptr, Bool, const);
 
-	ConstElementRef::ConstElementRef(const LayoutElement* pLayout, char* pBytes, size_t offset)
+	ConstElementRef::ConstElementRef(const LayoutElement* pLayout, char* pBytes, size_t offset) noexcept
 		:
 		m_offset(offset),
 		m_pLayout(pLayout),
@@ -395,7 +397,7 @@ namespace DynamicData
 	DCB_REF_CONST(ConstElementRef, Float);
 	DCB_REF_CONST(ConstElementRef, Bool);
 
-	ElementRef::Ptr::Ptr(ElementRef& ref)
+	ElementRef::Ptr::Ptr(ElementRef& ref) noexcept
 		:
 		m_ref(ref)
 	{
@@ -408,7 +410,7 @@ namespace DynamicData
 	DCB_PTR_CONVERSION(ElementRef::Ptr, Float);
 	DCB_PTR_CONVERSION(ElementRef::Ptr, Bool);
 
-	ElementRef::ElementRef(const LayoutElement* pLayout, char* pBytes, size_t offset)
+	ElementRef::ElementRef(const LayoutElement* pLayout, char* pBytes, size_t offset) noexcept
 		:
 		m_pLayout(pLayout),
 		m_pBytes(pBytes),
@@ -455,14 +457,14 @@ namespace DynamicData
 
 
 
-	Buffer::Buffer(Layout& layout)
+	Buffer::Buffer(Layout& layout) noexcept
 		:
 		m_pLayout(layout.ShareRoot()),
 		m_bytes(m_pLayout->GetOffsetEnd()) // 根据布局初始化缓存大小
 	{
 	}
 
-	Buffer::Buffer(Layout&& layout)
+	Buffer::Buffer(Layout&& layout) noexcept
 		:
 		Buffer(layout)
 	{
@@ -498,7 +500,7 @@ namespace DynamicData
 		return *m_pLayout;
 	}
 
-	std::shared_ptr<LayoutElement> Buffer::ShareLayout() const
+	std::shared_ptr<LayoutElement> Buffer::ShareLayout() const noexcept
 	{
 		return m_pLayout;
 	}
