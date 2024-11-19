@@ -152,10 +152,10 @@ public:
 				ImGui::SliderFloat("Y", &transform.y, -20.f, 20.f);
 				ImGui::SliderFloat("Z", &transform.z, -20.f, 20.f);
 
-				if (!m_pSelectedNode->ControlNode(gfx, m_skinMaterialConstant))
-				{
-					m_pSelectedNode->ControlNode(gfx, m_ringMaterialConstant);
-				}
+				//if (!m_pSelectedNode->ControlNode(gfx, m_skinMaterialConstant))
+				//{
+				//	m_pSelectedNode->ControlNode(gfx, m_ringMaterialConstant);
+				//}
 			}
 		}
 		ImGui::End();
@@ -178,11 +178,7 @@ public:
 	}
 
 private:
-
 	Node* m_pSelectedNode = nullptr;
-
-	Node::PSMaterialConstantFullmonte m_skinMaterialConstant;
-	Node::PSMaterialConstantNotex m_ringMaterialConstant;
 
 	struct TransformParameters
 	{
@@ -381,11 +377,30 @@ std::unique_ptr<Mesh> Model::ParseMesh(Graphics& gfx, const aiMesh& mesh, const 
 		// 输入布局
 		bindablePtrs.emplace_back(InputLayout::Resolve(gfx, vBuf.GetVertexLayout(), pVertexShaderByteCode));
 
-		Node::PSMaterialConstantFullmonte pmc;
-		pmc.specularPower = shininess;
-		pmc.hasGlossMap = hasAlphaGloss ? TRUE : FALSE;
+		//Node::PSMaterialConstantFullmonte pmc;
+		//pmc.specularPower = shininess;
+		//pmc.hasGlossMap = hasAlphaGloss ? TRUE : FALSE;
 
-		bindablePtrs.emplace_back(PixelConstantBuffer<Node::PSMaterialConstantFullmonte>::Resolve(gfx, pmc, 1u));
+		//bindablePtrs.emplace_back(PixelConstantBuffer<Node::PSMaterialConstantFullmonte>::Resolve(gfx, pmc, 1u));
+
+		DynamicData::RawLayout layout;
+		layout.Add<DynamicData::Bool>("normalMapEnabled");
+		layout.Add<DynamicData::Bool>("specularMapEnabled");
+		layout.Add<DynamicData::Bool>("hasGlossMap");
+		layout.Add<DynamicData::Float>("specularPower");
+		layout.Add<DynamicData::Float3>("specularColor");
+		layout.Add<DynamicData::Float>("specularMapWeight");
+
+		auto cbuf = DynamicData::Buffer::Make(std::move(layout));
+		cbuf["normalMapEnabled"] = true;
+		cbuf["specularMapEnabled"] = true;
+		cbuf["hasGlossMap"] = hasAlphaGloss;
+		cbuf["specularPower"] = shininess;
+		cbuf["specularColor"] = DirectX::XMFLOAT3{ 0.75f,0.75f,0.75f };
+		cbuf["specularMapWeight"] = 0.671f;
+
+		bindablePtrs.emplace_back(std::make_shared<PixelConstantBufferEx>(gfx, cbuf, 1u));
+
 	}
 	else if (hasDiffuseMap && hasNormalMap) // 没有高光纹理
 	{
@@ -450,8 +465,6 @@ std::unique_ptr<Mesh> Model::ParseMesh(Graphics& gfx, const aiMesh& mesh, const 
 
 		//bindablePtrs.emplace_back(PixelConstantBuffer<PSMaterialConstantDiffNorm>::Resolve(gfx, pmc, 1u));
 
-
-
 		DynamicData::RawLayout layout;
 		bool loaded = false;
 		auto tag = "diff&nrm";
@@ -464,7 +477,7 @@ std::unique_ptr<Mesh> Model::ParseMesh(Graphics& gfx, const aiMesh& mesh, const 
 		cbuf["specularIntensity"] = (specularColor.x + specularColor.y + specularColor.z) / 3.0f;
 		cbuf["specularPower"] = shininess;
 		cbuf["normalMapEnabled"] = true;
-		bindablePtrs.emplace_back(std::make_shared<PixelContantBufferEx>(gfx, cbuf, 1u));
+		bindablePtrs.emplace_back(std::make_shared<PixelConstantBufferEx>(gfx, cbuf, 1u));
 	}
 	else if (hasDiffuseMap && !hasNormalMap && hasSpecularMap) // 没有法线纹理
 	{
@@ -510,19 +523,29 @@ std::unique_ptr<Mesh> Model::ParseMesh(Graphics& gfx, const aiMesh& mesh, const 
 		// 输入布局
 		bindablePtrs.emplace_back(InputLayout::Resolve(gfx, verticesBuffer.GetVertexLayout(), pVertexShaderByteCode));
 
-		struct PSMaterialConstantDiffuseSpec
-		{
-			float specularPowerConst;
-			BOOL hasGloss;
-			float specularMapWeight;
-			float padding;
-		} pmc;
+		//struct PSMaterialConstantDiffuseSpec
+		//{
+		//	float specularPowerConst;
+		//	BOOL hasGloss;
+		//	float specularMapWeight;
+		//	float padding;
+		//} pmc;
+		//pmc.specularPowerConst = shininess;
+		//pmc.hasGloss = hasAlphaGloss ? TRUE : FALSE;
+		//pmc.specularMapWeight = 1.0f;
+		// bindablePtrs.emplace_back(PixelConstantBuffer<PSMaterialConstantDiffuseSpec>::Resolve(gfx, pmc, 1u));
 
-		pmc.specularPowerConst = shininess;
-		pmc.hasGloss = hasAlphaGloss ? TRUE : FALSE;
-		pmc.specularMapWeight = 1.0f;
+		DynamicData::RawLayout layout;
+		layout.Add<DynamicData::Float>("specularPowerConst");
+		layout.Add<DynamicData::Bool>("hasGloss");
+		layout.Add<DynamicData::Float>("specularMapWeight");
 
-		bindablePtrs.emplace_back(PixelConstantBuffer<PSMaterialConstantDiffuseSpec>::Resolve(gfx, pmc, 1u));
+		auto cbuf = DynamicData::Buffer::Make(std::move(layout));
+		cbuf["specularPowerConst"] = shininess;
+		cbuf["hasGloss"] = hasAlphaGloss;
+		cbuf["specularMapWeight"] = 1.0f;
+
+		bindablePtrs.emplace_back(std::make_unique<PixelConstantBufferEx>(gfx, cbuf, 1u));
 	}
 	else if (hasDiffuseMap)
 	{
@@ -571,16 +594,26 @@ std::unique_ptr<Mesh> Model::ParseMesh(Graphics& gfx, const aiMesh& mesh, const 
 		// 输入布局
 		bindablePtrs.emplace_back(InputLayout::Resolve(gfx, vBuf.GetVertexLayout(), pVertexShaderByteCode));
 
-		struct PSMaterialConstantDiffuse
-		{
-			float specularIntensity;
-			float specularPower = 18;
-			float padding[2];
-		} pmc;
-		pmc.specularPower = shininess;
-		pmc.specularIntensity = (specularColor.x + specularColor.y + specularColor.z) / 3.0f;
+		//struct PSMaterialConstantDiffuse
+		//{
+		//	float specularIntensity;
+		//	float specularPower = 18;
+		//	float padding[2];
+		//} pmc;
+		//pmc.specularPower = shininess;
+		//pmc.specularIntensity = (specularColor.x + specularColor.y + specularColor.z) / 3.0f;
 
-		bindablePtrs.emplace_back(PixelConstantBuffer<PSMaterialConstantDiffuse>::Resolve(gfx, pmc, 1u));
+		//bindablePtrs.emplace_back(PixelConstantBuffer<PSMaterialConstantDiffuse>::Resolve(gfx, pmc, 1u));
+
+		DynamicData::RawLayout lay;
+		lay.Add<DynamicData::Float>("specularIntensity");
+		lay.Add<DynamicData::Float>("specularPower");
+
+		auto buf = DynamicData::Buffer::Make(std::move(lay));
+		buf["specularIntensity"] = (specularColor.x + specularColor.y + specularColor.z) / 3.0f;
+		buf["specularPower"] = shininess;
+
+		bindablePtrs.push_back(std::make_unique<PixelConstantBufferEx>(gfx, buf, 1u));
 	}
 	else if (!hasDiffuseMap && !hasNormalMap && !hasSpecularMap)
 	{
@@ -627,12 +660,24 @@ std::unique_ptr<Mesh> Model::ParseMesh(Graphics& gfx, const aiMesh& mesh, const 
 		// 输入布局
 		bindablePtrs.emplace_back(InputLayout::Resolve(gfx, vBuf.GetVertexLayout(), pVertexShaderByteCode));
 
-		Node::PSMaterialConstantNotex pmc;
-		pmc.specularPower = shininess;
-		pmc.specularColor = specularColor;
-		pmc.materialColor = diffuseColor;
+		//Node::PSMaterialConstantNotex pmc;
+		//pmc.specularPower = shininess;
+		//pmc.specularColor = specularColor;
+		//pmc.materialColor = diffuseColor;
 
-		bindablePtrs.emplace_back(PixelConstantBuffer<Node::PSMaterialConstantNotex>::Resolve(gfx, pmc, 1u));
+		//bindablePtrs.emplace_back(PixelConstantBuffer<Node::PSMaterialConstantNotex>::Resolve(gfx, pmc, 1u));
+
+		DynamicData::RawLayout lay;
+		lay.Add<DynamicData::Float4>("materialColor");
+		lay.Add<DynamicData::Float4>("specularColor");
+		lay.Add<DynamicData::Float>("specularPower");
+
+		auto buf = DynamicData::Buffer::Make(std::move(lay));
+		buf["specularPower"] = shininess;
+		buf["specularColor"] = specularColor;
+		buf["materialColor"] = diffuseColor;
+
+		bindablePtrs.push_back(std::make_unique<Bind::PixelConstantBufferEx>(gfx, buf, 1u));
 	}
 	else
 	{

@@ -5,18 +5,18 @@
 namespace Bind
 {
 	// 扩展的像素常数缓存，适配DynamicConstant
-	class PixelContantBufferEx : public Bindable
+	class PixelConstantBufferEx : public Bindable
 	{
 	public:
-		PixelContantBufferEx(Graphics& gfx, std::shared_ptr<DynamicData::LayoutElement> layout, UINT slot)
+		PixelConstantBufferEx(Graphics& gfx, std::shared_ptr<DynamicData::LayoutElement> layout, UINT slot)
 			:
-			PixelContantBufferEx(gfx, layout, slot, nullptr)
+			PixelConstantBufferEx(gfx, layout, slot, nullptr)
 		{
 		}
 
-		PixelContantBufferEx(Graphics& gfx, const DynamicData::Buffer& buf, UINT slot)
+		PixelConstantBufferEx(Graphics& gfx, const DynamicData::Buffer& buf, UINT slot)
 			:
-			PixelContantBufferEx(gfx, buf.ShareLayout(), slot, &buf)
+			PixelConstantBufferEx(gfx, buf.ShareLayout(), slot, &buf)
 		{
 		}
 
@@ -43,7 +43,7 @@ namespace Bind
 			return *m_pLayout;
 		}
 	private:
-		PixelContantBufferEx(Graphics& gfx, std::shared_ptr<DynamicData::LayoutElement> playout_in, UINT slot, const DynamicData::Buffer* pBuf)
+		PixelConstantBufferEx(Graphics& gfx, std::shared_ptr<DynamicData::LayoutElement> playout_in, UINT slot, const DynamicData::Buffer* pBuf)
 			:
 			m_slot(slot),
 			m_pLayout(std::move(playout_in))

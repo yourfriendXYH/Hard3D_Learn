@@ -48,25 +48,6 @@ class Node
 {
 	friend class Model;
 public:
-	struct PSMaterialConstantFullmonte
-	{
-		BOOL normalMapEnabled = TRUE; // 是否使用法线纹理
-		BOOL specularMapEnabled = TRUE;
-		BOOL hasGlossMap = FALSE;
-		float specularPower = 3.1f;
-		DirectX::XMFLOAT3 specularColor = { 0.75f, 0.75f, 0.75f };
-		float specularMapWeight = 0.671f;
-	};
-
-	struct PSMaterialConstantNotex
-	{
-		DirectX::XMFLOAT4 materialColor = { 0.447970f,0.327254f,0.176283f,1.0f };
-		DirectX::XMFLOAT4 specularColor = { 0.65f, 0.65f, 0.65f, 1.0f };
-		float specularPower = 120.0f;
-		float padding[3];
-	};
-
-public:
 	Node(int id, const std::string& name, std::vector<Mesh*> meshPtrs, const DirectX::XMMATRIX& transform) noexcept;
 
 	// 递归绘制Mesh
@@ -81,60 +62,60 @@ public:
 	void ShowTree(Node*& pSelectedNode) const noexcept;
 
 	// 控制节点的材质效果
-	template<class T>
-	bool ControlNode(Graphics& gfx, T& constant)
-	{
-		if (m_meshPtrs.empty())
-		{
-			return false;
-		}
+	//template<class T>
+	//bool ControlNode(Graphics& gfx, T& constant)
+	//{
+	//	if (m_meshPtrs.empty())
+	//	{
+	//		return false;
+	//	}
 
-		if constexpr (std::is_same<T, PSMaterialConstantFullmonte>::value)
-		{
-			if (auto pcb = m_meshPtrs.front()->QueryBindable<Bind::PixelConstantBuffer<T>>())
-			{
-				ImGui::Text("Material");
+	//	if constexpr (std::is_same<T, PSMaterialConstantFullmonte>::value)
+	//	{
+	//		if (auto pcb = m_meshPtrs.front()->QueryBindable<Bind::PixelConstantBuffer<T>>())
+	//		{
+	//			ImGui::Text("Material");
 
-				bool normalMapEnabled = (bool)constant.normalMapEnabled;
-				ImGui::Checkbox("Norm Map", &normalMapEnabled);
-				constant.normalMapEnabled = normalMapEnabled ? TRUE : FALSE;
+	//			bool normalMapEnabled = (bool)constant.normalMapEnabled;
+	//			ImGui::Checkbox("Norm Map", &normalMapEnabled);
+	//			constant.normalMapEnabled = normalMapEnabled ? TRUE : FALSE;
 
-				bool specularMapEnabled = (bool)constant.specularMapEnabled;
-				ImGui::Checkbox("Spec Map", &specularMapEnabled);
-				constant.specularMapEnabled = specularMapEnabled ? TRUE : FALSE;
+	//			bool specularMapEnabled = (bool)constant.specularMapEnabled;
+	//			ImGui::Checkbox("Spec Map", &specularMapEnabled);
+	//			constant.specularMapEnabled = specularMapEnabled ? TRUE : FALSE;
 
-				bool hasGlossMap = (bool)constant.hasGlossMap;
-				ImGui::Checkbox("Gloss Alpha", &hasGlossMap);
-				constant.hasGlossMap = hasGlossMap ? TRUE : FALSE;
+	//			bool hasGlossMap = (bool)constant.hasGlossMap;
+	//			ImGui::Checkbox("Gloss Alpha", &hasGlossMap);
+	//			constant.hasGlossMap = hasGlossMap ? TRUE : FALSE;
 
-				ImGui::SliderFloat("Spec Weight", &constant.specularMapWeight, 0.0f, 2.0f);
+	//			ImGui::SliderFloat("Spec Weight", &constant.specularMapWeight, 0.0f, 2.0f);
 
-				ImGui::SliderFloat("Spec Pow", &constant.specularPower, 0.0f, 1000.0f, "%f");
+	//			ImGui::SliderFloat("Spec Pow", &constant.specularPower, 0.0f, 1000.0f, "%f");
 
-				ImGui::ColorPicker3("Spec Color", reinterpret_cast<float*>(&constant.specularColor));
+	//			ImGui::ColorPicker3("Spec Color", reinterpret_cast<float*>(&constant.specularColor));
 
-				pcb->Update(gfx, constant);
-				return true;
-			}
-		}
-		else if constexpr (std::is_same<T, PSMaterialConstantNotex>::value)
-		{
-			if (auto pcb = m_meshPtrs.front()->QueryBindable<Bind::PixelConstantBuffer<T>>())
-			{
-				ImGui::Text("Material");
+	//			pcb->Update(gfx, constant);
+	//			return true;
+	//		}
+	//	}
+	//	else if constexpr (std::is_same<T, PSMaterialConstantNotex>::value)
+	//	{
+	//		if (auto pcb = m_meshPtrs.front()->QueryBindable<Bind::PixelConstantBuffer<T>>())
+	//		{
+	//			ImGui::Text("Material");
 
-				ImGui::ColorPicker3("Spec Color", reinterpret_cast<float*>(&constant.specularColor));
+	//			ImGui::ColorPicker3("Spec Color", reinterpret_cast<float*>(&constant.specularColor));
 
-				ImGui::SliderFloat("Spec Pow", &constant.specularPower, 0.0f, 1000.0f, "%f");
+	//			ImGui::SliderFloat("Spec Pow", &constant.specularPower, 0.0f, 1000.0f, "%f");
 
-				ImGui::ColorPicker3("Diff Color", reinterpret_cast<float*>(&constant.materialColor));
+	//			ImGui::ColorPicker3("Diff Color", reinterpret_cast<float*>(&constant.materialColor));
 
-				pcb->Update(gfx, constant);
-				return true;
-			}
-		}
-		return false;
-	}
+	//			pcb->Update(gfx, constant);
+	//			return true;
+	//		}
+	//	}
+	//	return false;
+	//}
 
 private:
 	// 给Model使用
