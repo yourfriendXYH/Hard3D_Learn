@@ -452,7 +452,7 @@ std::unique_ptr<Mesh> Model::ParseMesh(Graphics& gfx, const aiMesh& mesh, const 
 
 
 
-		DynamicData::Layout layout;
+		DynamicData::RawLayout layout;
 		bool loaded = false;
 		auto tag = "diff&nrm";
 
@@ -460,7 +460,7 @@ std::unique_ptr<Mesh> Model::ParseMesh(Graphics& gfx, const aiMesh& mesh, const 
 		layout.Add<DynamicData::Float>("specularPower");
 		layout.Add<DynamicData::Bool>("normalMapEnabled");
 
-		DynamicData::Buffer cbuf = DynamicData::Buffer::Make(layout);
+		auto cbuf = DynamicData::Buffer::Make(std::move(layout));
 		cbuf["specularIntensity"] = (specularColor.x + specularColor.y + specularColor.z) / 3.0f;
 		cbuf["specularPower"] = shininess;
 		cbuf["normalMapEnabled"] = true;

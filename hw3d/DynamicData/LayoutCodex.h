@@ -12,7 +12,7 @@ namespace DynamicData
 	class LayoutCodex
 	{
 	public:
-		static Layout Resolve(Layout& layout) noexcept;
+		static CookedLayout Resolve(RawLayout&& layout) noexcept;
 
 	private:
 		static LayoutCodex& Get_() noexcept;

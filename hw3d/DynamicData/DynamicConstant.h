@@ -54,7 +54,7 @@ namespace DynamicData
 	{
 		friend class Struct;
 		friend class Array;
-		friend class Layout;
+		friend class RawLayout;
 	public:
 		virtual ~LayoutElement();
 
@@ -206,11 +206,25 @@ namespace DynamicData
 		friend class LayoutCodex;
 		friend class Buffer;
 	public:
+		size_t GetSizeInByte() const noexcept;
+
+		std::string GetSignature() const noexcept;
+	protected:
 		Layout() noexcept;
+		Layout(std::shared_ptr<LayoutElement> pLayout) noexcept;
+
+	protected:
+		std::shared_ptr<LayoutElement> m_pLayout;
+	};
+
+	/* 原始布局 表示尚未最终确定的布局，可以通过添加布局节点来编辑注册结构 */
+	class RawLayout : public Layout
+	{
+		friend class LayoutCodex;
+	public:
+		RawLayout() = default;
 
 		LayoutElement& operator[](const std::string& key);
-
-		size_t GetSizeInByte() const noexcept;
 
 		template<typename T>
 		LayoutElement& Add(const std::string& key) noexcept
@@ -218,20 +232,23 @@ namespace DynamicData
 			return m_pLayout->Add<T>(key);
 		}
 
-		void Finalize() noexcept;
-
-		bool IsFinalized() const noexcept;
-
-		std::string GetSignature() const noexcept;
-
 	private:
-		Layout(std::shared_ptr<LayoutElement> pLayout) noexcept;
+		// 交付布局
+		std::shared_ptr<LayoutElement> DeliverLayout() noexcept;
+		void ClearLayout() noexcept;
+	};
 
+	class CookedLayout : public Layout
+	{
+		friend class LayoutCodex;
+		friend class Buffer;
+	public:
+		const LayoutElement& operator[](const std::string& key);
+	private:
+		// this ctor used by Codex to return cooked layouts
+		CookedLayout(std::shared_ptr<LayoutElement> pLayout) noexcept;
+		// 由缓冲区使用，将对共享指针的引用添加到布局树根
 		std::shared_ptr<LayoutElement> ShareRoot() const noexcept;
-
-	private:
-		bool m_finalized = false;
-		std::shared_ptr<LayoutElement> m_pLayout;
 	};
 
 	class ConstElementRef
@@ -329,7 +346,8 @@ namespace DynamicData
 	class Buffer
 	{
 	public:
-		static Buffer Make(Layout& layout) noexcept;
+		static Buffer Make(RawLayout&& layout) noexcept;
+		static Buffer Make(const CookedLayout& layout) noexcept;
 
 		ElementRef operator[](const std::string& key);
 
@@ -343,11 +361,8 @@ namespace DynamicData
 
 		std::shared_ptr<LayoutElement> ShareLayout() const noexcept;
 
-		std::string GetSignature() const noexcept;
-
 	private:
-		Buffer(Layout& layout) noexcept;
-		Buffer(Layout&& layout) noexcept;
+		Buffer(const CookedLayout& layout) noexcept;
 
 	private:
 		std::shared_ptr<LayoutElement> m_pLayout; // 常数缓存的布局

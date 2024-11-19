@@ -298,8 +298,6 @@ namespace DynamicData
 	}
 
 	Layout::Layout() noexcept
-		:
-		m_finalized(true)
 	{
 		struct Enabler : public Struct {};
 		m_pLayout = std::make_shared<Struct>();
@@ -307,14 +305,26 @@ namespace DynamicData
 
 	Layout::Layout(std::shared_ptr<LayoutElement> pLayout) noexcept
 		:
-		m_pLayout(std::move(pLayout)),
-		m_finalized(true)
+		m_pLayout(std::move(pLayout))
 	{
 	}
 
-	LayoutElement& Layout::operator[](const std::string& key)
+	LayoutElement& RawLayout::operator[](const std::string& key)
 	{
 		return (*m_pLayout)[key];
+	}
+
+	std::shared_ptr<DynamicData::LayoutElement> RawLayout::DeliverLayout() noexcept
+	{
+		auto temp = std::move(m_pLayout);
+		temp->Finalize(0);
+		ClearLayout();
+		return std::move(temp);
+	}
+
+	void RawLayout::ClearLayout() noexcept
+	{
+		*this = RawLayout();
 	}
 
 	size_t Layout::GetSizeInByte() const noexcept
@@ -322,24 +332,23 @@ namespace DynamicData
 		return m_pLayout->GetSizeInBytes();
 	}
 
-	void Layout::Finalize() noexcept
-	{
-		m_pLayout->Finalize(0u); // 初始布局的偏移值
-		m_finalized = true;
-	}
-
-	bool Layout::IsFinalized() const noexcept
-	{
-		return m_finalized;
-	}
-
 	std::string Layout::GetSignature() const noexcept
 	{
-		assert(m_finalized);
 		return m_pLayout->GetSignature();
 	}
 
-	std::shared_ptr<LayoutElement> Layout::ShareRoot() const noexcept
+	const DynamicData::LayoutElement& CookedLayout::operator[](const std::string& key)
+	{
+		return (*m_pLayout)[key];
+	}
+
+	CookedLayout::CookedLayout(std::shared_ptr<LayoutElement> pLayout) noexcept
+		:
+		Layout(std::move(pLayout))
+	{
+	}
+
+	std::shared_ptr<LayoutElement> CookedLayout::ShareRoot() const noexcept
 	{
 		return m_pLayout;
 	}
@@ -457,22 +466,21 @@ namespace DynamicData
 
 
 
-	Buffer::Buffer(Layout& layout) noexcept
+	Buffer::Buffer(const CookedLayout& layout) noexcept
 		:
 		m_pLayout(layout.ShareRoot()),
 		m_bytes(m_pLayout->GetOffsetEnd()) // 根据布局初始化缓存大小
 	{
 	}
 
-	Buffer::Buffer(Layout&& layout) noexcept
-		:
-		Buffer(layout)
+	Buffer Buffer::Make(RawLayout&& layout) noexcept
 	{
+		return { LayoutCodex::Resolve(std::move(layout)) };
 	}
 
-	Buffer Buffer::Make(Layout& layout) noexcept
+	Buffer Buffer::Make(const CookedLayout& layout) noexcept
 	{
-		return { LayoutCodex::Resolve(layout) };
+		return { layout.ShareRoot() };
 	}
 
 	ElementRef Buffer::operator[](const std::string& key)
@@ -503,11 +511,6 @@ namespace DynamicData
 	std::shared_ptr<LayoutElement> Buffer::ShareLayout() const noexcept
 	{
 		return m_pLayout;
-	}
-
-	std::string Buffer::GetSignature() const noexcept
-	{
-		return m_pLayout->GetSignature();
 	}
 
 }

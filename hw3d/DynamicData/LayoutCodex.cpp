@@ -3,9 +3,8 @@
 namespace DynamicData
 {
 
-	DynamicData::Layout LayoutCodex::Resolve(Layout& layout) noexcept
+	DynamicData::CookedLayout LayoutCodex::Resolve(RawLayout&& layout) noexcept
 	{
-		layout.Finalize();
 		auto sig = layout.GetSignature();
 		auto& map = Get_().m_map;
 		const auto iter = map.find(sig);
@@ -13,7 +12,7 @@ namespace DynamicData
 		{
 			return { iter->second };
 		}
-		auto result = map.insert({ std::move(sig), layout.ShareRoot() });
+		auto result = map.insert({ std::move(sig), layout.DeliverLayout() });
 		return { result.first->second };
 	}
 
