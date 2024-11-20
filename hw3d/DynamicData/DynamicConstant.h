@@ -5,6 +5,7 @@
 #include <memory>
 #include <DirectXMath.h>
 
+// 旧代码
 /* 宏简化了向 LayoutElement 添加基本虚拟解析函数的过
 程，解析函数是验证多态类型访问的系统，这里的基础都提
 供了默认的断言失败行为，例如 Float1 将重载 ResolveFloat1() 并提供不会失败的实现*/
@@ -44,8 +45,93 @@ elementType::SystemType& operator=(const elementType::SystemType& rhs) noexcept;
 #define DCB_PTR_CONVERSION(elementType,...) \
 operator __VA_ARGS__ elementType::SystemType*() noexcept;
 
+// 重构代码
+#define LEAF_ELEMENT_TYPES \
+	X(EFloat) \
+	X(EFloat2) \
+	X(EFloat3) \
+	X(EFloat4) \
+	X(EMatrix) \
+	X(EBool)
+
 namespace DynamicData
 {
+	/// <summary>
+	/// 动态常数缓存重构代码
+	/// </summary>
+	enum Type
+	{
+		// 用宏定义枚举
+		#define X(element) element,
+		LEAF_ELEMENT_TYPES
+		#undef X
+		EStruct,
+		EArray,
+		EEmpty,
+	};
+
+	// 模板特化类型
+	template<Type type>
+	struct Map
+	{
+		static constexpr bool m_valid = false;
+	};
+	
+	template<> struct Map<EFloat>
+	{
+		using SysType = float;
+		static constexpr size_t m_hlslSize = sizeof(SysType); // 着色器中的字节大小
+		static constexpr const char* m_code = "F1"; // 类型签名
+		static constexpr bool m_valid = true;
+	};
+
+	template<> struct Map<EFloat2>
+	{
+		using SysType = DirectX::XMFLOAT2;
+		static constexpr size_t m_hlslSize = sizeof(SysType); // 着色器中的字节大小
+		static constexpr const char* m_code = "F2"; // 类型签名
+		static constexpr bool m_valid = true;
+	};
+
+	template<> struct Map<EFloat3>
+	{
+		using SysType = DirectX::XMFLOAT3;
+		static constexpr size_t m_hlslSize = sizeof(SysType); // 着色器中的字节大小
+		static constexpr const char* m_code = "F3"; // 类型签名
+		static constexpr bool m_valid = true;
+	};
+
+	template<> struct Map<EFloat4>
+	{
+		using SysType = DirectX::XMFLOAT4;
+		static constexpr size_t m_hlslSize = sizeof(SysType); // 着色器中的字节大小
+		static constexpr const char* m_code = "F4"; // 类型签名
+		static constexpr bool m_valid = true;
+	};
+
+	template<> struct Map<EMatrix>
+	{
+		using SysType = DirectX::XMFLOAT4X4;
+		static constexpr size_t m_hlslSize = sizeof(SysType); // 着色器中的字节大小
+		static constexpr const char* m_code = "M4"; // 类型签名
+		static constexpr bool m_valid = true;
+	};
+
+	template<> struct Map<EBool>
+	{
+		using SysType = bool;
+		static constexpr size_t m_hlslSize = sizeof(SysType); // 着色器中的字节大小
+		static constexpr const char* m_code = "BL"; // 类型签名
+		static constexpr bool m_valid = true;
+	};
+
+
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	/// <summary>
+	/// 动态常数缓存旧代码
+	/// </summary>
 	class Struct;
 	class Array;
 	class Layout;
