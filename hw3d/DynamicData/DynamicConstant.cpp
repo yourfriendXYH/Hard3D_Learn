@@ -348,6 +348,11 @@ namespace DynamicData
 	{
 	}
 
+	std::shared_ptr<LayoutElement> CookedLayout::ReliquishLayout() const noexcept
+	{
+		return std::move(m_pLayout);
+	}
+
 	std::shared_ptr<LayoutElement> CookedLayout::ShareRoot() const noexcept
 	{
 		return m_pLayout;
@@ -464,7 +469,19 @@ namespace DynamicData
 	DCB_REF_NONCONST(ElementRef, Float);
 	DCB_REF_NONCONST(ElementRef, Bool);
 
+	Buffer::Buffer(RawLayout&& layout) noexcept
+		:
+		Buffer(LayoutCodex::Resolve(std::move(layout)))
+	{
 
+	}
+
+	Buffer::Buffer(CookedLayout&& layout) noexcept
+		:
+		m_pLayout(layout.ReliquishLayout()),
+		m_bytes(m_pLayout->GetOffsetEnd())
+	{
+	}
 
 	Buffer::Buffer(const CookedLayout& layout) noexcept
 		:
@@ -473,14 +490,18 @@ namespace DynamicData
 	{
 	}
 
-	Buffer Buffer::Make(RawLayout&& layout) noexcept
+	Buffer::Buffer(const Buffer& buffer) noexcept
+		:
+		m_pLayout(buffer.m_pLayout),
+		m_bytes(buffer.m_bytes)
 	{
-		return { LayoutCodex::Resolve(std::move(layout)) };
 	}
 
-	Buffer Buffer::Make(const CookedLayout& layout) noexcept
+	Buffer::Buffer(Buffer&& buffer) noexcept
+		:
+		m_pLayout(std::move(buffer.m_pLayout)),
+		m_bytes(std::move(buffer.m_bytes))
 	{
-		return { layout.ShareRoot() };
 	}
 
 	ElementRef Buffer::operator[](const std::string& key)
@@ -506,6 +527,12 @@ namespace DynamicData
 	const LayoutElement& Buffer::GetLayout() const noexcept
 	{
 		return *m_pLayout;
+	}
+
+	void Buffer::CopyFrom(const Buffer& buffer) noexcept
+	{
+		assert(&GetLayout() == &buffer.GetLayout());
+		std::copy(buffer.m_bytes.begin(), buffer.m_bytes.end(), m_bytes.begin());
 	}
 
 	std::shared_ptr<LayoutElement> Buffer::ShareLayout() const noexcept

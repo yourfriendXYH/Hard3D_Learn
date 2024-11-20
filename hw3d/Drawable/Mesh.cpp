@@ -100,6 +100,23 @@ void Node::ShowTree(Node*& pSelectedNode) const noexcept
 	}
 }
 
+const DynamicData::Buffer* Node::GetMaterialConstant() const noexcept
+{
+	if (m_meshPtrs.size() == 0u)
+	{
+		return nullptr;
+	}
+	auto pBindable = m_meshPtrs.front()->QueryBindable<Bind::CachingPixelConstantBufferEx>();
+	return &pBindable->GetBuffer();
+}
+
+void Node::SetMaterialConstant(const DynamicData::Buffer& buf) noexcept
+{
+	auto pcb = m_meshPtrs.front()->QueryBindable<Bind::CachingPixelConstantBufferEx>();
+	assert(pcb != nullptr);
+	pcb->SetBuffer(buf);
+}
+
 void Node::AddChild(std::unique_ptr<Node> pChild)
 {
 	assert(nullptr != pChild);
@@ -137,10 +154,12 @@ public:
 					//transParams.y = translation.y;
 					//transParams.z = translation.z;
 
-					std::tie(iter, std::ignore) = m_transformsMap.insert({ id, transParams });
+					auto pMatConst = m_pSelectedNode->GetMaterialConstant();
+					auto buf = nullptr != pMatConst ? std::optional<DynamicData::Buffer>{*pMatConst} : std::optional<DynamicData::Buffer>{};
+					std::tie(iter, std::ignore) = m_transformsMap.insert({ id, {transParams, std::move(buf)} });
 
 				}
-				auto& transform = iter->second;
+				auto& transform = iter->second.m_transformParams;
 				//auto& transform = m_transformsMap[m_pSelectedNode->GetId()];
 
 				ImGui::Text("Orientation");
@@ -152,10 +171,43 @@ public:
 				ImGui::SliderFloat("Y", &transform.y, -20.f, 20.f);
 				ImGui::SliderFloat("Z", &transform.z, -20.f, 20.f);
 
-				//if (!m_pSelectedNode->ControlNode(gfx, m_skinMaterialConstant))
-				//{
-				//	m_pSelectedNode->ControlNode(gfx, m_ringMaterialConstant);
-				//}
+				if (iter->second.m_materialCBuf)
+				{
+					auto& mat = *iter->second.m_materialCBuf;
+					ImGui::Text("Material");
+					if (auto v = mat["normalMapEnabled"]; v.Exists())
+					{
+						ImGui::Checkbox("Norm Map", &v);
+					}
+					if (auto v = mat["specularMapEnabled"]; v.Exists())
+					{
+						ImGui::Checkbox("Spec Map", &v);
+					}
+					if (auto v = mat["hasGlossMap"]; v.Exists())
+					{
+						ImGui::Checkbox("Gloss Map", &v);
+					}
+					if (auto v = mat["materialColor"]; v.Exists())
+					{
+						ImGui::ColorPicker3("Diff Color", reinterpret_cast<float*>(&static_cast<DirectX::XMFLOAT3&>(v)));
+					}
+					if (auto v = mat["specularPowerConst"]; v.Exists())
+					{
+						ImGui::SliderFloat("Spec Power", &v, 0.0f, 100.0f, "%.1f", 1.5f);
+					}
+					if (auto v = mat["specularColor"]; v.Exists())
+					{
+						ImGui::ColorPicker3("Spec Color", reinterpret_cast<float*>(&static_cast<DirectX::XMFLOAT3&>(v)));
+					}
+					if (auto v = mat["specularMapWeight"]; v.Exists())
+					{
+						ImGui::SliderFloat("Spec Weight", &v, 0.0f, 4.0f);
+					}
+					if (auto v = mat["specularIntensity"]; v.Exists())
+					{
+						ImGui::SliderFloat("Spec Intens", &v, 0.0f, 1.0f);
+					}
+				}
 			}
 		}
 		ImGui::End();
@@ -164,11 +216,20 @@ public:
 	DirectX::XMMATRIX GetTransform() const noexcept
 	{
 		assert(m_pSelectedNode != nullptr);
-		const auto& transform = m_transformsMap.at(m_pSelectedNode->GetId());
+		const auto& transform = m_transformsMap.at(m_pSelectedNode->GetId()).m_transformParams;
 		return DirectX::XMMatrixRotationRollPitchYaw(transform.pitch, transform.yaw, transform.roll) *
 			DirectX::XMMatrixTranslation(transform.x, transform.y, transform.z);
 
 		return DirectX::XMMatrixIdentity();
+	}
+
+	// 获取当前选择模型节点的像素常数缓存
+	const DynamicData::Buffer* GetMaterial() const noexcept
+	{
+		assert(m_pSelectedNode != nullptr);
+		// 材质的常数缓存
+		const auto& matCBuf = m_transformsMap.at(m_pSelectedNode->GetId()).m_materialCBuf;
+		return matCBuf != std::nullopt ? &*matCBuf : nullptr;
 	}
 
 	// UI中被选择的节点
@@ -189,8 +250,15 @@ private:
 		float y = 0.0f;
 		float z = 0.0f;
 	};
+
+	struct NodeData
+	{
+		TransformParameters m_transformParams;
+		std::optional<DynamicData::Buffer> m_materialCBuf;
+	};
+
 	// 每个模型节点的自身坐标系变换
-	std::unordered_map<int, TransformParameters> m_transformsMap;
+	std::unordered_map<int, NodeData> m_transformsMap;
 };
 
 Model::Model(Graphics& gfx, const std::string& pathString, float scale)
@@ -226,6 +294,10 @@ void Model::Draw(Graphics& gfx) const
 	if (nullptr != pNode)
 	{
 		pNode->SetAppliedTransform(m_pModelWindow->GetTransform()); // 将UI上设置好的变换值给到节点上
+		if (auto matCBuf = m_pModelWindow->GetMaterial())
+		{
+			pNode->SetMaterialConstant(*matCBuf);
+		}
 	}
 
 	// 从根节点递归绘制
@@ -391,7 +463,7 @@ std::unique_ptr<Mesh> Model::ParseMesh(Graphics& gfx, const aiMesh& mesh, const 
 		layout.Add<DynamicData::Float3>("specularColor");
 		layout.Add<DynamicData::Float>("specularMapWeight");
 
-		auto cbuf = DynamicData::Buffer::Make(std::move(layout));
+		auto cbuf = DynamicData::Buffer(std::move(layout));
 		cbuf["normalMapEnabled"] = true;
 		cbuf["specularMapEnabled"] = true;
 		cbuf["hasGlossMap"] = hasAlphaGloss;
@@ -399,7 +471,7 @@ std::unique_ptr<Mesh> Model::ParseMesh(Graphics& gfx, const aiMesh& mesh, const 
 		cbuf["specularColor"] = DirectX::XMFLOAT3{ 0.75f,0.75f,0.75f };
 		cbuf["specularMapWeight"] = 0.671f;
 
-		bindablePtrs.emplace_back(std::make_shared<PixelConstantBufferEx>(gfx, cbuf, 1u));
+		bindablePtrs.emplace_back(std::make_shared<CachingPixelConstantBufferEx>(gfx, cbuf, 1u));
 
 	}
 	else if (hasDiffuseMap && hasNormalMap) // 没有高光纹理
@@ -473,11 +545,11 @@ std::unique_ptr<Mesh> Model::ParseMesh(Graphics& gfx, const aiMesh& mesh, const 
 		layout.Add<DynamicData::Float>("specularPower");
 		layout.Add<DynamicData::Bool>("normalMapEnabled");
 
-		auto cbuf = DynamicData::Buffer::Make(std::move(layout));
+		auto cbuf = DynamicData::Buffer(std::move(layout));
 		cbuf["specularIntensity"] = (specularColor.x + specularColor.y + specularColor.z) / 3.0f;
 		cbuf["specularPower"] = shininess;
 		cbuf["normalMapEnabled"] = true;
-		bindablePtrs.emplace_back(std::make_shared<PixelConstantBufferEx>(gfx, cbuf, 1u));
+		bindablePtrs.emplace_back(std::make_shared<CachingPixelConstantBufferEx>(gfx, cbuf, 1u));
 	}
 	else if (hasDiffuseMap && !hasNormalMap && hasSpecularMap) // 没有法线纹理
 	{
@@ -540,12 +612,12 @@ std::unique_ptr<Mesh> Model::ParseMesh(Graphics& gfx, const aiMesh& mesh, const 
 		layout.Add<DynamicData::Bool>("hasGloss");
 		layout.Add<DynamicData::Float>("specularMapWeight");
 
-		auto cbuf = DynamicData::Buffer::Make(std::move(layout));
+		auto cbuf = DynamicData::Buffer(std::move(layout));
 		cbuf["specularPowerConst"] = shininess;
 		cbuf["hasGloss"] = hasAlphaGloss;
 		cbuf["specularMapWeight"] = 1.0f;
 
-		bindablePtrs.emplace_back(std::make_unique<PixelConstantBufferEx>(gfx, cbuf, 1u));
+		bindablePtrs.emplace_back(std::make_unique<CachingPixelConstantBufferEx>(gfx, cbuf, 1u));
 	}
 	else if (hasDiffuseMap)
 	{
@@ -609,11 +681,11 @@ std::unique_ptr<Mesh> Model::ParseMesh(Graphics& gfx, const aiMesh& mesh, const 
 		lay.Add<DynamicData::Float>("specularIntensity");
 		lay.Add<DynamicData::Float>("specularPower");
 
-		auto buf = DynamicData::Buffer::Make(std::move(lay));
+		auto buf = DynamicData::Buffer(std::move(lay));
 		buf["specularIntensity"] = (specularColor.x + specularColor.y + specularColor.z) / 3.0f;
 		buf["specularPower"] = shininess;
 
-		bindablePtrs.push_back(std::make_unique<PixelConstantBufferEx>(gfx, buf, 1u));
+		bindablePtrs.push_back(std::make_unique<CachingPixelConstantBufferEx>(gfx, buf, 1u));
 	}
 	else if (!hasDiffuseMap && !hasNormalMap && !hasSpecularMap)
 	{
@@ -672,12 +744,12 @@ std::unique_ptr<Mesh> Model::ParseMesh(Graphics& gfx, const aiMesh& mesh, const 
 		lay.Add<DynamicData::Float4>("specularColor");
 		lay.Add<DynamicData::Float>("specularPower");
 
-		auto buf = DynamicData::Buffer::Make(std::move(lay));
+		auto buf = DynamicData::Buffer(std::move(lay));
 		buf["specularPower"] = shininess;
 		buf["specularColor"] = specularColor;
 		buf["materialColor"] = diffuseColor;
 
-		bindablePtrs.push_back(std::make_unique<Bind::PixelConstantBufferEx>(gfx, buf, 1u));
+		bindablePtrs.push_back(std::make_unique<Bind::CachingPixelConstantBufferEx>(gfx, buf, 1u));
 	}
 	else
 	{

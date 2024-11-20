@@ -244,11 +244,13 @@ namespace DynamicData
 		friend class Buffer;
 	public:
 		const LayoutElement& operator[](const std::string& key);
+		// 将对共享指针的引用添加到布局树根
+		std::shared_ptr<LayoutElement> ShareRoot() const noexcept;
 	private:
 		// this ctor used by Codex to return cooked layouts
 		CookedLayout(std::shared_ptr<LayoutElement> pLayout) noexcept;
-		// 由缓冲区使用，将对共享指针的引用添加到布局树根
-		std::shared_ptr<LayoutElement> ShareRoot() const noexcept;
+		// 用于窃取布局树
+		std::shared_ptr<LayoutElement> ReliquishLayout() const noexcept;
 	};
 
 	class ConstElementRef
@@ -346,8 +348,12 @@ namespace DynamicData
 	class Buffer
 	{
 	public:
-		static Buffer Make(RawLayout&& layout) noexcept;
-		static Buffer Make(const CookedLayout& layout) noexcept;
+		Buffer(RawLayout&& layout) noexcept;
+		Buffer(const CookedLayout& layout) noexcept;
+		Buffer(CookedLayout&& layout) noexcept;
+		// 拷贝构造
+		Buffer(const Buffer& buffer) noexcept;
+		Buffer(Buffer&& buffer) noexcept;
 
 		ElementRef operator[](const std::string& key);
 
@@ -359,10 +365,10 @@ namespace DynamicData
 
 		const LayoutElement& GetLayout() const noexcept;
 
-		std::shared_ptr<LayoutElement> ShareLayout() const noexcept;
+		// 拷贝函数
+		void CopyFrom(const Buffer& buffer) noexcept;
 
-	private:
-		Buffer(const CookedLayout& layout) noexcept;
+		std::shared_ptr<LayoutElement> ShareLayout() const noexcept;
 
 	private:
 		std::shared_ptr<LayoutElement> m_pLayout; // 常数缓存的布局

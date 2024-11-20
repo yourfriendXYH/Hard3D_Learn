@@ -1,21 +1,22 @@
 #pragma once
-#include "..\Topology.h"
-#include "..\IndexBuffer.h"
-#include "..\TransformCBuf.h"
+#include "../Topology.h"
+#include "../IndexBuffer.h"
+#include "../TransformCBuf.h"
 
 #include "../assimp/include/assimp/Importer.hpp"
 #include "../assimp/include/assimp/scene.h"
 #include "../assimp/include/assimp/postprocess.h"
 #include <optional>
 
-#include "..\DynamicData\DynamicVertex.h"
-#include "..\VertexBuffer.h"
-#include "..\VertexShader.h"
-#include "..\PixelShader.h"
-#include "..\InputLayout.h"
-#include "..\Texture.h"
-#include "..\Sampler.h"
+#include "../DynamicData/DynamicVertex.h"
+#include "../VertexBuffer.h"
+#include "../VertexShader.h"
+#include "../PixelShader.h"
+#include "../InputLayout.h"
+#include "../Texture.h"
+#include "../Sampler.h"
 #include "../imgui/imgui.h"
+#include "../DynamicData/DynamicConstant.h"
 #include <type_traits>
 #include <filesystem>
 
@@ -61,61 +62,9 @@ public:
 
 	void ShowTree(Node*& pSelectedNode) const noexcept;
 
-	// 控制节点的材质效果
-	//template<class T>
-	//bool ControlNode(Graphics& gfx, T& constant)
-	//{
-	//	if (m_meshPtrs.empty())
-	//	{
-	//		return false;
-	//	}
+	const DynamicData::Buffer* GetMaterialConstant() const noexcept;
 
-	//	if constexpr (std::is_same<T, PSMaterialConstantFullmonte>::value)
-	//	{
-	//		if (auto pcb = m_meshPtrs.front()->QueryBindable<Bind::PixelConstantBuffer<T>>())
-	//		{
-	//			ImGui::Text("Material");
-
-	//			bool normalMapEnabled = (bool)constant.normalMapEnabled;
-	//			ImGui::Checkbox("Norm Map", &normalMapEnabled);
-	//			constant.normalMapEnabled = normalMapEnabled ? TRUE : FALSE;
-
-	//			bool specularMapEnabled = (bool)constant.specularMapEnabled;
-	//			ImGui::Checkbox("Spec Map", &specularMapEnabled);
-	//			constant.specularMapEnabled = specularMapEnabled ? TRUE : FALSE;
-
-	//			bool hasGlossMap = (bool)constant.hasGlossMap;
-	//			ImGui::Checkbox("Gloss Alpha", &hasGlossMap);
-	//			constant.hasGlossMap = hasGlossMap ? TRUE : FALSE;
-
-	//			ImGui::SliderFloat("Spec Weight", &constant.specularMapWeight, 0.0f, 2.0f);
-
-	//			ImGui::SliderFloat("Spec Pow", &constant.specularPower, 0.0f, 1000.0f, "%f");
-
-	//			ImGui::ColorPicker3("Spec Color", reinterpret_cast<float*>(&constant.specularColor));
-
-	//			pcb->Update(gfx, constant);
-	//			return true;
-	//		}
-	//	}
-	//	else if constexpr (std::is_same<T, PSMaterialConstantNotex>::value)
-	//	{
-	//		if (auto pcb = m_meshPtrs.front()->QueryBindable<Bind::PixelConstantBuffer<T>>())
-	//		{
-	//			ImGui::Text("Material");
-
-	//			ImGui::ColorPicker3("Spec Color", reinterpret_cast<float*>(&constant.specularColor));
-
-	//			ImGui::SliderFloat("Spec Pow", &constant.specularPower, 0.0f, 1000.0f, "%f");
-
-	//			ImGui::ColorPicker3("Diff Color", reinterpret_cast<float*>(&constant.materialColor));
-
-	//			pcb->Update(gfx, constant);
-	//			return true;
-	//		}
-	//	}
-	//	return false;
-	//}
+	void SetMaterialConstant(const DynamicData::Buffer& buf) noexcept;
 
 private:
 	// 给Model使用
