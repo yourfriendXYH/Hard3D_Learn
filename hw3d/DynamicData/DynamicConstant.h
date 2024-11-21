@@ -4,6 +4,7 @@
 #include <string>
 #include <memory>
 #include <DirectXMath.h>
+#include <optional>
 
 // 旧代码
 /* 宏简化了向 LayoutElement 添加基本虚拟解析函数的过
@@ -125,7 +126,39 @@ namespace DynamicData
 		static constexpr bool m_valid = true;
 	};
 
+	#define X(element) static_assert(Map<element>::m_valid, "Missing map implementation for" #element);
+	LEAF_ELEMENT_TYPES
+	#undef X
 
+	template<typename T>
+	struct ReverseMap
+	{
+		static constexpr bool m_valid = false;
+	};
+
+	#define X(element) \
+	template<> struct ReverseMap<Map<element>::SysType> \
+	{ \
+		static constexpr Type m_type = element; \
+		static constexpr bool m_valid = true; \
+	};
+	LEAF_ELEMENT_TYPES
+	#undef X
+
+	class LayoutElementEx
+	{
+	private:
+		struct ExtraDataBase
+		{
+			virtual ~ExtraDataBase() = default;
+		};
+	public:
+	protected:
+	private:
+		std::optional<size_t> m_offset;
+		Type m_type = EEmpty;
+		std::unique_ptr<ExtraDataBase> m_pExtraData;
+	};
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
