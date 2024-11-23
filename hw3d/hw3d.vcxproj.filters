@@ -464,6 +464,9 @@
     <ClInclude Include="DynamicData\LayoutCodex.h">
       <Filter>头文件</Filter>
     </ClInclude>
+    <ClInclude Include="Bindable\Stencil.h">
+      <Filter>Code</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="hw3d.rc">
