@@ -100,7 +100,7 @@ void Node::ShowTree(Node*& pSelectedNode) const noexcept
 	}
 }
 
-const DynamicData::Buffer* Node::GetMaterialConstant() const noexcept
+const DynamicData::BufferEx* Node::GetMaterialConstant() const noexcept
 {
 	if (m_meshPtrs.size() == 0u)
 	{
@@ -110,7 +110,7 @@ const DynamicData::Buffer* Node::GetMaterialConstant() const noexcept
 	return &pBindable->GetBuffer();
 }
 
-void Node::SetMaterialConstant(const DynamicData::Buffer& buf) noexcept
+void Node::SetMaterialConstant(const DynamicData::BufferEx& buf) noexcept
 {
 	auto pcb = m_meshPtrs.front()->QueryBindable<Bind::CachingPixelConstantBufferEx>();
 	assert(pcb != nullptr);
@@ -155,7 +155,7 @@ public:
 					//transParams.z = translation.z;
 
 					auto pMatConst = m_pSelectedNode->GetMaterialConstant();
-					auto buf = nullptr != pMatConst ? std::optional<DynamicData::Buffer>{*pMatConst} : std::optional<DynamicData::Buffer>{};
+					auto buf = nullptr != pMatConst ? std::optional<DynamicData::BufferEx>{*pMatConst} : std::optional<DynamicData::BufferEx>{};
 					std::tie(iter, std::ignore) = m_transformsMap.insert({ id, {transParams, std::move(buf)} });
 
 				}
@@ -224,7 +224,7 @@ public:
 	}
 
 	// 获取当前选择模型节点的像素常数缓存
-	const DynamicData::Buffer* GetMaterial() const noexcept
+	const DynamicData::BufferEx* GetMaterial() const noexcept
 	{
 		assert(m_pSelectedNode != nullptr);
 		// 材质的常数缓存
@@ -254,7 +254,7 @@ private:
 	struct NodeData
 	{
 		TransformParameters m_transformParams;
-		std::optional<DynamicData::Buffer> m_materialCBuf;
+		std::optional<DynamicData::BufferEx> m_materialCBuf;
 	};
 
 	// 每个模型节点的自身坐标系变换
@@ -455,15 +455,15 @@ std::unique_ptr<Mesh> Model::ParseMesh(Graphics& gfx, const aiMesh& mesh, const 
 
 		//bindablePtrs.emplace_back(PixelConstantBuffer<Node::PSMaterialConstantFullmonte>::Resolve(gfx, pmc, 1u));
 
-		DynamicData::RawLayout layout;
-		layout.Add<DynamicData::Bool>("normalMapEnabled");
-		layout.Add<DynamicData::Bool>("specularMapEnabled");
-		layout.Add<DynamicData::Bool>("hasGlossMap");
-		layout.Add<DynamicData::Float>("specularPower");
-		layout.Add<DynamicData::Float3>("specularColor");
-		layout.Add<DynamicData::Float>("specularMapWeight");
+		DynamicData::RawLayoutEx layout;
+		layout.Add<DynamicData::EBool>("normalMapEnabled");
+		layout.Add<DynamicData::EBool>("specularMapEnabled");
+		layout.Add<DynamicData::EBool>("hasGlossMap");
+		layout.Add<DynamicData::EFloat>("specularPower");
+		layout.Add<DynamicData::EFloat3>("specularColor");
+		layout.Add<DynamicData::EFloat>("specularMapWeight");
 
-		auto cbuf = DynamicData::Buffer(std::move(layout));
+		auto cbuf = DynamicData::BufferEx(std::move(layout));
 		cbuf["normalMapEnabled"] = true;
 		cbuf["specularMapEnabled"] = true;
 		cbuf["hasGlossMap"] = hasAlphaGloss;
@@ -537,15 +537,15 @@ std::unique_ptr<Mesh> Model::ParseMesh(Graphics& gfx, const aiMesh& mesh, const 
 
 		//bindablePtrs.emplace_back(PixelConstantBuffer<PSMaterialConstantDiffNorm>::Resolve(gfx, pmc, 1u));
 
-		DynamicData::RawLayout layout;
+		DynamicData::RawLayoutEx layout;
 		bool loaded = false;
 		auto tag = "diff&nrm";
 
-		layout.Add<DynamicData::Float>("specularIntensity");
-		layout.Add<DynamicData::Float>("specularPower");
-		layout.Add<DynamicData::Bool>("normalMapEnabled");
+		layout.Add<DynamicData::EFloat>("specularIntensity");
+		layout.Add<DynamicData::EFloat>("specularPower");
+		layout.Add<DynamicData::EBool>("normalMapEnabled");
 
-		auto cbuf = DynamicData::Buffer(std::move(layout));
+		auto cbuf = DynamicData::BufferEx(std::move(layout));
 		cbuf["specularIntensity"] = (specularColor.x + specularColor.y + specularColor.z) / 3.0f;
 		cbuf["specularPower"] = shininess;
 		cbuf["normalMapEnabled"] = true;
@@ -607,12 +607,12 @@ std::unique_ptr<Mesh> Model::ParseMesh(Graphics& gfx, const aiMesh& mesh, const 
 		//pmc.specularMapWeight = 1.0f;
 		// bindablePtrs.emplace_back(PixelConstantBuffer<PSMaterialConstantDiffuseSpec>::Resolve(gfx, pmc, 1u));
 
-		DynamicData::RawLayout layout;
-		layout.Add<DynamicData::Float>("specularPowerConst");
-		layout.Add<DynamicData::Bool>("hasGloss");
-		layout.Add<DynamicData::Float>("specularMapWeight");
+		DynamicData::RawLayoutEx layout;
+		layout.Add<DynamicData::EFloat>("specularPowerConst");
+		layout.Add<DynamicData::EBool>("hasGloss");
+		layout.Add<DynamicData::EFloat>("specularMapWeight");
 
-		auto cbuf = DynamicData::Buffer(std::move(layout));
+		auto cbuf = DynamicData::BufferEx(std::move(layout));
 		cbuf["specularPowerConst"] = shininess;
 		cbuf["hasGloss"] = hasAlphaGloss;
 		cbuf["specularMapWeight"] = 1.0f;
@@ -677,11 +677,11 @@ std::unique_ptr<Mesh> Model::ParseMesh(Graphics& gfx, const aiMesh& mesh, const 
 
 		//bindablePtrs.emplace_back(PixelConstantBuffer<PSMaterialConstantDiffuse>::Resolve(gfx, pmc, 1u));
 
-		DynamicData::RawLayout lay;
-		lay.Add<DynamicData::Float>("specularIntensity");
-		lay.Add<DynamicData::Float>("specularPower");
+		DynamicData::RawLayoutEx lay;
+		lay.Add<DynamicData::EFloat>("specularIntensity");
+		lay.Add<DynamicData::EFloat>("specularPower");
 
-		auto buf = DynamicData::Buffer(std::move(lay));
+		auto buf = DynamicData::BufferEx(std::move(lay));
 		buf["specularIntensity"] = (specularColor.x + specularColor.y + specularColor.z) / 3.0f;
 		buf["specularPower"] = shininess;
 
@@ -739,12 +739,12 @@ std::unique_ptr<Mesh> Model::ParseMesh(Graphics& gfx, const aiMesh& mesh, const 
 
 		//bindablePtrs.emplace_back(PixelConstantBuffer<Node::PSMaterialConstantNotex>::Resolve(gfx, pmc, 1u));
 
-		DynamicData::RawLayout lay;
-		lay.Add<DynamicData::Float4>("materialColor");
-		lay.Add<DynamicData::Float4>("specularColor");
-		lay.Add<DynamicData::Float>("specularPower");
+		DynamicData::RawLayoutEx lay;
+		lay.Add<DynamicData::EFloat4>("materialColor");
+		lay.Add<DynamicData::EFloat4>("specularColor");
+		lay.Add<DynamicData::EFloat>("specularPower");
 
-		auto buf = DynamicData::Buffer(std::move(lay));
+		auto buf = DynamicData::BufferEx(std::move(lay));
 		buf["specularPower"] = shininess;
 		buf["specularColor"] = specularColor;
 		buf["materialColor"] = diffuseColor;

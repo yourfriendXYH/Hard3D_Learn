@@ -62,9 +62,9 @@ public:
 
 	void ShowTree(Node*& pSelectedNode) const noexcept;
 
-	const DynamicData::Buffer* GetMaterialConstant() const noexcept;
+	const DynamicData::BufferEx* GetMaterialConstant() const noexcept;
 
-	void SetMaterialConstant(const DynamicData::Buffer& buf) noexcept;
+	void SetMaterialConstant(const DynamicData::BufferEx& buf) noexcept;
 
 private:
 	// ∏¯Model π”√

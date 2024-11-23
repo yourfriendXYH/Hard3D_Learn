@@ -14,10 +14,13 @@ namespace DynamicData
 	public:
 		static CookedLayout Resolve(RawLayout&& layout) noexcept;
 
+		static CookedLayoutEx Resolve(RawLayoutEx&& layout) noexcept;
+
 	private:
 		static LayoutCodex& Get_() noexcept;
 
 	private:
-		std::unordered_map<std::string, std::shared_ptr<DynamicData::LayoutElement>> m_map;
+		std::unordered_map<std::string, std::shared_ptr<DynamicData::LayoutElement>> m_mapOld;
+		std::unordered_map<std::string, std::shared_ptr<DynamicData::LayoutElementEx>> m_map;
 	};
 }

@@ -9,14 +9,14 @@ namespace Bind
 	{
 	public:
 		// 更新像素常数缓存
-		void Update(Graphics& gfx, const DynamicData::Buffer& buf)
+		void Update(Graphics& gfx, const DynamicData::BufferEx& buf)
 		{
 			// 判断是否为同一块数据
-			assert(&buf.GetLayout() == &GetLayout());
+			assert(&buf.GetRootLayoutElement() == &GetLayout());
 
 			D3D11_MAPPED_SUBRESOURCE msr;
 			GetContext(gfx)->Map(m_pConstantBuffer.Get(), 0u, D3D11_MAP_WRITE_DISCARD, 0u, &msr);
-			memcpy(msr.pData, buf.GetData(), buf.GetSizeInByte());
+			memcpy(msr.pData, buf.GetData(), buf.GetSizeInBytes());
 			GetContext(gfx)->Unmap(m_pConstantBuffer.Get(), 0u);
 		}
 
@@ -27,7 +27,7 @@ namespace Bind
 		}
 
 	protected:
-		PixelConstantBufferEx(Graphics& gfx, const DynamicData::LayoutElement& layoutRoot, UINT slot, const DynamicData::Buffer* pBuf)
+		PixelConstantBufferEx(Graphics& gfx, const DynamicData::LayoutElementEx& layoutRoot, UINT slot, const DynamicData::BufferEx* pBuf)
 			:
 			m_slot(slot)
 		{
@@ -53,7 +53,7 @@ namespace Bind
 		}
 
 	private:
-		virtual const DynamicData::LayoutElement& GetLayout() const noexcept = 0;
+		virtual const DynamicData::LayoutElementEx& GetLayout() const noexcept = 0;
 
 	private:
 		Microsoft::WRL::ComPtr<ID3D11Buffer> m_pConstantBuffer;
@@ -63,31 +63,31 @@ namespace Bind
 	class CachingPixelConstantBufferEx : public PixelConstantBufferEx
 	{
 	public:
-		CachingPixelConstantBufferEx(Graphics& gfx, const DynamicData::CookedLayout& layout, UINT slot)
+		CachingPixelConstantBufferEx(Graphics& gfx, const DynamicData::CookedLayoutEx& layout, UINT slot)
 			:
 			PixelConstantBufferEx(gfx, *layout.ShareRoot(), slot, nullptr),
-			m_buf(DynamicData::Buffer(layout))
+			m_buf(DynamicData::BufferEx(layout))
 		{
 		}
 
-		CachingPixelConstantBufferEx(Graphics& gfx, const DynamicData::Buffer& buf, UINT slot)
+		CachingPixelConstantBufferEx(Graphics& gfx, const DynamicData::BufferEx& buf, UINT slot)
 			:
-			PixelConstantBufferEx(gfx, buf.GetLayout(), slot, &buf),
+			PixelConstantBufferEx(gfx, buf.GetRootLayoutElement(), slot, &buf),
 			m_buf(buf)
 		{
 		}
 
-		const DynamicData::LayoutElement& GetLayout() const noexcept override
+		const DynamicData::LayoutElementEx& GetLayout() const noexcept override
 		{
-			return m_buf.GetLayout();
+			return m_buf.GetRootLayoutElement();
 		}
 
-		const DynamicData::Buffer& GetBuffer() const noexcept
+		const DynamicData::BufferEx& GetBuffer() const noexcept
 		{
 			return m_buf;
 		}
 
-		void SetBuffer(const DynamicData::Buffer& buf_in)
+		void SetBuffer(const DynamicData::BufferEx& buf_in)
 		{
 			m_buf.CopyFrom(buf_in);
 			m_dirty = true;
@@ -105,31 +105,31 @@ namespace Bind
 
 	private:
 		bool m_dirty = false; // 缓存数据是否置脏
-		DynamicData::Buffer m_buf;
+		DynamicData::BufferEx m_buf;
 	};
 
 	class NoCachePixelConstantBufferEx : public PixelConstantBufferEx
 	{
 	public:
-		NoCachePixelConstantBufferEx(Graphics& gfx, const DynamicData::CookedLayout& layout, UINT slot)
+		NoCachePixelConstantBufferEx(Graphics& gfx, const DynamicData::CookedLayoutEx& layout, UINT slot)
 			:
 			PixelConstantBufferEx(gfx, *layout.ShareRoot(), slot, nullptr),
 			m_pLayoutRoot(layout.ShareRoot())
 		{
 		}
-		NoCachePixelConstantBufferEx(Graphics& gfx, const DynamicData::Buffer& buf, UINT slot)
+		NoCachePixelConstantBufferEx(Graphics& gfx, const DynamicData::BufferEx& buf, UINT slot)
 			:
-			PixelConstantBufferEx(gfx, buf.GetLayout(), slot, &buf),
-			m_pLayoutRoot(buf.ShareLayout())
+			PixelConstantBufferEx(gfx, buf.GetRootLayoutElement(), slot, &buf),
+			m_pLayoutRoot(buf.ShareLayoutRoot())
 		{
 		}
 
-		const DynamicData::LayoutElement& GetLayout() const noexcept override
+		const DynamicData::LayoutElementEx& GetLayout() const noexcept override
 		{
 			return *m_pLayoutRoot;
 		}
 
 	private:
-		std::shared_ptr<DynamicData::LayoutElement> m_pLayoutRoot;
+		std::shared_ptr<DynamicData::LayoutElementEx> m_pLayoutRoot;
 	};
 }
