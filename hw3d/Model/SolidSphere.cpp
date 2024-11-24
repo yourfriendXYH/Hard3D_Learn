@@ -10,6 +10,7 @@
 #include "../IndexBuffer.h"
 #include "../Bindable/Blender.h"
 #include "../Bindable/Rasterizer.h"
+#include "../Bindable/Stencil.h"
 
 SolidSphere::SolidSphere(Graphics& gfx, float radius)
 {
@@ -50,6 +51,8 @@ SolidSphere::SolidSphere(Graphics& gfx, float radius)
 
 	AddBind(Blender::Resolve(gfx, false));
 	AddBind(Rasterizer::Resolve(gfx, false));
+
+	AddBind(std::make_shared<Stencil>(gfx, Stencil::Mode::Off));
 }
 
 DirectX::XMMATRIX SolidSphere::GetTransformXM() const noexcept

@@ -47,7 +47,7 @@ private:
 	//Model m_model{ m_wnd.GetGfx(), "Models\\nano_textured\\nanosuit.obj", 2.0f };
 	//TestPlane m_testPlane;
 
-	//TestCube m_testCube;
+	TestCube m_testCube{ m_wnd.GetGfx(), 4.0f };
 
 	//Model m_TestCube1{ m_wnd.GetGfx(), "Models\\brick_wall\\brick_wall.obj", 6.0f };
 
@@ -61,7 +61,7 @@ private:
 	Model m_testSponza{ m_wnd.GetGfx(), "Models\\Sponza\\sponza.obj", 1.0f / 20.0f };
 
 	// AlphaªÏ∫œ≤‚ ‘Model
-	TestPlane m_testBluePlane{ m_wnd.GetGfx(), 6.0f, {0.3f, 0.3f, 1.0f, 0.0f} };
-	TestPlane m_testRedPlane{ m_wnd.GetGfx(), 6.0f, {1.0f, 0.3f, 0.3f, 0.0f} };
+	//TestPlane m_testBluePlane{ m_wnd.GetGfx(), 6.0f, {0.3f, 0.3f, 1.0f, 0.0f} };
+	//TestPlane m_testRedPlane{ m_wnd.GetGfx(), 6.0f, {1.0f, 0.3f, 0.3f, 0.0f} };
 
 };

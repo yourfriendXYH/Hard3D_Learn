@@ -23,7 +23,7 @@ namespace Bind
 			if (mode == Mode::Write)
 			{
 				dsDesc.StencilEnable = TRUE;
-				dsDesc.StencilWriteMask = 0xFF;
+				dsDesc.StencilWriteMask = 0xA;
 				dsDesc.FrontFace.StencilFunc = D3D11_COMPARISON_ALWAYS;
 				dsDesc.FrontFace.StencilPassOp = D3D11_STENCIL_OP_REPLACE;
 			}
@@ -31,7 +31,7 @@ namespace Bind
 			{
 				dsDesc.DepthEnable = FALSE;
 				dsDesc.StencilEnable = TRUE;
-				dsDesc.StencilReadMask = 0xFF;
+				dsDesc.StencilReadMask = 0xA;
 				dsDesc.FrontFace.StencilFunc = D3D11_COMPARISON_NOT_EQUAL;
 				dsDesc.FrontFace.StencilPassOp = D3D11_STENCIL_OP_KEEP;
 			}
@@ -41,7 +41,7 @@ namespace Bind
 
 		void Bind(Graphics& gfx) noexcept override
 		{
-			GetContext(gfx)->OMSetDepthStencilState(m_pStencil.Get(), 0xff);
+			GetContext(gfx)->OMSetDepthStencilState(m_pStencil.Get(), 0xFF);
 		}
 
 	private:

@@ -8,6 +8,7 @@
 #include "../Bindable/ConstantBuffersEx.h"
 #include "../DynamicData/DynamicConstant.h"
 #include "../DynamicData/LayoutCodex.h"
+#include "../Bindable/Stencil.h"
 
 Mesh::Mesh(Graphics& gfx, std::vector<std::shared_ptr<Bindable>> bindPtrs)
 {
@@ -765,6 +766,8 @@ std::unique_ptr<Mesh> Model::ParseMesh(Graphics& gfx, const aiMesh& mesh, const 
 	bindablePtrs.emplace_back(Blender::Resolve(gfx, false));
 
 	bindablePtrs.emplace_back(Rasterizer::Resolve(gfx, hasAlphaDiffuse));
+
+	bindablePtrs.emplace_back(std::make_shared<Stencil>(gfx, Stencil::Mode::Off));
 
 	return std::make_unique<Mesh>(gfx, std::move(bindablePtrs));
 }

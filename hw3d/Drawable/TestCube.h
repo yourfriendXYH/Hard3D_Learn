@@ -1,5 +1,6 @@
 #pragma once
 #include "../Drawable.h"
+#include "../Bindable.h"
 
 class TestCube : public Drawable
 {
@@ -9,9 +10,15 @@ public:
 	void SetRotation(float roll, float pitch, float yaw) noexcept;
 	DirectX::XMMATRIX GetTransformXM() const noexcept override;
 
-	void SpawnControlWindow(Graphics& gfx) noexcept;
+	void SpawnControlWindow(Graphics& gfx, const char* name) noexcept;
+
+	// 绘制描边效果
+	void DrawOutline(Graphics& gfx) noexcept;
 
 private:
+	// 描边效果
+	std::vector<std::shared_ptr<Bindable>> m_outlineEffect;
+
 	// 像素着色器常量缓存
 	struct PSMaterialConstant
 	{
@@ -25,4 +32,6 @@ private:
 	float m_roll = 0.f;
 	float m_pitch = 0.f;
 	float m_yaw = 0.f;
+
+	bool m_outlining = false;
 };
