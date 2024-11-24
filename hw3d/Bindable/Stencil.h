@@ -23,7 +23,7 @@ namespace Bind
 			if (mode == Mode::Write)
 			{
 				dsDesc.StencilEnable = TRUE;
-				dsDesc.StencilWriteMask = 0xA;
+				dsDesc.StencilWriteMask = 0xA; // 写入标记
 				dsDesc.FrontFace.StencilFunc = D3D11_COMPARISON_ALWAYS;
 				dsDesc.FrontFace.StencilPassOp = D3D11_STENCIL_OP_REPLACE;
 			}
@@ -31,7 +31,7 @@ namespace Bind
 			{
 				dsDesc.DepthEnable = FALSE;
 				dsDesc.StencilEnable = TRUE;
-				dsDesc.StencilReadMask = 0xA;
+				dsDesc.StencilReadMask = 0xA; // 读取标记
 				dsDesc.FrontFace.StencilFunc = D3D11_COMPARISON_NOT_EQUAL;
 				dsDesc.FrontFace.StencilPassOp = D3D11_STENCIL_OP_KEEP;
 			}

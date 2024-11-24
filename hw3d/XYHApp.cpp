@@ -338,6 +338,7 @@ void XYHApp::DoFrame()
 	m_pointLight.Draw(m_wnd.GetGfx());
 
 	// 测试场景
+	// 场景要先绘制，否则描边效果看不到
 	m_testSponza.Draw(m_wnd.GetGfx());
 
 	// mipmap的测试条纹
@@ -346,6 +347,7 @@ void XYHApp::DoFrame()
 	m_testCube.Draw(m_wnd.GetGfx());
 	m_testCube.DrawOutline(m_wnd.GetGfx());
 
+	// 先注释掉，Blender会影响Stencil
 	//// 蓝色面片
 	//m_testBluePlane.Draw(m_wnd.GetGfx());
 	//// 红色面片
