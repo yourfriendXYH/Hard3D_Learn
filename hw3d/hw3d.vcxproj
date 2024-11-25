@@ -153,7 +153,11 @@
   <ItemGroup>
     <ClCompile Include="Bindable.cpp" />
     <ClCompile Include="Bindable\Blender.cpp" />
+    <ClCompile Include="Bindable\Job.cpp" />
+    <ClCompile Include="Bindable\NullPixelShader.cpp" />
     <ClCompile Include="Bindable\Rasterizer.cpp" />
+    <ClCompile Include="Bindable\Step.cpp" />
+    <ClCompile Include="Bindable\Technique.cpp" />
     <ClCompile Include="Bindable\TransformCBufDoubleboi.cpp" />
     <ClCompile Include="Camera.cpp" />
     <ClCompile Include="CommonFunction.cpp" />
@@ -213,8 +217,14 @@
     <ClInclude Include="BindableCodex.h" />
     <ClInclude Include="Bindable\Blender.h" />
     <ClInclude Include="Bindable\ConstantBuffersEx.h" />
+    <ClInclude Include="Bindable\FrameCommander.h" />
+    <ClInclude Include="Bindable\Job.h" />
+    <ClInclude Include="Bindable\NullPixelShader.h" />
+    <ClInclude Include="Bindable\Pass.h" />
     <ClInclude Include="Bindable\Rasterizer.h" />
     <ClInclude Include="Bindable\Stencil.h" />
+    <ClInclude Include="Bindable\Step.h" />
+    <ClInclude Include="Bindable\Technique.h" />
     <ClInclude Include="Bindable\TransformCBufDoubleboi.h" />
     <ClInclude Include="Camera.h" />
     <ClInclude Include="Cone.h" />
