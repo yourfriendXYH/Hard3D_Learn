@@ -5,7 +5,26 @@
 class Technique
 {
 public:
-protected:
+	// Ã·Ωª
+	void Submit(class FrameCommander& frame, class Drawable& drawable) const noexcept;
+
+	void AddStep(Step step) noexcept
+	{
+		m_steps.emplace_back(std::move(step));
+	}
+
+	void Activate() noexcept
+	{
+		m_active = true;
+	}
+
+	void Deactivate() noexcept
+	{
+		m_active = false;
+	}
+
+	void InitializeParentReferences(const class Drawable& parent) noexcept;
+
 private:
 	bool m_active = true;
 	std::vector<Step> m_steps;

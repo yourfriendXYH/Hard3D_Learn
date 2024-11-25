@@ -153,8 +153,10 @@
   <ItemGroup>
     <ClCompile Include="Bindable.cpp" />
     <ClCompile Include="Bindable\Blender.cpp" />
+    <ClCompile Include="Bindable\FrameCommander.cpp" />
     <ClCompile Include="Bindable\Job.cpp" />
     <ClCompile Include="Bindable\NullPixelShader.cpp" />
+    <ClCompile Include="Bindable\Pass.cpp" />
     <ClCompile Include="Bindable\Rasterizer.cpp" />
     <ClCompile Include="Bindable\Step.cpp" />
     <ClCompile Include="Bindable\Technique.cpp" />
