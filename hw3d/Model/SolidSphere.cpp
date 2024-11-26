@@ -21,38 +21,40 @@ SolidSphere::SolidSphere(Graphics& gfx, float radius)
 	model.Transform(DirectX::XMMatrixScaling(radius, radius, radius));
 	// 顶点缓存
 	const auto geometryTag = "$sphere." + std::to_string(radius);
-	AddBind(VertexBuffer::Resolve(gfx, geometryTag, model.m_vertices));
+	m_pVertexBuffer = VertexBuffer::Resolve(gfx, geometryTag, model.m_vertices);
 	// 索引缓存
-	AddBind(IndexBuffer::Resolve(gfx, geometryTag, model.m_indices));
-
-	// 顶点着色器
-	auto pVertexShader = VertexShader::Resolve(gfx, "SolidVS.cso");
-	auto pVertexShaderByteCode = pVertexShader->GetByteCode();
-	AddBind(std::move(pVertexShader));
-	// 像素着色器
-	AddBind(PixelShader::Resolve(gfx, "SolidPS.cso"));
-
-	// 像素着色器 用到的 常数缓存
-	struct PSColorConstant
-	{
-		DirectX::XMFLOAT3 m_color = { 1.0f, 1.0f, 1.0f };
-		float m_padding;
-	} colorConstant;
-	AddBind(PixelConstantBuffer<PSColorConstant>::Resolve(gfx, colorConstant, 1u));
-
-	// 顶点着色器 传入的参数
-	AddBind(InputLayout::Resolve(gfx, model.m_vertices.GetVertexLayout(), pVertexShaderByteCode));
-
+	m_pIndexBuffer = IndexBuffer::Resolve(gfx, geometryTag, model.m_indices);
 	// 图元拓扑
-	AddBind(Topology::Resolve(gfx, D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST));
+	m_pTopology = Topology::Resolve(gfx, D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 
-	// 顶点变换
-	AddBind(std::make_shared<TransformCBuf>(gfx, *this));
+	{
+		Technique solid;
+		Step only(0u);
 
-	AddBind(Blender::Resolve(gfx, false));
-	AddBind(Rasterizer::Resolve(gfx, false));
+		// 顶点着色器
+		auto pVertexShader = VertexShader::Resolve(gfx, "SolidVS.cso");
+		auto pVertexShaderByteCode = pVertexShader->GetByteCode();
+		only.AddBindable(std::move(pVertexShader));
+		// 像素着色器
+		only.AddBindable(PixelShader::Resolve(gfx, "SolidPS.cso"));
 
-	AddBind(std::make_shared<Stencil>(gfx, Stencil::Mode::Off));
+		// 像素着色器 用到的 常数缓存
+		struct PSColorConstant
+		{
+			DirectX::XMFLOAT3 m_color = { 1.0f, 1.0f, 1.0f };
+			float m_padding;
+		} colorConstant;
+
+		only.AddBindable(PixelConstantBuffer<PSColorConstant>::Resolve(gfx, colorConstant, 1u));
+		only.AddBindable(InputLayout::Resolve(gfx, model.m_vertices.GetVertexLayout(), pVertexShaderByteCode));
+		only.AddBindable(std::make_shared<TransformCBuf>(gfx, *this));
+		only.AddBindable(Blender::Resolve(gfx, false));
+		only.AddBindable(Rasterizer::Resolve(gfx, false));
+		only.AddBindable(std::make_shared<Stencil>(gfx, Stencil::Mode::Off));
+
+		solid.AddStep(std::move(only));
+		AddTechnique(std::move(solid));
+	}
 }
 
 DirectX::XMMATRIX SolidSphere::GetTransformXM() const noexcept

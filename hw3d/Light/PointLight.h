@@ -14,7 +14,9 @@ public:
 public:
 	void SpawnControlWindow();
 
-	void Draw(Graphics& gfx) noexcept;
+	// void Draw(Graphics& gfx) noexcept;
+
+	void Submit(class FrameCommander& frame) const noexcept;
 
 	void Bind(Graphics& gfx, DirectX::XMMATRIX cameraMatrix) noexcept;
 
@@ -22,7 +24,7 @@ private:
 	void Reset() noexcept;
 
 private:
-	struct PointLightCBuf 
+	struct PointLightCBuf
 	{
 		alignas(16) DirectX::XMFLOAT3 m_position; // 点光源位置
 		alignas(16) DirectX::XMFLOAT3 m_ambient;	// 环境光颜色

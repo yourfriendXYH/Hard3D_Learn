@@ -1,5 +1,6 @@
 #include "PointLight.h"
 #include "../imgui/imgui.h"
+#include "../Bindable/FrameCommander.h"
 
 PointLight::PointLight(Graphics& gfx, float radius /*= 0.0f*/)
 	:
@@ -53,10 +54,10 @@ void PointLight::Reset() noexcept
 	};
 }
 
-void PointLight::Draw(Graphics& gfx) noexcept
+void PointLight::Submit(FrameCommander& frame) const noexcept
 {
 	m_mesh.SetPos(m_cbufData.m_position);
-	m_mesh.Draw(gfx);
+	m_mesh.Submit(frame);
 }
 
 void PointLight::Bind(Graphics& gfx, DirectX::XMMATRIX cameraMatrix) noexcept

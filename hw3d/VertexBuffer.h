@@ -33,6 +33,8 @@ namespace Bind
 
 		void Bind(Graphics& gfx) noexcept override;
 
+		const DynamicData::VertexLayout& GetLayout() const noexcept;
+
 		static std::shared_ptr<VertexBuffer> Resolve(Graphics& gfx, const std::string& tag, const DynamicData::VerticesBuffer& verticesBuf);
 		template<typename...Ignore>
 		static std::string GenerateUID(const std::string& tag, Ignore...ignore)
@@ -48,6 +50,7 @@ namespace Bind
 		std::string m_tag;
 		Microsoft::WRL::ComPtr<ID3D11Buffer> m_pVertexBuffer;
 		UINT m_stride;
+		DynamicData::VertexLayout m_layout;
 	};
 }
 

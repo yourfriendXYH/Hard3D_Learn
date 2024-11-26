@@ -33,12 +33,16 @@ private:
 class Mesh : public Drawable
 {
 public:
-	Mesh(Graphics& gfx, std::vector<std::shared_ptr<Bindable>> bindPtrs);
+	//Mesh(Graphics& gfx, std::vector<std::shared_ptr<Bindable>> bindPtrs);
 
-	// 传入累计的矩阵
-	void Draw(Graphics& gfx, DirectX::FXMMATRIX accumulatedTransform) const noexcept;
+	//// 传入累计的矩阵
+	//void Draw(Graphics& gfx, DirectX::FXMMATRIX accumulatedTransform) const noexcept;
+
+	using Drawable::Drawable;
 
 	DirectX::XMMATRIX GetTransformXM() const noexcept override;
+
+	void Submit(FrameCommander& frame, DirectX::FXMMATRIX accumulatedTransform) const noexcept;
 
 private:
 	mutable DirectX::XMFLOAT4X4 m_transform; // 模型的变换矩阵
@@ -52,7 +56,9 @@ public:
 	Node(int id, const std::string& name, std::vector<Mesh*> meshPtrs, const DirectX::XMMATRIX& transform) noexcept;
 
 	// 递归绘制Mesh
-	void Draw(Graphics& gfx, DirectX::FXMMATRIX accumulatedTransform) const;
+	//void Draw(Graphics& gfx, DirectX::FXMMATRIX accumulatedTransform) const;
+
+	void Submit(class FrameCommander& frame, DirectX::FXMMATRIX accumulatedTransform) const noexcept;
 
 	void SetAppliedTransform(DirectX::FXMMATRIX transform) noexcept;
 
@@ -62,9 +68,9 @@ public:
 
 	void ShowTree(Node*& pSelectedNode) const noexcept;
 
-	const DynamicData::BufferEx* GetMaterialConstant() const noexcept;
+	//const DynamicData::BufferEx* GetMaterialConstant() const noexcept;
 
-	void SetMaterialConstant(const DynamicData::BufferEx& buf) noexcept;
+	//void SetMaterialConstant(const DynamicData::BufferEx& buf) noexcept;
 
 private:
 	// 给Model使用
@@ -87,7 +93,9 @@ public:
 	~Model();
 
 public:
-	void Draw(Graphics& gfx) const;
+	//void Draw(Graphics& gfx) const;
+
+	void Submit(FrameCommander& frame) const noexcept;
 
 	void ShowWindow(Graphics& gfx, const char* windowName = nullptr) noexcept;
 	void SetModelRootTransform(DirectX::FXMMATRIX transform);

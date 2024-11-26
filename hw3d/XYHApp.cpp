@@ -334,18 +334,18 @@ void XYHApp::DoFrame()
 
 	auto delta = m_timer.Mark();
 
-	// 绘制点光源
-	m_pointLight.Draw(m_wnd.GetGfx());
+	//// 绘制点光源
+	//m_pointLight.Draw(m_wnd.GetGfx());
 
-	// 测试场景
-	// 场景要先绘制，否则描边效果看不到
-	m_testSponza.Draw(m_wnd.GetGfx());
+	//// 测试场景
+	//// 场景要先绘制，否则描边效果看不到
+	//m_testSponza.Draw(m_wnd.GetGfx());
 
-	// mipmap的测试条纹
-	m_testStripey.Draw(m_wnd.GetGfx());
+	//// mipmap的测试条纹
+	//m_testStripey.Draw(m_wnd.GetGfx());
 
-	m_testCube.Draw(m_wnd.GetGfx());
-	m_testCube.DrawOutline(m_wnd.GetGfx());
+	//m_testCube.Draw(m_wnd.GetGfx());
+	// m_testCube.DrawOutline(m_wnd.GetGfx());
 
 	// 先注释掉，Blender会影响Stencil
 	//// 蓝色面片

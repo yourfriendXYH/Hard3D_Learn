@@ -1,27 +1,39 @@
 #include "Drawable.h"
 #include "Bindable.h"
 #include "IndexBuffer.h"
-//#include "Draw"
+#include "VertexBuffer.h"
+#include "Topology.h"
+#include "Bindable\FrameCommander.h"
 
 using namespace Bind;
 
-void Drawable::Draw(Graphics& gfx) const noexcept
+Drawable::~Drawable()
 {
-	for (auto& bind : m_binds)
-	{
-		bind->Bind(gfx);
-	}
 
-	gfx.DrawIndexed(m_pIndexBuffer->GetCount());
 }
 
-void Drawable::AddBind(std::shared_ptr<Bindable> bind) noexcept
+void Drawable::AddTechnique(Technique technique_in) noexcept
 {
-	//assert("Must use AddIndexBuffer to " && typeid(*bind) != typeid(IndexBuffer));
-	if (typeid(*bind) == typeid(IndexBuffer)) // 如果是索引缓存类型
+	technique_in.InitializeParentReferences(*this);
+	m_techniques.emplace_back(std::move(technique_in));
+}
+
+void Drawable::Submit(FrameCommander& frame) const noexcept
+{
+	for (const auto& technique : m_techniques)
 	{
-		assert(m_pIndexBuffer == nullptr);
-		m_pIndexBuffer = &static_cast<IndexBuffer&>(*bind);
+		technique.Submit(frame, *this);
 	}
-	m_binds.emplace_back(std::move(bind));
+}
+
+void Drawable::Bind(Graphics& gfx) const noexcept
+{
+	m_pIndexBuffer->Bind(gfx);
+	m_pVertexBuffer->Bind(gfx);
+	m_pTopology->Bind(gfx);
+}
+
+UINT Drawable::GetIndexCount() const noexcept
+{
+	return m_pIndexBuffer->GetCount();
 }

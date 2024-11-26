@@ -2,14 +2,14 @@
 #include "Job.h"
 #include "Step.h"
 
-Job::Job(const class Step* pStep, const class Drawable* pDrawable)
+Job::Job(const Step* pStep, const Drawable* pDrawable)
 	:
 	m_pDrawable(pDrawable),
 	m_pStep(pStep)
 {
 }
 
-void Job::Execute(class Graphics& gfx) const noexcept
+void Job::Execute(Graphics& gfx) const noexcept
 {
 	// m_pDrawable->Draw(gfx);
 	m_pStep->Bind(gfx);

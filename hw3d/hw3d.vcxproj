@@ -158,6 +158,7 @@
     <ClCompile Include="Bindable\NullPixelShader.cpp" />
     <ClCompile Include="Bindable\Pass.cpp" />
     <ClCompile Include="Bindable\Rasterizer.cpp" />
+    <ClCompile Include="Bindable\Stencil.cpp" />
     <ClCompile Include="Bindable\Step.cpp" />
     <ClCompile Include="Bindable\Technique.cpp" />
     <ClCompile Include="Bindable\TransformCBufDoubleboi.cpp" />

@@ -1,20 +1,20 @@
 #include "Technique.h"
 
-void Technique::Submit(class FrameCommander& frame, class Drawable& drawable) const noexcept
+void Technique::Submit(class FrameCommander& frame, const Drawable& drawable) const noexcept
 {
 	if (m_active)
 	{
 		for (const auto& step : m_steps)
 		{
-			step;
+			step.Submit(frame, drawable);
 		}
 	}
 }
 
 void Technique::InitializeParentReferences(const class Drawable& parent) noexcept
 {
-	for (const auto& step : m_steps)
+	for (auto& step : m_steps)
 	{
-		step;
+		step.InitializeParentReferences(parent);
 	}
 }

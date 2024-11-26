@@ -6,7 +6,7 @@ class Technique
 {
 public:
 	// Ã·Ωª
-	void Submit(class FrameCommander& frame, class Drawable& drawable) const noexcept;
+	void Submit(class FrameCommander& frame, const class Drawable& drawable) const noexcept;
 
 	void AddStep(Step step) noexcept
 	{

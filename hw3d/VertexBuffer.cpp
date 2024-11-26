@@ -12,7 +12,8 @@ namespace Bind
 	VertexBuffer::VertexBuffer(Graphics& gfx, const std::string& tag, const DynamicData::VerticesBuffer& verticesBuf)
 		:
 		m_tag(tag),
-		m_stride((UINT)verticesBuf.GetVertexLayout().Size())
+		m_stride((UINT)verticesBuf.GetVertexLayout().Size()),
+		m_layout(verticesBuf.GetVertexLayout())
 	{
 		// ´´½¨²¢ÉèÖÃ¶¥µã»º´æ
 		D3D11_BUFFER_DESC bd = {};	//»º³åÃèÊö
@@ -31,6 +32,11 @@ namespace Bind
 	{
 		UINT offset = 0u;
 		GetContext(gfx)->IASetVertexBuffers(0u, 1u, m_pVertexBuffer.GetAddressOf(), &m_stride, &offset);
+	}
+
+	const DynamicData::VertexLayout& VertexBuffer::GetLayout() const noexcept
+	{
+		return m_layout;
 	}
 
 	std::shared_ptr<VertexBuffer> VertexBuffer::Resolve(Graphics& gfx, const std::string& tag, const DynamicData::VerticesBuffer& verticesBuf)
