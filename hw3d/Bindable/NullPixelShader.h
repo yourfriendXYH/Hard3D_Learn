@@ -1,9 +1,16 @@
 #pragma once
+#include <memory>
 #include "../Bindable.h"
 
-class NullPixelShader : public Bindable
+namespace Bind
 {
-public:
-protected:
-private:
-};
+	class NullPixelShader : public Bindable
+	{
+	public:
+		NullPixelShader(Graphics& gfx);
+		void Bind(Graphics& gfx) noexcept override;
+		static std::shared_ptr<NullPixelShader> Resolve(Graphics& gfx);
+		static std::string GenerateUID();
+		std::string GetUID() const noexcept override;
+	};
+}

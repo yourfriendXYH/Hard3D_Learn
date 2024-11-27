@@ -15,10 +15,12 @@ namespace Bind
 		};
 
 	public:
-		TransformCBuf(Graphics& gfx, const Drawable& parent, UINT slot = 0u);
+		TransformCBuf(Graphics& gfx, UINT slot = 0u);
 
 		// 将矩阵变换绑定到顶点着色器上
 		void Bind(Graphics& gfx) noexcept override;
+
+		void InitializeParentReference(const Drawable& parent) noexcept override;
 
 	protected:
 		// 更新着色器 矩阵常数缓存
@@ -28,14 +30,9 @@ namespace Bind
 		Transforms GetTransforms(Graphics& gfx) noexcept;
 
 	private:
-		// 顶点常量缓存
-		// static std::unique_ptr<VertexConstantBuffer<Transforms>> m_pVertexCBuf;
-		// 用同一个常量缓存更新每一个parent
 		static std::unique_ptr<VertexConstantBuffer<Transforms>> m_vertexConstantBuffer;
 
-		const Drawable& m_parent;
-
-		// const Drawable* m_parent = nullptr;
+		const Drawable* m_parent = nullptr;
 	};
 }
 

@@ -4,9 +4,7 @@ namespace Bind
 {
 	std::unique_ptr<VertexConstantBuffer<TransformCBuf::Transforms>> TransformCBuf::m_vertexConstantBuffer;
 
-	TransformCBuf::TransformCBuf(Graphics& gfx, const Drawable& parent, UINT slot)
-		:
-		m_parent(parent)
+	TransformCBuf::TransformCBuf(Graphics& gfx, UINT slot)
 	{
 		if (nullptr == m_vertexConstantBuffer)
 		{
@@ -19,6 +17,11 @@ namespace Bind
 		UpdateBindImpl(gfx, GetTransforms(gfx));
 	}
 
+	void TransformCBuf::InitializeParentReference(const Drawable& parent) noexcept
+	{
+		m_parent = &parent;
+	}
+
 	void TransformCBuf::UpdateBindImpl(Graphics& gfx, const Transforms& tranforms) noexcept
 	{
 		m_vertexConstantBuffer->Update(gfx, tranforms);
@@ -27,7 +30,8 @@ namespace Bind
 
 	Bind::TransformCBuf::Transforms TransformCBuf::GetTransforms(Graphics& gfx) noexcept
 	{
-		const auto modelView = m_parent.GetTransformXM() * gfx.GetCamera();
+		assert(m_parent != nullptr);
+		const auto modelView = m_parent->GetTransformXM() * gfx.GetCamera();
 		return { DirectX::XMMatrixTranspose(modelView), DirectX::XMMatrixTranspose(modelView * gfx.GetProjection()) };
 	}
 

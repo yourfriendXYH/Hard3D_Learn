@@ -8,6 +8,7 @@
 #include "Drawable/TestPlane.h"
 #include "Drawable/TestCube.h"
 #include "Utils/ScriptCommander.h"
+#include "Bindable/FrameCommander.h"
 
 class XYHApp
 {
@@ -39,6 +40,8 @@ private:
 	PointLight m_pointLight;
 
 	ScriptCommander m_scriptCommander;
+
+	FrameCommander m_frameCommader;
 
 	std::vector<std::unique_ptr<class Drawable>> m_drawables;
 

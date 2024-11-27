@@ -47,7 +47,7 @@ SolidSphere::SolidSphere(Graphics& gfx, float radius)
 
 		only.AddBindable(PixelConstantBuffer<PSColorConstant>::Resolve(gfx, colorConstant, 1u));
 		only.AddBindable(InputLayout::Resolve(gfx, model.m_vertices.GetVertexLayout(), pVertexShaderByteCode));
-		only.AddBindable(std::make_shared<TransformCBuf>(gfx, *this));
+		only.AddBindable(std::make_shared<TransformCBuf>(gfx));
 		only.AddBindable(Blender::Resolve(gfx, false));
 		only.AddBindable(Rasterizer::Resolve(gfx, false));
 		only.AddBindable(std::make_shared<Stencil>(gfx, Stencil::Mode::Off));

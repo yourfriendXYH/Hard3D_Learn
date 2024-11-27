@@ -11,7 +11,7 @@ Job::Job(const Step* pStep, const Drawable* pDrawable)
 
 void Job::Execute(Graphics& gfx) const noexcept
 {
-	// m_pDrawable->Draw(gfx);
+	m_pDrawable->Bind(gfx);
 	m_pStep->Bind(gfx);
-	// gfx.DrawIndexed(m_pDrawable->GetIndexCount());
+	gfx.DrawIndexed(m_pDrawable->GetIndexCount());
 }

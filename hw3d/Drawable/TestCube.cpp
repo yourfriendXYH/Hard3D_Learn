@@ -21,6 +21,72 @@ TestCube::TestCube(Graphics& gfx, float size)
 	model.SetNormalsIndependentFlat();
 
 	const auto geomtryTag = "$cube." + std::to_string(size);
+
+	m_pVertexBuffer = VertexBuffer::Resolve(gfx, geomtryTag, model.m_vertices);
+	m_pIndexBuffer = IndexBuffer::Resolve(gfx, geomtryTag, model.m_indices);
+	m_pTopology = Topology::Resolve(gfx, D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+
+	{
+		Technique standard;
+		{
+			Step only(0u);
+			only.AddBindable(Texture::Resolve(gfx, "Resources/Wall/brickwall.jpg"));
+			only.AddBindable(Sampler::Resolve(gfx));
+
+			auto pvs = VertexShader::Resolve(gfx, "PhongVS.cso");
+			auto pvsbc = pvs->GetByteCode();
+			only.AddBindable(std::move(pvs));
+			only.AddBindable(PixelShader::Resolve(gfx, "PhongPS.cso"));
+			only.AddBindable(PixelConstantBuffer<PSMaterialConstant>::Resolve(gfx, m_pmc, 1u));
+			only.AddBindable(InputLayout::Resolve(gfx, model.m_vertices.GetVertexLayout(), pvsbc));
+			only.AddBindable(std::make_shared<TransformCBuf>(gfx));
+
+			standard.AddStep(only);
+		}
+		AddTechnique(std::move(standard));
+	}
+
+	{
+		Technique outline;
+		{
+			Step mask(1u);
+
+			auto pvs = VertexShader::Resolve(gfx, "SolidVS.cso");
+			auto pvsbc = pvs->GetByteCode();
+			mask.AddBindable(std::move(pvs));
+			mask.AddBindable(InputLayout::Resolve(gfx, model.m_vertices.GetVertexLayout(), pvsbc));
+			mask.AddBindable(std::make_shared<TransformCBuf>(gfx));
+
+			outline.AddStep(std::move(mask));
+		}
+		{
+			Step draw(2u);
+			auto pvs = VertexShader::Resolve(gfx, "SolidVS.cso");
+			auto pvsbc = pvs->GetByteCode();
+			draw.AddBindable(std::move(pvs));
+			draw.AddBindable(PixelShader::Resolve(gfx, "SolidPS.cso"));
+			draw.AddBindable(InputLayout::Resolve(gfx, model.m_vertices.GetVertexLayout(), pvsbc));
+
+			class TransformCBufScaling : public TransformCBuf
+			{
+			public:
+				using TransformCBuf::TransformCBuf;
+				void Bind(Graphics& gfx) noexcept override
+				{
+					const auto scaling = DirectX::XMMatrixScaling(1.04f, 1.04f, 1.04f);
+					auto tempTransform = GetTransforms(gfx);
+					tempTransform.modelView = tempTransform.modelView * scaling;
+					tempTransform.modelViewProj = tempTransform.modelViewProj * scaling;
+					UpdateBindImpl(gfx, tempTransform);
+				}
+			};
+			draw.AddBindable(std::make_shared<TransformCBufScaling>(gfx));
+
+			outline.AddStep(std::move(draw));
+		}
+		AddTechnique(std::move(outline));
+	}
+
 	//AddBind(VertexBuffer::Resolve(gfx, geomtryTag, model.m_vertices));
 	//AddBind(IndexBuffer::Resolve(gfx, geomtryTag, model.m_indices));
 
@@ -78,15 +144,8 @@ void TestCube::SetRotation(float roll, float pitch, float yaw) noexcept
 
 DirectX::XMMATRIX TestCube::GetTransformXM() const noexcept
 {
-	auto cubeTransform = DirectX::XMMatrixRotationRollPitchYaw(m_pitch, m_yaw, m_roll) *
+	return DirectX::XMMatrixRotationRollPitchYaw(m_pitch, m_yaw, m_roll) *
 		DirectX::XMMatrixTranslation(m_pos.x, m_pos.y, m_pos.z);
-
-	if (m_outlining) // 绘制描边效果时，需要调整缩放矩阵
-	{
-		cubeTransform = DirectX::XMMatrixScaling(1.03f, 1.03f, 1.03f) * cubeTransform;
-	}
-
-	return cubeTransform;
 }
 
 void TestCube::SpawnControlWindow(Graphics& gfx, const char* name) noexcept
@@ -115,13 +174,3 @@ void TestCube::SpawnControlWindow(Graphics& gfx, const char* name) noexcept
 	//ImGui::End();
 }
 
-void TestCube::DrawOutline(Graphics& gfx) noexcept
-{
-	//m_outlining = true;
-	//for (auto& bindable : m_outlineEffect)
-	//{
-	//	bindable->Bind(gfx);
-	//}
-	//gfx.DrawIndexed(QueryBindable<Bind::IndexBuffer>()->GetCount());
-	//m_outlining = false;
-}

@@ -344,8 +344,11 @@ void XYHApp::DoFrame()
 	//// mipmap的测试条纹
 	//m_testStripey.Draw(m_wnd.GetGfx());
 
-	//m_testCube.Draw(m_wnd.GetGfx());
+	m_pointLight.Submit(m_frameCommader);
+	m_testCube.Submit(m_frameCommader);
 	// m_testCube.DrawOutline(m_wnd.GetGfx());
+
+	m_frameCommader.Execute(m_wnd.GetGfx());
 
 	// 先注释掉，Blender会影响Stencil
 	//// 蓝色面片
@@ -459,6 +462,8 @@ void XYHApp::DoFrame()
 
 	// 将后缓存给到前缓存
 	m_wnd.GetGfx().EndFrame();
+	// 重置渲染队列
+	m_frameCommader.Reset();
 }
 
 void XYHApp::ShowRawInputWindow()

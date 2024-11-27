@@ -12,9 +12,6 @@ public:
 
 	void SpawnControlWindow(Graphics& gfx, const char* name) noexcept;
 
-	// 绘制描边效果
-	void DrawOutline(Graphics& gfx) noexcept;
-
 private:
 	// 描边效果
 	std::vector<std::shared_ptr<Bindable>> m_outlineEffect;
@@ -32,6 +29,4 @@ private:
 	float m_roll = 0.f;
 	float m_pitch = 0.f;
 	float m_yaw = 0.f;
-
-	bool m_outlining = false;
 };
