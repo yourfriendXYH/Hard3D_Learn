@@ -246,6 +246,16 @@
     <ClCompile Include="DynamicData\LayoutCodex.cpp">
       <Filter>DynamicData</Filter>
     </ClCompile>
+    <ClCompile Include="Bindable\FrameCommander.cpp" />
+    <ClCompile Include="Bindable\Job.cpp" />
+    <ClCompile Include="Bindable\NullPixelShader.cpp" />
+    <ClCompile Include="Bindable\Pass.cpp" />
+    <ClCompile Include="Bindable\Stencil.cpp" />
+    <ClCompile Include="Bindable\Step.cpp" />
+    <ClCompile Include="Bindable\Technique.cpp" />
+    <ClCompile Include="Bindable\TechniqueProbe.cpp">
+      <Filter>Code\Bindable</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Window.h">
@@ -466,6 +476,27 @@
     </ClInclude>
     <ClInclude Include="Bindable\Stencil.h">
       <Filter>Code</Filter>
+    </ClInclude>
+    <ClInclude Include="Bindable\FrameCommander.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="Bindable\Job.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="Bindable\NullPixelShader.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="Bindable\Pass.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="Bindable\Step.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="Bindable\Technique.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="Bindable\TechniqueProbe.h">
+      <Filter>Code\Bindable</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

@@ -1,6 +1,7 @@
 #include "Step.h"
 #include "FrameCommander.h"
 #include "Job.h"
+#include "TechniqueProbe.h"
 
 void Step::AddBindable(std::shared_ptr<Bindable> pBindable_in) noexcept
 {
@@ -26,5 +27,14 @@ void Step::InitializeParentReferences(const class Drawable& parent) noexcept
 	for (const auto& pBindable : m_bindables)
 	{
 		pBindable->InitializeParentReference(parent);
+	}
+}
+
+void Step::Accept(TechniqueProbe& probe)
+{
+	probe.SetStep(this);
+	for (auto& pBindable : m_bindables)
+	{
+		pBindable->Accept(probe);
 	}
 }

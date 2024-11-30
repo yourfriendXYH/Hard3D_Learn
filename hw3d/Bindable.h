@@ -17,6 +17,8 @@ public:
 public:
 	virtual void InitializeParentReference(const Drawable& parent) noexcept {};
 
+	virtual void Accept(class TechniqueProbe& probe) {};
+
 protected:
 	static ID3D11DeviceContext* GetContext(Graphics& gfx) noexcept;
 	static ID3D11Device* GetDevice(Graphics& gfx) noexcept;

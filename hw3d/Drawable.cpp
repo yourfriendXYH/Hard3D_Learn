@@ -4,6 +4,7 @@
 #include "VertexBuffer.h"
 #include "Topology.h"
 #include "Bindable\FrameCommander.h"
+#include "Bindable\TechniqueProbe.h"
 
 using namespace Bind;
 
@@ -36,4 +37,12 @@ void Drawable::Bind(Graphics& gfx) const noexcept
 UINT Drawable::GetIndexCount() const noexcept
 {
 	return m_pIndexBuffer->GetCount();
+}
+
+void Drawable::Accept(TechniqueProbe& probe)
+{
+	for (auto& tech : m_techniques)
+	{
+		tech.Accept(probe);
+	}
 }

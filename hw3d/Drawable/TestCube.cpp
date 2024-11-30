@@ -11,6 +11,8 @@
 #include "../imgui/imgui.h"
 #include "../Bindable/Stencil.h"
 #include "../Sampler.h"
+#include "../DynamicData/DynamicConstant.h"
+#include "../Bindable/ConstantBuffersEx.h"
 
 TestCube::TestCube(Graphics& gfx, float size)
 {
@@ -27,7 +29,7 @@ TestCube::TestCube(Graphics& gfx, float size)
 	m_pTopology = Topology::Resolve(gfx, D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 
 	{
-		Technique standard;
+		Technique standard("Shade");
 		{
 			Step only(0u);
 			only.AddBindable(Texture::Resolve(gfx, "Resources/Wall/brickwall.jpg"));
@@ -37,7 +39,16 @@ TestCube::TestCube(Graphics& gfx, float size)
 			auto pvsbc = pvs->GetByteCode();
 			only.AddBindable(std::move(pvs));
 			only.AddBindable(PixelShader::Resolve(gfx, "PhongPS.cso"));
-			only.AddBindable(PixelConstantBuffer<PSMaterialConstant>::Resolve(gfx, m_pmc, 1u));
+
+			DynamicData::RawLayoutEx layout;
+			layout.Add<DynamicData::EFloat>("specularIntensity");
+			layout.Add<DynamicData::EFloat>("specularPower");
+			DynamicData::BufferEx buf = DynamicData::BufferEx(std::move(layout));
+			buf["specularIntensity"] = 0.1f;
+			buf["specularPower"] = 20.0f;
+
+			only.AddBindable(std::make_shared<CachingPixelConstantBufferEx>(gfx, buf, 1u));
+			//only.AddBindable(PixelConstantBuffer<PSMaterialConstant>::Resolve(gfx, m_pmc, 1u));
 			only.AddBindable(InputLayout::Resolve(gfx, model.m_vertices.GetVertexLayout(), pvsbc));
 			only.AddBindable(std::make_shared<TransformCBuf>(gfx));
 
@@ -47,7 +58,7 @@ TestCube::TestCube(Graphics& gfx, float size)
 	}
 
 	{
-		Technique outline;
+		Technique outline("Outline");
 		{
 			Step mask(1u);
 
@@ -65,20 +76,50 @@ TestCube::TestCube(Graphics& gfx, float size)
 			auto pvsbc = pvs->GetByteCode();
 			draw.AddBindable(std::move(pvs));
 			draw.AddBindable(PixelShader::Resolve(gfx, "SolidPS.cso"));
+
+			DynamicData::RawLayoutEx layout;
+			layout.Add<DynamicData::EFloat4>("color");
+			auto buf = DynamicData::BufferEx(std::move(layout));
+			buf["color"] = DirectX::XMFLOAT4{0.4f, 0.4f, 1.0f, 1.0f};
+			draw.AddBindable(std::make_shared<CachingPixelConstantBufferEx>(gfx, buf, 1u));
+
 			draw.AddBindable(InputLayout::Resolve(gfx, model.m_vertices.GetVertexLayout(), pvsbc));
 
 			class TransformCBufScaling : public TransformCBuf
 			{
 			public:
-				using TransformCBuf::TransformCBuf;
+				TransformCBufScaling(Graphics& gfx, float scale = 1.04f)
+					:
+					TransformCBuf(gfx),
+					m_buf(MakeLayout())
+				{
+
+				}
 				void Bind(Graphics& gfx) noexcept override
 				{
-					const auto scaling = DirectX::XMMatrixScaling(1.04f, 1.04f, 1.04f);
+					float scale = m_buf["scale"];
+					const auto scaleMatrix = DirectX::XMMatrixScaling(scale, scale, scale);
 					auto tempTransform = GetTransforms(gfx);
-					tempTransform.modelView = tempTransform.modelView * scaling;
-					tempTransform.modelViewProj = tempTransform.modelViewProj * scaling;
+					tempTransform.modelView = tempTransform.modelView * scaleMatrix;
+					tempTransform.modelViewProj = tempTransform.modelViewProj * scaleMatrix;
 					UpdateBindImpl(gfx, tempTransform);
 				}
+
+				void Accept(TechniqueProbe& probe)
+				{
+					probe.VisitBuffer(m_buf);
+				}
+
+			private:
+				static DynamicData::RawLayoutEx MakeLayout()
+				{
+					DynamicData::RawLayoutEx layout;
+					layout.Add<DynamicData::EFloat>("scale");
+					return layout;
+				}
+
+			private:
+				DynamicData::BufferEx m_buf;
 			};
 			draw.AddBindable(std::make_shared<TransformCBufScaling>(gfx));
 
@@ -150,27 +191,56 @@ DirectX::XMMATRIX TestCube::GetTransformXM() const noexcept
 
 void TestCube::SpawnControlWindow(Graphics& gfx, const char* name) noexcept
 {
-	//if (ImGui::Begin(name))
-	//{
-	//	ImGui::Text("Position");
-	//	ImGui::SliderFloat("X", &m_pos.x, -80.0f, 80.0f, "%.1f");
-	//	ImGui::SliderFloat("Y", &m_pos.y, -80.0f, 80.0f, "%.1f");
-	//	ImGui::SliderFloat("Z", &m_pos.z, -80.0f, 80.0f, "%.1f");
-	//	ImGui::Text("Orientation");
-	//	ImGui::SliderAngle("Roll", &m_roll, -180.0f, 180.0f);
-	//	ImGui::SliderAngle("Pitch", &m_pitch, -180.0f, 180.0f);
-	//	ImGui::SliderAngle("Yaw", &m_yaw, -180.0f, 180.0f);
-	//	ImGui::Text("Shading");
-	//	bool changed0 = ImGui::SliderFloat("Spec. Int.", &m_pmc.specularIntensity, 0.0f, 1.0f);
-	//	bool changed1 = ImGui::SliderFloat("Spec. Power", &m_pmc.specularPower, 0.0f, 100.0f);
-	//	bool checkState = m_pmc.normalMappingEnabled == TRUE;
-	//	bool changed2 = ImGui::Checkbox("Enable Normal Map", &checkState);
-	//	m_pmc.normalMappingEnabled = checkState ? TRUE : FALSE;
-	//	if (changed0 || changed1 || changed2)
-	//	{
-	//		QueryBindable<Bind::PixelConstantBuffer<PSMaterialConstant>>()->Update(gfx, m_pmc);
-	//	}
-	//}
-	//ImGui::End();
+	if (ImGui::Begin(name))
+	{
+		ImGui::Text("Position");
+		ImGui::SliderFloat("X", &m_pos.x, -80.0f, 80.0f, "%.1f");
+		ImGui::SliderFloat("Y", &m_pos.y, -80.0f, 80.0f, "%.1f");
+		ImGui::SliderFloat("Z", &m_pos.z, -80.0f, 80.0f, "%.1f");
+		ImGui::Text("Orientation");
+		ImGui::SliderAngle("Roll", &m_roll, -180.0f, 180.0f);
+		ImGui::SliderAngle("Pitch", &m_pitch, -180.0f, 180.0f);
+		ImGui::SliderAngle("Yaw", &m_yaw, -180.0f, 180.0f);
+
+		class Probe : public TechniqueProbe
+		{
+		public:
+			void OnSetTechnique() override
+			{
+				using namespace std::string_literals;
+				ImGui::TextColored({ 0.4f, 1.0f, 0.6f, 1.0f }, m_pTechnique->GetName().c_str()); // 显示Technique的名字
+				bool active = m_pTechnique->IsActive();
+				ImGui::Checkbox(("Tech Active##"s + m_pTechnique->GetName()).c_str(), &active);
+				m_pTechnique->SetActiveState(active);
+			}
+			bool VisitBuffer(DynamicData::BufferEx& buf) override
+			{
+				bool dirty = false;
+				// 当前UI被修改或前面的UI被修改，都置脏
+				const auto dirtyCheck = [&dirty](bool changed) { dirty = dirty || changed; };
+				if (auto value = buf["scale"]; value.Exists())
+				{
+					dirtyCheck(ImGui::SliderFloat("Scale", &value, 1.0f, 2.0f, "%.3f"));
+				}
+				if (auto value = buf["color"]; value.Exists())
+				{
+					dirtyCheck(ImGui::ColorPicker4("Color", reinterpret_cast<float*>(&static_cast<DirectX::XMFLOAT4&>(value))));
+				}
+				if (auto v = buf["specularIntensity"]; v.Exists())
+				{
+					dirtyCheck(ImGui::SliderFloat("Spec. Intens.", &v, 0.0f, 1.0f));
+				}
+				if (auto v = buf["specularPower"]; v.Exists())
+				{
+					dirtyCheck(ImGui::SliderFloat("Glossiness", &v, 1.0f, 100.0f, "%.1f"));
+				}
+				return dirty;
+			}
+		};
+
+		static Probe probe;
+		Accept(probe); // 显示常数缓存的UI
+	}
+	ImGui::End();
 }
 

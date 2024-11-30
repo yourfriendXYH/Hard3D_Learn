@@ -20,6 +20,8 @@ public:
 
 	void InitializeParentReferences(const class Drawable& parent) noexcept;
 
+	void Accept(class TechniqueProbe& probe);
+
 private:
 	size_t m_targetPass;
 	std::vector<std::shared_ptr<Bindable>> m_bindables;

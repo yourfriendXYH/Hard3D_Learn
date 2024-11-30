@@ -1,6 +1,7 @@
 #pragma once
 #include "../Bindable.h"
 #include "../DynamicData/DynamicConstant.h"
+#include "TechniqueProbe.h"
 
 namespace Bind
 {
@@ -101,6 +102,14 @@ namespace Bind
 				m_dirty = false;
 			}
 			PixelConstantBufferEx::Bind(gfx);
+		}
+
+		void Accept(TechniqueProbe& probe)
+		{
+			if (probe.VisitBuffer(m_buf))
+			{
+				m_dirty = true;
+			}
 		}
 
 	private:

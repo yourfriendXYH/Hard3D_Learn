@@ -30,6 +30,8 @@ public:
 
 	UINT GetIndexCount() const noexcept;
 
+	void Accept(class TechniqueProbe& probe);
+
 
 	// 获取指定的Bindable
 	//template<class T>
