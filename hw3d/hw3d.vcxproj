@@ -169,6 +169,7 @@
     <ClCompile Include="DrawableBase.cpp" />
     <ClCompile Include="Drawable\AssimpTest.cpp" />
     <ClCompile Include="Drawable\Cylinder.cpp" />
+    <ClCompile Include="Drawable\Material.cpp" />
     <ClCompile Include="Drawable\Mesh.cpp" />
     <ClCompile Include="Drawable\TestCube.cpp" />
     <ClCompile Include="Drawable\TestPlane.cpp" />
@@ -238,6 +239,7 @@
     <ClInclude Include="CommonFunction.h" />
     <ClInclude Include="CommonType.h" />
     <ClInclude Include="ConstantBuffers.h" />
+    <ClInclude Include="Drawable\Material.h" />
     <ClInclude Include="Drawable\TestCube.h" />
     <ClInclude Include="Drawable\TestPlane.h" />
     <ClInclude Include="dxerr.h" />

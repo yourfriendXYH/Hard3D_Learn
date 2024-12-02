@@ -4,6 +4,23 @@
 #include <DirectXMath.h>
 #include <d3d11.h>
 #include <string>
+#include "../assimp/include/assimp/scene.h"
+
+#define DVTX_ELEMENT_AI_EXTRACTOR(member) \
+static m_sysType Extract(const aiMesh& mesh, size_t index) noexcept \
+{return *reinterpret_cast<const m_sysType*>(&mesh.member[index]);}
+
+#define LAYOUT_ELEMENT_TYPES \
+	X(Position2D) \
+	X(Position3D) \
+	X(Texture2D) \
+	X(Normal) \
+	X(Tangent) \
+	X(Bitangent) \
+	X(Float3Color) \
+	X(Float4Color) \
+	X(BGRAColor) \
+	X(Count)
 
 namespace DynamicData
 {
@@ -23,16 +40,9 @@ namespace DynamicData
 		// 顶点数据类型
 		enum ElementType
 		{
-			Position2D, // 顶点坐标
-			Position3D,
-			Texture2D,	// 纹理坐标
-			Normal,		// 法线方向
-			Tangent, // 切线方向
-			Bitangent, // 与切线垂直的方向?
-			Float3Color,// 颜色
-			Float4Color,
-			BGRAColor,
-			Count, // ???
+			#define X(element) element,
+			LAYOUT_ELEMENT_TYPES
+			#undef X
 		};
 
 		// 顶点数据类型的map
@@ -43,6 +53,7 @@ namespace DynamicData
 			static constexpr DXGI_FORMAT m_dxgiFormat = DXGI_FORMAT_R32G32_FLOAT;
 			static constexpr const char* m_semantic = "Position";
 			static constexpr const char* m_code = "P2";
+			DVTX_ELEMENT_AI_EXTRACTOR(mVertices);
 		};
 		template<> struct Map<Position3D>
 		{
@@ -50,6 +61,7 @@ namespace DynamicData
 			static constexpr DXGI_FORMAT m_dxgiFormat = DXGI_FORMAT_R32G32B32_FLOAT;
 			static constexpr const char* m_semantic = "Position";
 			static constexpr const char* m_code = "P3";
+			DVTX_ELEMENT_AI_EXTRACTOR(mVertices);
 		};
 		template<> struct Map<Texture2D>
 		{
@@ -57,6 +69,7 @@ namespace DynamicData
 			static constexpr DXGI_FORMAT m_dxgiFormat = DXGI_FORMAT_R32G32_FLOAT;
 			static constexpr const char* m_semantic = "TexCoord"; // 纹理坐标
 			static constexpr const char* m_code = "T2";
+			DVTX_ELEMENT_AI_EXTRACTOR(mTextureCoords[0]);
 		};
 		template<> struct Map<Normal>
 		{
@@ -64,6 +77,7 @@ namespace DynamicData
 			static constexpr DXGI_FORMAT m_dxgiFormat = DXGI_FORMAT_R32G32B32_FLOAT;
 			static constexpr const char* m_semantic = "Normal";
 			static constexpr const char* m_code = "N";
+			DVTX_ELEMENT_AI_EXTRACTOR(mNormals);
 		};
 		template<> struct Map<Tangent>
 		{
@@ -71,6 +85,7 @@ namespace DynamicData
 			static constexpr DXGI_FORMAT m_dxgiFormat = DXGI_FORMAT_R32G32B32_FLOAT;
 			static constexpr const char* m_semantic = "Tangent";
 			static constexpr const char* m_code = "Nt";
+			DVTX_ELEMENT_AI_EXTRACTOR(mTangents)
 		};
 		template<> struct Map<Bitangent>
 		{
@@ -78,6 +93,7 @@ namespace DynamicData
 			static constexpr DXGI_FORMAT m_dxgiFormat = DXGI_FORMAT_R32G32B32_FLOAT;
 			static constexpr const char* m_semantic = "Bitangent";
 			static constexpr const char* m_code = "Nb";
+			DVTX_ELEMENT_AI_EXTRACTOR(mBitangents)
 		};
 		template<> struct Map<Float3Color>
 		{
@@ -85,6 +101,7 @@ namespace DynamicData
 			static constexpr DXGI_FORMAT m_dxgiFormat = DXGI_FORMAT_R32G32B32_FLOAT;
 			static constexpr const char* m_semantic = "Color";
 			static constexpr const char* m_code = "C3";
+			DVTX_ELEMENT_AI_EXTRACTOR(mColors[0])
 		};
 		template<> struct Map<Float4Color>
 		{
@@ -92,6 +109,7 @@ namespace DynamicData
 			static constexpr DXGI_FORMAT m_dxgiFormat = DXGI_FORMAT_R32G32B32A32_FLOAT;
 			static constexpr const char* m_semantic = "Color";
 			static constexpr const char* m_code = "C4";
+			DVTX_ELEMENT_AI_EXTRACTOR(mColors[0])
 		};
 		template<> struct Map<BGRAColor>
 		{
@@ -99,7 +117,30 @@ namespace DynamicData
 			static constexpr DXGI_FORMAT m_dxgiFormat = DXGI_FORMAT_R8G8B8A8_UNORM;
 			static constexpr const char* m_semantic = "Color";
 			static constexpr const char* m_code = "C8";
+			DVTX_ELEMENT_AI_EXTRACTOR(mColors[0])
 		};
+
+		template<> struct Map<Count>
+		{
+			using m_sysType = long double;
+			static constexpr DXGI_FORMAT dxgiFormat = DXGI_FORMAT_UNKNOWN;
+			static constexpr const char* semantic = "!INVALID!";
+			static constexpr const char* code = "!INV!";
+			DVTX_ELEMENT_AI_EXTRACTOR(mFaces)
+		};
+
+		template<template<VertexLayout::ElementType> class F, typename... Args>
+		static constexpr auto Bridge(VertexLayout::ElementType type, Args&&... args) noexcept
+		{
+			switch (type)
+			{
+				#define X(element) case VertexLayout::element: return F<VertexLayout::element>::Exec(std::forward<Args>(args)...);
+				LAYOUT_ELEMENT_TYPES
+				#undef X
+			}
+			assert("Invalid Element Type" && false);
+			return F<VertexLayout::Count>::Exec(std::forward<Args>(args)...);
+		}
 
 		// 顶点数据对象
 		class Element
@@ -236,6 +277,19 @@ namespace DynamicData
 
 		std::string GetCode() const	noexcept;
 
+		template<ElementType type>
+		bool Has() const noexcept
+		{
+			for (auto& ele : m_elements)
+			{
+				if (ele.GetType() == type)
+				{
+					return true;
+				}
+			}
+			return false;
+		}
+
 	private:
 		std::vector<Element> m_elements; // 顶点数据结构
 
@@ -252,6 +306,17 @@ namespace DynamicData
 			m_vertexLayout(layout)
 		{
 		}
+
+	private:
+		template<VertexLayout::ElementType type>
+		struct AttributeSetting
+		{
+			template<typename T>
+			static constexpr auto Exec(Vertex* pVertex, char* pAttribute, T&& val) noexcept
+			{
+				return pVertex->SetAttribute<type>(pAttribute, std::forward<T>(val));
+			}
+		};
 
 	public:
 		// 获取单个顶点中的某一个属性值
@@ -271,38 +336,40 @@ namespace DynamicData
 			// 获取顶点中的某个数据
 			const auto& element = m_vertexLayout.ResolveByIndex(index);
 			auto pAttribute = m_pData + element.GetOffset();
-			switch (element.GetType())
-			{
-			case VertexLayout::Position2D:
-				SetAttribute<VertexLayout::Position2D>(pAttribute, std::forward<T>(value));
-				break;
-			case VertexLayout::Position3D:
-				SetAttribute<VertexLayout::Position3D>(pAttribute, std::forward<T>(value));
-				break;
-			case VertexLayout::Texture2D:
-				SetAttribute<VertexLayout::Texture2D>(pAttribute, std::forward<T>(value));
-				break;
-			case VertexLayout::Normal:
-				SetAttribute<VertexLayout::Normal>(pAttribute, std::forward<T>(value));
-				break;
-			case VertexLayout::Tangent:
-				SetAttribute<VertexLayout::Tangent>(pAttribute, std::forward<T>(value));
-				break;
-			case VertexLayout::Bitangent:
-				SetAttribute<VertexLayout::Bitangent>(pAttribute, std::forward<T>(value));
-				break;
-			case VertexLayout::Float3Color:
-				SetAttribute<VertexLayout::Float3Color>(pAttribute, std::forward<T>(value));
-				break;
-			case VertexLayout::Float4Color:
-				SetAttribute<VertexLayout::Float4Color>(pAttribute, std::forward<T>(value));
-				break;
-			case VertexLayout::BGRAColor:
-				SetAttribute<VertexLayout::BGRAColor>(pAttribute, std::forward<T>(value));
-				break;
-			default:
-				assert("Bad element type" && false);
-			}
+			//switch (element.GetType())
+			//{
+			//case VertexLayout::Position2D:
+			//	SetAttribute<VertexLayout::Position2D>(pAttribute, std::forward<T>(value));
+			//	break;
+			//case VertexLayout::Position3D:
+			//	SetAttribute<VertexLayout::Position3D>(pAttribute, std::forward<T>(value));
+			//	break;
+			//case VertexLayout::Texture2D:
+			//	SetAttribute<VertexLayout::Texture2D>(pAttribute, std::forward<T>(value));
+			//	break;
+			//case VertexLayout::Normal:
+			//	SetAttribute<VertexLayout::Normal>(pAttribute, std::forward<T>(value));
+			//	break;
+			//case VertexLayout::Tangent:
+			//	SetAttribute<VertexLayout::Tangent>(pAttribute, std::forward<T>(value));
+			//	break;
+			//case VertexLayout::Bitangent:
+			//	SetAttribute<VertexLayout::Bitangent>(pAttribute, std::forward<T>(value));
+			//	break;
+			//case VertexLayout::Float3Color:
+			//	SetAttribute<VertexLayout::Float3Color>(pAttribute, std::forward<T>(value));
+			//	break;
+			//case VertexLayout::Float4Color:
+			//	SetAttribute<VertexLayout::Float4Color>(pAttribute, std::forward<T>(value));
+			//	break;
+			//case VertexLayout::BGRAColor:
+			//	SetAttribute<VertexLayout::BGRAColor>(pAttribute, std::forward<T>(value));
+			//	break;
+			//default:
+			//	assert("Bad element type" && false);
+			//}
+
+			VertexLayout::Bridge<AttributeSetting>(element.GetType(), this, pAttribute, std::forward<T>(value));
 		}
 
 	private:

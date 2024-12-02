@@ -210,35 +210,42 @@ void TestCube::SpawnControlWindow(Graphics& gfx, const char* name) noexcept
 				using namespace std::string_literals;
 				ImGui::TextColored({ 0.4f, 1.0f, 0.6f, 1.0f }, m_pTechnique->GetName().c_str()); // 显示Technique的名字
 				bool active = m_pTechnique->IsActive();
-				ImGui::Checkbox(("Tech Active##"s + m_pTechnique->GetName()).c_str(), &active);
+				ImGui::Checkbox(("Tech Active##"s + /*m_pTechnique->GetName()*/std::to_string(m_techIndex)).c_str(), &active);
 				m_pTechnique->SetActiveState(active);
 			}
-			bool VisitBuffer(DynamicData::BufferEx& buf) override
+			bool OnVisitBuffer(DynamicData::BufferEx& buf) override
 			{
 				bool dirty = false;
 				// 当前UI被修改或前面的UI被修改，都置脏
 				const auto dirtyCheck = [&dirty](bool changed) { dirty = dirty || changed; };
+
+				auto tag = [tagScratch = std::string{}, tagString = "##" + std::to_string(m_bufIndex)](const char* label) mutable
+					{
+						tagScratch = label + tagString;
+						return tagScratch.c_str();
+					};
+
 				if (auto value = buf["scale"]; value.Exists())
 				{
-					dirtyCheck(ImGui::SliderFloat("Scale", &value, 1.0f, 2.0f, "%.3f"));
+					dirtyCheck(ImGui::SliderFloat(tag("Scale"), &value, 1.0f, 2.0f, "%.3f"));
 				}
 				if (auto value = buf["color"]; value.Exists())
 				{
-					dirtyCheck(ImGui::ColorPicker4("Color", reinterpret_cast<float*>(&static_cast<DirectX::XMFLOAT4&>(value))));
+					dirtyCheck(ImGui::ColorPicker4(tag("Color"), reinterpret_cast<float*>(&static_cast<DirectX::XMFLOAT4&>(value))));
 				}
 				if (auto v = buf["specularIntensity"]; v.Exists())
 				{
-					dirtyCheck(ImGui::SliderFloat("Spec. Intens.", &v, 0.0f, 1.0f));
+					dirtyCheck(ImGui::SliderFloat(tag("Spec. Intens."), &v, 0.0f, 1.0f));
 				}
 				if (auto v = buf["specularPower"]; v.Exists())
 				{
-					dirtyCheck(ImGui::SliderFloat("Glossiness", &v, 1.0f, 100.0f, "%.1f"));
+					dirtyCheck(ImGui::SliderFloat(tag("Glossiness"), &v, 1.0f, 100.0f, "%.1f"));
 				}
 				return dirty;
 			}
-		};
+		} probe;
 
-		static Probe probe;
+		// static Probe probe;
 		Accept(probe); // 显示常数缓存的UI
 	}
 	ImGui::End();

@@ -256,6 +256,9 @@
     <ClCompile Include="Bindable\TechniqueProbe.cpp">
       <Filter>Code\Bindable</Filter>
     </ClCompile>
+    <ClCompile Include="Drawable\Material.cpp">
+      <Filter>Code\Drawable</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Window.h">
@@ -497,6 +500,9 @@
     </ClInclude>
     <ClInclude Include="Bindable\TechniqueProbe.h">
       <Filter>Code\Bindable</Filter>
+    </ClInclude>
+    <ClInclude Include="Drawable\Material.h">
+      <Filter>Code\Drawable</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
