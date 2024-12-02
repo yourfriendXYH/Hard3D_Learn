@@ -123,9 +123,9 @@ namespace DynamicData
 		template<> struct Map<Count>
 		{
 			using m_sysType = long double;
-			static constexpr DXGI_FORMAT dxgiFormat = DXGI_FORMAT_UNKNOWN;
-			static constexpr const char* semantic = "!INVALID!";
-			static constexpr const char* code = "!INV!";
+			static constexpr DXGI_FORMAT m_dxgiFormat = DXGI_FORMAT_UNKNOWN;
+			static constexpr const char* m_semantic = "!INVALID!";
+			static constexpr const char* m_code = "!INV!";
 			DVTX_ELEMENT_AI_EXTRACTOR(mFaces)
 		};
 
@@ -169,39 +169,39 @@ namespace DynamicData
 			}
 
 			// 数据大小
-			size_t Size() const
+			size_t Size() const 
 			{
 				return SizeOf(m_type);
 			}
 
-			size_t SizeOf(ElementType type) const
-			{
-				//return sizeof(Map<type>::m_sysType);
+			constexpr size_t SizeOf(ElementType type) const noexcept;
+			//{
+			//	//return sizeof(Map<type>::m_sysType);
 
-				switch (type)
-				{
-				case VertexLayout::Position2D:
-					return sizeof(Map<VertexLayout::Position2D>::m_sysType);
-				case VertexLayout::Position3D:
-					return sizeof(Map<VertexLayout::Position3D>::m_sysType);
-				case VertexLayout::Texture2D:
-					return sizeof(Map<VertexLayout::Texture2D>::m_sysType);
-				case VertexLayout::Normal:
-					return sizeof(Map<VertexLayout::Normal>::m_sysType);
-				case VertexLayout::Tangent:
-					return sizeof(Map<VertexLayout::Tangent>::m_sysType);
-				case VertexLayout::Bitangent:
-					return sizeof(Map<VertexLayout::Bitangent>::m_sysType);
-				case VertexLayout::Float3Color:
-					return sizeof(Map<VertexLayout::Float3Color>::m_sysType);
-				case VertexLayout::Float4Color:
-					return sizeof(Map<VertexLayout::Float4Color>::m_sysType);
-				case VertexLayout::BGRAColor:
-					return sizeof(Map<VertexLayout::BGRAColor>::m_sysType);
-				}
-				assert("Invalid element type" && false);
-				return 0u;
-			}
+			//	switch (type)
+			//	{
+			//	case VertexLayout::Position2D:
+			//		return sizeof(Map<VertexLayout::Position2D>::m_sysType);
+			//	case VertexLayout::Position3D:
+			//		return sizeof(Map<VertexLayout::Position3D>::m_sysType);
+			//	case VertexLayout::Texture2D:
+			//		return sizeof(Map<VertexLayout::Texture2D>::m_sysType);
+			//	case VertexLayout::Normal:
+			//		return sizeof(Map<VertexLayout::Normal>::m_sysType);
+			//	case VertexLayout::Tangent:
+			//		return sizeof(Map<VertexLayout::Tangent>::m_sysType);
+			//	case VertexLayout::Bitangent:
+			//		return sizeof(Map<VertexLayout::Bitangent>::m_sysType);
+			//	case VertexLayout::Float3Color:
+			//		return sizeof(Map<VertexLayout::Float3Color>::m_sysType);
+			//	case VertexLayout::Float4Color:
+			//		return sizeof(Map<VertexLayout::Float4Color>::m_sysType);
+			//	case VertexLayout::BGRAColor:
+			//		return sizeof(Map<VertexLayout::BGRAColor>::m_sysType);
+			//	}
+			//	assert("Invalid element type" && false);
+			//	return 0u;
+			//}
 
 			// 获取单个数据的描述
 			D3D11_INPUT_ELEMENT_DESC GetDesc() const;
@@ -504,3 +504,8 @@ namespace DynamicData
 	};
 
 }
+
+#undef DVTX_ELEMENT_AI_EXTRACTOR
+#ifndef DVTX_SOURCE_FILE
+#undef LAYOUT_ELEMENT_TYPES
+#endif
