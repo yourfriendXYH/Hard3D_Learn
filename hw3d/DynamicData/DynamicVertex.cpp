@@ -60,7 +60,7 @@ namespace DynamicData
 		return Bridge<CodeLookup>(m_type);
 	}
 
-	template<VertexLayout::ElementType type> 
+	template<VertexLayout::ElementType type>
 	struct DescGenerate
 	{
 		static constexpr D3D11_INPUT_ELEMENT_DESC Exec(size_t offset) noexcept
@@ -130,6 +130,29 @@ namespace DynamicData
 		m_vertexLayout(std::move(layout))
 	{
 		Resize(size);
+	}
+
+	template<VertexLayout::ElementType type>
+	struct AttributeAiMeshFill
+	{
+		static const void Exec(VerticesBuffer* pBuf, const aiMesh& mesh)
+		{
+			for (auto end = mesh.mNumVertices, i = 0u; i < end; ++i)
+			{
+				(*pBuf)[i].Attr<type>() = VertexLayout::Map<type>::Extract(mesh, i);
+			}
+		}
+	};
+
+	VerticesBuffer::VerticesBuffer(VertexLayout layout_in, const aiMesh& mesh)
+		:
+		m_vertexLayout(std::move(layout_in))
+	{
+		Resize(mesh.mNumVertices);
+		for (size_t i = 0u; i < m_vertexLayout.GetElementCount(); ++i)
+		{
+			VertexLayout::Bridge<AttributeAiMeshFill>(m_vertexLayout.ResolveByIndex(i).GetType(), this, mesh);
+		}
 	}
 
 	void VerticesBuffer::Resize(size_t newSize) noexcept

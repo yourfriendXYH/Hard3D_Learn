@@ -40,9 +40,9 @@ namespace DynamicData
 		// 顶点数据类型
 		enum ElementType
 		{
-			#define X(element) element,
+#define X(element) element,
 			LAYOUT_ELEMENT_TYPES
-			#undef X
+#undef X
 		};
 
 		// 顶点数据类型的map
@@ -129,14 +129,15 @@ namespace DynamicData
 			DVTX_ELEMENT_AI_EXTRACTOR(mFaces)
 		};
 
+		// 动态switch
 		template<template<VertexLayout::ElementType> class F, typename... Args>
 		static constexpr auto Bridge(VertexLayout::ElementType type, Args&&... args) noexcept
 		{
 			switch (type)
 			{
-				#define X(element) case VertexLayout::element: return F<VertexLayout::element>::Exec(std::forward<Args>(args)...);
+#define X(element) case VertexLayout::element: return F<VertexLayout::element>::Exec(std::forward<Args>(args)...);
 				LAYOUT_ELEMENT_TYPES
-				#undef X
+#undef X
 			}
 			assert("Invalid Element Type" && false);
 			return F<VertexLayout::Count>::Exec(std::forward<Args>(args)...);
@@ -169,7 +170,7 @@ namespace DynamicData
 			}
 
 			// 数据大小
-			size_t Size() const 
+			size_t Size() const
 			{
 				return SizeOf(m_type);
 			}
@@ -428,6 +429,8 @@ namespace DynamicData
 	{
 	public:
 		VerticesBuffer(VertexLayout layout, size_t size = 0u) noexcept;
+
+		VerticesBuffer(VertexLayout layout_in, const aiMesh& mesh);
 
 	public:
 		const VertexLayout& GetVertexLayout() const
