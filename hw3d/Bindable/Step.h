@@ -12,7 +12,7 @@ public:
 	{
 	}
 
-	void AddBindable(std::shared_ptr<Bindable> pBindable_in) noexcept;
+	void AddBindable(std::shared_ptr<Bind::Bindable> pBindable_in) noexcept;
 
 	void Submit(class FrameCommander& frame, const class Drawable& drawable) const;
 
@@ -24,5 +24,5 @@ public:
 
 private:
 	size_t m_targetPass;
-	std::vector<std::shared_ptr<Bindable>> m_bindables;
+	std::vector<std::shared_ptr<Bind::Bindable>> m_bindables;
 };

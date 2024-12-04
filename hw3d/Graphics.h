@@ -6,9 +6,14 @@
 #include <vector>
 #include <DirectXMath.h>
 
+namespace Bind
+{
+	class Bindable;
+}
+
 class Graphics
 {
-	friend class Bindable;
+	friend Bind::Bindable;
 
 public:
 	class Exception : public XyhException

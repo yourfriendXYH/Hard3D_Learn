@@ -247,11 +247,7 @@ namespace DynamicData
 
 		// 添加顶点的数据结构
 		//template<ElementType type>
-		VertexLayout& Append(VertexLayout::ElementType type)
-		{
-			m_elements.emplace_back(type, Size());
-			return *this;
-		}
+		VertexLayout& Append(VertexLayout::ElementType type);
 
 		// 获取数据类型的总大小
 		size_t Size() const
@@ -278,18 +274,7 @@ namespace DynamicData
 
 		std::string GetCode() const	noexcept;
 
-		template<ElementType type>
-		bool Has() const noexcept
-		{
-			for (auto& ele : m_elements)
-			{
-				if (ele.GetType() == type)
-				{
-					return true;
-				}
-			}
-			return false;
-		}
+		bool Has(ElementType type) const noexcept;
 
 	private:
 		std::vector<Element> m_elements; // 顶点数据结构

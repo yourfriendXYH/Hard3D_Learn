@@ -14,7 +14,7 @@ public:
 
 private:
 	// 描边效果
-	std::vector<std::shared_ptr<Bindable>> m_outlineEffect;
+	std::vector<std::shared_ptr<Bind::Bindable>> m_outlineEffect;
 
 	// 像素着色器常量缓存
 	struct PSMaterialConstant

@@ -3,7 +3,7 @@
 #include "Job.h"
 #include "TechniqueProbe.h"
 
-void Step::AddBindable(std::shared_ptr<Bindable> pBindable_in) noexcept
+void Step::AddBindable(std::shared_ptr<Bind::Bindable> pBindable_in) noexcept
 {
 	m_bindables.emplace_back(std::move(pBindable_in));
 }

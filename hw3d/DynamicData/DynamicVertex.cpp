@@ -77,6 +77,16 @@ namespace DynamicData
 	{
 		return Bridge<DescGenerate>(m_type, GetOffset());
 	}
+
+	VertexLayout& VertexLayout::Append(VertexLayout::ElementType type)
+	{
+		if (!Has(type))
+		{
+			m_elements.emplace_back(type, Size());
+		}
+		return *this;
+	}
+
 	//{
 	//	switch (m_type)
 	//	{
@@ -123,6 +133,18 @@ namespace DynamicData
 		}
 
 		return code;
+	}
+
+	bool VertexLayout::Has(ElementType type) const noexcept
+	{
+		for (auto& ele : m_elements)
+		{
+			if (ele.GetType() == type)
+			{
+				return true;
+			}
+		}
+		return false;
 	}
 
 	VerticesBuffer::VerticesBuffer(VertexLayout layout, size_t size /*= 0u*/) noexcept
