@@ -1,4 +1,5 @@
 #include "Material.h"
+#include "../DynamicData/DynamicConstant.h"
 
 Material::Material(Graphics& gfx, const aiMaterial& material, const std::filesystem::path& path) noexcept
 	:
@@ -9,6 +10,29 @@ Material::Material(Graphics& gfx, const aiMaterial& material, const std::filesys
 		aiString tempName;
 		material.Get(AI_MATKEY_NAME, tempName);
 		m_name = tempName.C_Str();
+	}
+	// phong technique
+	{
+		Technique phong{ "Phong" };
+		Step step(0);
+		std::string shaderCode = "Phong";
+		aiString texFileName;
+		m_vtxLayout.Append(DynamicData::VertexLayout::Position3D);
+		m_vtxLayout.Append(DynamicData::VertexLayout::Normal);
+		DynamicData::RawLayout pscLayout;
+		bool hasTexture = false;
+		bool hasGlossAlpha = false;
+
+		// diffuse
+		{
+			bool hasAlpha = false;
+			if (material.GetTexture(aiTextureType_DIFFUSE, 0, &texFileName) == aiReturn_SUCCESS)
+			{
+				hasTexture = true;
+				shaderCode += "Dif";
+				m_vtxLayout.Append(DynamicData::VertexLayout::Texture2D);
+			}
+		}
 	}
 
 }
