@@ -1,5 +1,7 @@
 #include "Material.h"
 #include "../DynamicData/DynamicConstant.h"
+#include "../Texture.h"
+#include "../Bindable/Rasterizer.h"
 
 Material::Material(Graphics& gfx, const aiMaterial& material, const std::filesystem::path& path) noexcept
 	:
@@ -19,7 +21,7 @@ Material::Material(Graphics& gfx, const aiMaterial& material, const std::filesys
 		aiString texFileName;
 		m_vtxLayout.Append(DynamicData::VertexLayout::Position3D);
 		m_vtxLayout.Append(DynamicData::VertexLayout::Normal);
-		DynamicData::RawLayout pscLayout;
+		DynamicData::RawLayoutEx pscLayout;
 		bool hasTexture = false;
 		bool hasGlossAlpha = false;
 
@@ -31,7 +33,19 @@ Material::Material(Graphics& gfx, const aiMaterial& material, const std::filesys
 				hasTexture = true;
 				shaderCode += "Dif";
 				m_vtxLayout.Append(DynamicData::VertexLayout::Texture2D);
+				auto pTexture = Bind::Texture::Resolve(gfx, rootPath + texFileName.C_Str());
+				if (pTexture->HasAlpha())
+				{
+					hasAlpha = true;
+					shaderCode += "Msk";
+				}
+				step.AddBindable(std::move(pTexture));
 			}
+			else
+			{
+				pscLayout.Add<DynamicData::EFloat3>("materialColor");
+			}
+			step.AddBindable(Bind::Rasterizer::Resolve(gfx, hasAlpha));
 		}
 	}
 
