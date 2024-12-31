@@ -7,6 +7,8 @@
 
 // ªÊ÷∆£ø£ø
 class Bindable;
+class Material;
+struct aiMesh;
 namespace Bind
 {
 	class IndexBuffer;
@@ -17,6 +19,7 @@ class Drawable
 {
 public:
 	Drawable() = default;
+	Drawable(Graphics& gfx, const Material& material, const aiMesh& mesh) noexcept;
 	Drawable(const Drawable&) = delete;
 	virtual ~Drawable();
 

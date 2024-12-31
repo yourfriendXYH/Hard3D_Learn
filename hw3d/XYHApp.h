@@ -67,4 +67,5 @@ private:
 	//TestPlane m_testBluePlane{ m_wnd.GetGfx(), 6.0f, {0.3f, 0.3f, 1.0f, 0.0f} };
 	//TestPlane m_testRedPlane{ m_wnd.GetGfx(), 6.0f, {1.0f, 0.3f, 0.3f, 0.0f} };
 
+	std::unique_ptr<Mesh> m_pLoaded;
 };

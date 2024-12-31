@@ -578,5 +578,11 @@
     <FxCompile Include="PhongPSSpecNormalMask.hlsl">
       <Filter>Code\HLSL</Filter>
     </FxCompile>
+    <FxCompile Include="HLSL\PhongDifNrmPS.hlsl">
+      <Filter>Shader</Filter>
+    </FxCompile>
+    <FxCompile Include="HLSL\PhongDifNrmVS.hlsl">
+      <Filter>Shader</Filter>
+    </FxCompile>
   </ItemGroup>
 </Project>

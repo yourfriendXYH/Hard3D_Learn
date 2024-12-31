@@ -33,7 +33,7 @@ private:
 class Mesh : public Drawable
 {
 public:
-	//Mesh(Graphics& gfx, std::vector<std::shared_ptr<Bindable>> bindPtrs);
+	Mesh(Graphics& gfx, const class Material& mat, const aiMesh& mesh) noexcept;
 
 	//// 传入累计的矩阵
 	//void Draw(Graphics& gfx, DirectX::FXMMATRIX accumulatedTransform) const noexcept;

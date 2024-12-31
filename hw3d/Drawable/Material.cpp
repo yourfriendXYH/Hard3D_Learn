@@ -2,6 +2,13 @@
 #include "../DynamicData/DynamicConstant.h"
 #include "../Texture.h"
 #include "../Bindable/Rasterizer.h"
+#include "../TransformCBuf.h"
+#include "../Bindable/Blender.h"
+#include "../VertexShader.h"
+#include "../PixelShader.h"
+#include "../InputLayout.h"
+#include "../Sampler.h"
+#include "../Bindable/ConstantBuffersEx.h"
 
 Material::Material(Graphics& gfx, const aiMaterial& material, const std::filesystem::path& path) noexcept
 	:
@@ -25,7 +32,8 @@ Material::Material(Graphics& gfx, const aiMaterial& material, const std::filesys
 		bool hasTexture = false;
 		bool hasGlossAlpha = false;
 
-		// diffuse
+		// 材质属性相关的管线数据
+		// diffuse（漫反射纹理数据）
 		{
 			bool hasAlpha = false;
 			if (material.GetTexture(aiTextureType_DIFFUSE, 0, &texFileName) == aiReturn_SUCCESS)
@@ -47,6 +55,83 @@ Material::Material(Graphics& gfx, const aiMaterial& material, const std::filesys
 			}
 			step.AddBindable(Bind::Rasterizer::Resolve(gfx, hasAlpha));
 		}
+		// specular（高光纹理数据）
+		{
+			if (material.GetTexture(aiTextureType_SPECULAR, 0, &texFileName) == aiReturn_SUCCESS)
+			{
+				hasTexture = true;
+				shaderCode += "Spc";
+				m_vtxLayout.Append(DynamicData::VertexLayout::Texture2D);
+				auto pTexture = Bind::Texture::Resolve(gfx, rootPath + texFileName.C_Str(), 1u);
+				hasGlossAlpha = pTexture->HasAlpha();
+				step.AddBindable(std::move(pTexture));
+				pscLayout.Add<DynamicData::EBool>("useGlossAlpha");
+			}
+			pscLayout.Add<DynamicData::EFloat3>("specularColor");
+			pscLayout.Add<DynamicData::EFloat>("specularWeight");
+			pscLayout.Add<DynamicData::EFloat>("specularGloss");
+		}
+		// normal（法线纹理数据）
+		{
+			if (material.GetTexture(aiTextureType_NORMALS, 0, &texFileName) == aiReturn_SUCCESS)
+			{
+				hasTexture = true;
+				shaderCode += "Nrm";
+				m_vtxLayout.Append(DynamicData::VertexLayout::Texture2D);
+				m_vtxLayout.Append(DynamicData::VertexLayout::Tangent);
+				m_vtxLayout.Append(DynamicData::VertexLayout::Bitangent);
+				step.AddBindable(Bind::Texture::Resolve(gfx, rootPath + texFileName.C_Str(), 2u));
+				pscLayout.Add<DynamicData::EBool>("useNormalMap");
+				pscLayout.Add<DynamicData::EFloat>("normalMapWeight");
+			}
+		}
+
+		// 通用管线数据
+		// common（post）
+		{
+			step.AddBindable(std::make_shared<Bind::TransformCBuf>(gfx, 0u));
+			step.AddBindable(Bind::Blender::Resolve(gfx, false));
+			auto pvs = Bind::VertexShader::Resolve(gfx, shaderCode + "VS.cso");
+			auto pvsbc = pvs->GetByteCode();
+			step.AddBindable(std::move(pvs));
+			step.AddBindable(Bind::PixelShader::Resolve(gfx, shaderCode + "PS.cso"));
+			step.AddBindable(Bind::InputLayout::Resolve(gfx, m_vtxLayout, pvsbc));
+			if (hasTexture)
+			{
+				step.AddBindable(Bind::Sampler::Resolve(gfx)); // 纹理采样器
+			}
+
+			// 顶点着色器的常数缓存（材质参数）
+			DynamicData::BufferEx buf{std::move(pscLayout)};
+			if (DynamicData::ElementRefEx result = buf["materialColor"]; result.Exists())
+			{
+				aiColor3D color = { 0.45f, 0.45f, 0.85f };
+				material.Get(AI_MATKEY_COLOR_DIFFUSE, color);
+				result = reinterpret_cast<DirectX::XMFLOAT3&>(color);
+			}
+
+			buf["useGlossAlpha"].SetIfExists(hasGlossAlpha);
+			if (auto r = buf["specularColor"]; r.Exists())
+			{
+				aiColor3D color = { 0.18f, 0.18f, 0.18f };
+				material.Get(AI_MATKEY_COLOR_SPECULAR, color);
+				r = reinterpret_cast<DirectX::XMFLOAT3&>(color);
+			}
+			buf["specularWeight"].SetIfExists(1.0f);
+			if (auto r = buf["specularGloss"]; r.Exists())
+			{
+				float gloss = 8.0f;
+				material.Get(AI_MATKEY_SHININESS, gloss);
+				r = gloss;
+			}
+			buf["useNormalMap"].SetIfExists(true);
+			buf["normalMapWeight"].SetIfExists(1.0f);
+			step.AddBindable(std::make_shared<Bind::CachingPixelConstantBufferEx>(gfx, std::move(buf), 1u));
+		}
+
+		phong.AddStep(std::move(step));
+
+		m_techniques.push_back(std::move(phong));
 	}
 
 }

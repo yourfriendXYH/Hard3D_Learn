@@ -30,7 +30,7 @@ private:
 
 private:
 
-	DynamicData::VertexLayout m_vtxLayout;
+	DynamicData::VertexLayout m_vtxLayout; // 动态顶点布局
 	std::vector<Technique> m_techniques;
 	std::string m_modelPath;
 	std::string m_name;

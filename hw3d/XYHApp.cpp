@@ -20,6 +20,7 @@
 
 #include <shellapi.h>
 #include "Utils/XYHUtil.h"
+#include "Drawable/Material.h"
 
 //#include "assimp/include/assimp/Importer.hpp"
 //#include "assimp/include/assimp/scene.h"
@@ -140,6 +141,18 @@ XYHApp::XYHApp(const std::string& commandLine)
 	auto d = testImage->pixels[3];
 
 	TestDynamicConstant();
+
+	std::string path = "Models\\brick_wall\\brick_wall.obj";
+	Assimp::Importer imp;
+	const auto pScene = imp.ReadFile(path,
+		aiProcess_Triangulate |
+		aiProcess_JoinIdenticalVertices |
+		aiProcess_ConvertToLeftHanded |
+		aiProcess_GenNormals |
+		aiProcess_CalcTangentSpace);
+
+	Material mat{m_wnd.GetGfx(), *pScene->mMaterials[1], path};
+	m_pLoaded = std::make_unique<Mesh>(m_wnd.GetGfx(), mat, *pScene->mMeshes[0]);
 
 	// ´¦ÀíÃüÁîÐÐ
 	if (this->m_commandLine != "")

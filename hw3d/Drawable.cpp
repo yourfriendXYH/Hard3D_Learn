@@ -5,8 +5,22 @@
 #include "Topology.h"
 #include "Bindable\FrameCommander.h"
 #include "Bindable\TechniqueProbe.h"
+#include "Drawable\Material.h"
+#include "assimp/include/assimp/scene.h"
 
 using namespace Bind;
+
+Drawable::Drawable(Graphics& gfx, const Material& material, const aiMesh& mesh) noexcept
+{
+	m_pVertexBuffer = material.MakeVertexBindable(gfx, mesh);
+	m_pIndexBuffer = material.MakeIndexBindable(gfx, mesh);
+	m_pTopology = Topology::Resolve(gfx);
+
+	for (auto& technique : material.GetTechniques())
+	{
+		AddTechnique(std::move(technique));
+	}
+}
 
 Drawable::~Drawable()
 {

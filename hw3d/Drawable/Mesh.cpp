@@ -10,26 +10,14 @@
 #include "../DynamicData/LayoutCodex.h"
 #include "../Bindable/Stencil.h"
 #include "../Bindable/FrameCommander.h"
+#include "Material.h"
 
-//Mesh::Mesh(Graphics& gfx, std::vector<std::shared_ptr<Bindable>> bindPtrs)
-//{
-//	using namespace Bind;
-//	// Í¼ÔªÍØÆË
-//	AddBind(Topology::Resolve(gfx, D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST));
-//
-//	for (auto& pBind : bindPtrs)
-//	{
-//		AddBind(std::move(pBind));
-//	}
-//
-//	AddBind(std::make_shared<TransformCBuf>(gfx, *this));
-//}
-//
-//void Mesh::Draw(Graphics& gfx, DirectX::FXMMATRIX accumulatedTransform) const noexcept
-//{
-//	DirectX::XMStoreFloat4x4(&m_transform, accumulatedTransform);
-//	Drawable::Draw(gfx);
-//}
+Mesh::Mesh(Graphics& gfx, const Material& mat, const aiMesh& mesh) noexcept
+	:
+	Drawable(gfx, mat, mesh)
+{
+
+}
 
 DirectX::XMMATRIX Mesh::GetTransformXM() const noexcept
 {
