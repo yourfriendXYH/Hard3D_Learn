@@ -1,5 +1,6 @@
 #pragma once
 #include <queue>
+#include <optional>
 
 // 鼠标事件队列
 class Mouse
@@ -35,7 +36,8 @@ public:
 			rightIsPressed(false),
 			x(0),
 			y(0)
-		{};
+		{
+		};
 		//用Mouse的数据来构造
 		Event(Type type, const Mouse& parent) noexcept
 			:
@@ -145,5 +147,5 @@ private:
 	std::queue<Event> buffer;
 
 	bool m_rawEnabled = true;
-	std::queue<RawDelta> m_rawDeltaBuffer; 
+	std::queue<RawDelta> m_rawDeltaBuffer;
 };

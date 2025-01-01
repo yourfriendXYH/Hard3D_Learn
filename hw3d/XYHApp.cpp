@@ -21,6 +21,7 @@
 #include <shellapi.h>
 #include "Utils/XYHUtil.h"
 #include "Drawable/Material.h"
+#include "Bindable/TechniqueProbe.h"
 
 //#include "assimp/include/assimp/Importer.hpp"
 //#include "assimp/include/assimp/scene.h"
@@ -151,7 +152,7 @@ XYHApp::XYHApp(const std::string& commandLine)
 		aiProcess_GenNormals |
 		aiProcess_CalcTangentSpace);
 
-	Material mat{m_wnd.GetGfx(), *pScene->mMaterials[1], path};
+	Material mat{ m_wnd.GetGfx(), *pScene->mMaterials[1], path };
 	m_pLoaded = std::make_unique<Mesh>(m_wnd.GetGfx(), mat, *pScene->mMeshes[0]);
 
 	// 处理命令行
@@ -361,6 +362,8 @@ void XYHApp::DoFrame()
 	m_testCube.Submit(m_frameCommader);
 	// m_testCube.DrawOutline(m_wnd.GetGfx());
 
+	m_pLoaded->Submit(m_frameCommader, DirectX::XMMatrixIdentity());
+
 	m_frameCommader.Execute(m_wnd.GetGfx());
 
 	// 先注释掉，Blender会影响Stencil
@@ -448,6 +451,63 @@ void XYHApp::DoFrame()
 	//}
 	//ImGui::Render();
 	//ImGui_ImplDX11_RenderDrawData(ImGui::GetDrawData());
+
+	class Probe : public TechniqueProbe
+	{
+	public:
+		void OnSetTechnique() override
+		{
+			using namespace std::string_literals;
+			ImGui::TextColored({ 0.4f,1.0f,0.6f,1.0f }, m_pTechnique->GetName().c_str());
+			bool active = m_pTechnique->IsActive();
+			ImGui::Checkbox(("Tech Active##"s + std::to_string(m_techIndex)).c_str(), &active);
+			m_pTechnique->SetActiveState(active);
+		}
+
+		bool OnVisitBuffer(DynamicData::BufferEx& buffer) override
+		{
+			namespace dx = DirectX;
+			float dirty = false;
+			const auto dcheck = [&dirty](bool changed) {dirty = dirty || changed; };
+			auto tag = [tagScratch = std::string{}, tagString = "##" + std::to_string(m_techIndex)]
+			(const char* label) mutable
+				{
+					tagScratch = label + tagString;
+					return tagScratch.c_str();
+				};
+
+			if (auto v = buffer["scale"]; v.Exists())
+			{
+				dcheck(ImGui::SliderFloat(tag("Scale"), &v, 1.0f, 2.0f, "%.3f"));
+			}
+			if (auto v = buffer["color"]; v.Exists())
+			{
+				dcheck(ImGui::ColorPicker3(tag("Color"), reinterpret_cast<float*>(&static_cast<dx::XMFLOAT3&>(v))));
+			}
+			if (auto v = buffer["specularColor"]; v.Exists())
+			{
+				dcheck(ImGui::ColorPicker3(tag("Spec. Color"), reinterpret_cast<float*>(&static_cast<dx::XMFLOAT3&>(v))));
+			}
+			if (auto v = buffer["specularGloss"]; v.Exists())
+			{
+				dcheck(ImGui::SliderFloat(tag("Glossiness"), &v, 1.0f, 100.0f, "%.1f"));
+			}
+			if (auto v = buffer["specularWeight"]; v.Exists())
+			{
+				dcheck(ImGui::SliderFloat(tag("Spec. Weight"), &v, 0.0f, 2.0f));
+			}
+			if (auto v = buffer["useNormalMap"]; v.Exists())
+			{
+				dcheck(ImGui::Checkbox(tag("Normal Map Enable"), &v));
+			}
+			if (auto v = buffer["normalMapWeight"]; v.Exists())
+			{
+				dcheck(ImGui::SliderFloat(tag("Normal Map Weight"), &v, 0.0f, 2.0f));
+			}
+			return dirty;
+		}
+	} probe;
+	m_pLoaded->Accept(probe);
 
 	// 控制相机的UI
 	m_camera.SpawnControlWindow();

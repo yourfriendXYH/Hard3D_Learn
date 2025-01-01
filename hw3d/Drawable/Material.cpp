@@ -102,7 +102,7 @@ Material::Material(Graphics& gfx, const aiMaterial& material, const std::filesys
 			}
 
 			// 顶点着色器的常数缓存（材质参数）
-			DynamicData::BufferEx buf{std::move(pscLayout)};
+			DynamicData::BufferEx buf{ std::move(pscLayout) };
 			if (DynamicData::ElementRefEx result = buf["materialColor"]; result.Exists())
 			{
 				aiColor3D color = { 0.45f, 0.45f, 0.85f };
@@ -129,9 +129,82 @@ Material::Material(Graphics& gfx, const aiMaterial& material, const std::filesys
 			step.AddBindable(std::make_shared<Bind::CachingPixelConstantBufferEx>(gfx, std::move(buf), 1u));
 		}
 
+		// 描边特效 Outline Technique
+		{
+			Technique outline("Outline");
+			{
+				Step mask(1u);
+
+				auto pvs = Bind::VertexShader::Resolve(gfx, "SolidVS.cso");
+				auto pvsbc = pvs->GetByteCode();
+				mask.AddBindable(std::move(pvs));
+				mask.AddBindable(Bind::InputLayout::Resolve(gfx, m_vtxLayout, pvsbc));
+				mask.AddBindable(std::make_shared<Bind::TransformCBuf>(gfx));
+
+				outline.AddStep(std::move(mask));
+			}
+			{
+				Step draw(2u);
+				auto pvs = Bind::VertexShader::Resolve(gfx, "SolidVS.cso");
+				auto pvsbc = pvs->GetByteCode();
+				draw.AddBindable(std::move(pvs));
+				draw.AddBindable(Bind::PixelShader::Resolve(gfx, "SolidPS.cso"));
+
+				DynamicData::RawLayoutEx layout;
+				layout.Add<DynamicData::EFloat3>("color");
+				auto buf = DynamicData::BufferEx(std::move(layout));
+				buf["color"] = DirectX::XMFLOAT3{ 0.4f, 0.4f, 1.0f };
+				draw.AddBindable(std::make_shared<Bind::CachingPixelConstantBufferEx>(gfx, buf, 1u));
+
+				draw.AddBindable(Bind::InputLayout::Resolve(gfx, m_vtxLayout, pvsbc));
+
+				class TransformCBufScaling : public Bind::TransformCBuf
+				{
+				public:
+					TransformCBufScaling(Graphics& gfx, float scale = 1.04f)
+						:
+						TransformCBuf(gfx),
+						m_buf(MakeLayout())
+					{
+						m_buf["scale"] = scale;
+					}
+					void Bind(Graphics& gfx) noexcept override
+					{
+						float scale = m_buf["scale"];
+						const auto scaleMatrix = DirectX::XMMatrixScaling(scale, scale, scale);
+						auto tempTransform = GetTransforms(gfx);
+						tempTransform.modelView = tempTransform.modelView * scaleMatrix;
+						tempTransform.modelViewProj = tempTransform.modelViewProj * scaleMatrix;
+						UpdateBindImpl(gfx, tempTransform);
+					}
+
+					void Accept(TechniqueProbe& probe)
+					{
+						probe.VisitBuffer(m_buf);
+					}
+
+				private:
+					static DynamicData::RawLayoutEx MakeLayout()
+					{
+						DynamicData::RawLayoutEx layout;
+						layout.Add<DynamicData::EFloat>("scale");
+						return layout;
+					}
+
+				private:
+					DynamicData::BufferEx m_buf;
+				};
+				draw.AddBindable(std::make_shared<TransformCBufScaling>(gfx));
+
+				outline.AddStep(std::move(draw));
+			}
+			m_techniques.emplace_back(std::move(outline));
+		}
+
 		phong.AddStep(std::move(step));
 
 		m_techniques.push_back(std::move(phong));
+
 	}
 
 }

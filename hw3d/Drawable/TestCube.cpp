@@ -80,7 +80,7 @@ TestCube::TestCube(Graphics& gfx, float size)
 			DynamicData::RawLayoutEx layout;
 			layout.Add<DynamicData::EFloat4>("color");
 			auto buf = DynamicData::BufferEx(std::move(layout));
-			buf["color"] = DirectX::XMFLOAT4{0.4f, 0.4f, 1.0f, 1.0f};
+			buf["color"] = DirectX::XMFLOAT4{ 0.4f, 0.4f, 1.0f, 1.0f };
 			draw.AddBindable(std::make_shared<CachingPixelConstantBufferEx>(gfx, buf, 1u));
 
 			draw.AddBindable(InputLayout::Resolve(gfx, model.m_vertices.GetVertexLayout(), pvsbc));
@@ -93,7 +93,7 @@ TestCube::TestCube(Graphics& gfx, float size)
 					TransformCBuf(gfx),
 					m_buf(MakeLayout())
 				{
-
+					m_buf["scale"] = scale;
 				}
 				void Bind(Graphics& gfx) noexcept override
 				{
