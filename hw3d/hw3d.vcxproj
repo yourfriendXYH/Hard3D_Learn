@@ -171,6 +171,7 @@
     <ClCompile Include="Drawable\Cylinder.cpp" />
     <ClCompile Include="Drawable\Material.cpp" />
     <ClCompile Include="Drawable\Mesh.cpp" />
+    <ClCompile Include="Drawable\SolidSphere.cpp" />
     <ClCompile Include="Drawable\TestCube.cpp" />
     <ClCompile Include="Drawable\TestPlane.cpp" />
     <ClCompile Include="dxerr.cpp" />
@@ -193,7 +194,6 @@
     <ClCompile Include="Keyboard.cpp" />
     <ClCompile Include="Light\PointLight.cpp" />
     <ClCompile Include="Melon.cpp" />
-    <ClCompile Include="Model\SolidSphere.cpp" />
     <ClCompile Include="Mouse.cpp" />
     <ClCompile Include="PixelShader.cpp" />
     <ClCompile Include="Pyramid.cpp" />
@@ -240,6 +240,7 @@
     <ClInclude Include="CommonType.h" />
     <ClInclude Include="ConstantBuffers.h" />
     <ClInclude Include="Drawable\Material.h" />
+    <ClInclude Include="Drawable\SolidSphere.h" />
     <ClInclude Include="Drawable\TestCube.h" />
     <ClInclude Include="Drawable\TestPlane.h" />
     <ClInclude Include="dxerr.h" />
@@ -266,7 +267,6 @@
     <ClInclude Include="InputLayout.h" />
     <ClInclude Include="json.hpp" />
     <ClInclude Include="Light\PointLight.h" />
-    <ClInclude Include="Model\SolidSphere.h" />
     <ClInclude Include="PixelShader.h" />
     <ClInclude Include="Plane.h" />
     <ClInclude Include="Prism.h" />
@@ -314,13 +314,13 @@
     <ClInclude Include="HLSL\LightVectorData.hlsl">
       <FileType>Document</FileType>
     </ClInclude>
-    <FxCompile Include="HLSL\PhongDifNrmPS.hlsl">
+    <FxCompile Include="HLSL\PhongDifNrm_PS.hlsl">
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Pixel</ShaderType>
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Vertex</ShaderType>
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Vertex</ShaderType>
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Vertex</ShaderType>
     </FxCompile>
-    <FxCompile Include="HLSL\PhongDifNrmVS.hlsl">
+    <FxCompile Include="HLSL\PhongDifNrm_VS.hlsl">
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Vertex</ShaderType>
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Pixel</ShaderType>
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Pixel</ShaderType>
@@ -350,7 +350,7 @@
     <ClInclude Include="HLSL\Transform.hlsl">
       <FileType>Document</FileType>
     </ClInclude>
-    <FxCompile Include="PhongPS.hlsl">
+    <FxCompile Include="Phong_PS.hlsl">
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Pixel</ShaderType>
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Pixel</ShaderType>
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Pixel</ShaderType>
@@ -368,7 +368,7 @@
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Pixel</ShaderType>
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Pixel</ShaderType>
     </FxCompile>
-    <FxCompile Include="PhongVS.hlsl">
+    <FxCompile Include="Phong_VS.hlsl">
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Vertex</ShaderType>
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Vertex</ShaderType>
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Vertex</ShaderType>
@@ -409,13 +409,13 @@
       <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Release|x64'">4.0</ShaderModel>
       <FileType>Document</FileType>
     </ClInclude>
-    <FxCompile Include="SolidPS.hlsl">
+    <FxCompile Include="Solid_PS.hlsl">
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Pixel</ShaderType>
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Pixel</ShaderType>
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Pixel</ShaderType>
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Pixel</ShaderType>
     </FxCompile>
-    <FxCompile Include="SolidVS.hlsl">
+    <FxCompile Include="Solid_VS.hlsl">
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Vertex</ShaderType>
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Vertex</ShaderType>
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Vertex</ShaderType>

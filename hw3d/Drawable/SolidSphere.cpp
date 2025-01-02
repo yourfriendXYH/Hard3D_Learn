@@ -1,4 +1,3 @@
-#include "SolidSphere.h"
 #include "../Sphere.h"
 #include "../VertexBuffer.h"
 #include "../VertexShader.h"
@@ -11,6 +10,7 @@
 #include "../Bindable/Blender.h"
 #include "../Bindable/Rasterizer.h"
 #include "../Bindable/Stencil.h"
+#include "SolidSphere.h"
 
 SolidSphere::SolidSphere(Graphics& gfx, float radius)
 {
@@ -32,11 +32,11 @@ SolidSphere::SolidSphere(Graphics& gfx, float radius)
 		Step only(0u);
 
 		// 顶点着色器
-		auto pVertexShader = VertexShader::Resolve(gfx, "SolidVS.cso");
+		auto pVertexShader = VertexShader::Resolve(gfx, "Solid_VS.cso");
 		auto pVertexShaderByteCode = pVertexShader->GetByteCode();
 		only.AddBindable(std::move(pVertexShader));
 		// 像素着色器
-		only.AddBindable(PixelShader::Resolve(gfx, "SolidPS.cso"));
+		only.AddBindable(PixelShader::Resolve(gfx, "Solid_PS.cso"));
 
 		// 像素着色器 用到的 常数缓存
 		struct PSColorConstant

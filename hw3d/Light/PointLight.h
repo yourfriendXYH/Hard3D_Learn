@@ -2,7 +2,7 @@
 
 #include "../Graphics.h"
 #include "../ConstantBuffers.h"
-#include "../Model/SolidSphere.h"
+#include "../Drawable/SolidSphere.h"
 
 using namespace Bind;
 

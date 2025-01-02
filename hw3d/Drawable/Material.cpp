@@ -91,10 +91,10 @@ Material::Material(Graphics& gfx, const aiMaterial& material, const std::filesys
 		{
 			step.AddBindable(std::make_shared<Bind::TransformCBuf>(gfx, 0u));
 			step.AddBindable(Bind::Blender::Resolve(gfx, false));
-			auto pvs = Bind::VertexShader::Resolve(gfx, shaderCode + "VS.cso");
+			auto pvs = Bind::VertexShader::Resolve(gfx, shaderCode + "_VS.cso");
 			auto pvsbc = pvs->GetByteCode();
 			step.AddBindable(std::move(pvs));
-			step.AddBindable(Bind::PixelShader::Resolve(gfx, shaderCode + "PS.cso"));
+			step.AddBindable(Bind::PixelShader::Resolve(gfx, shaderCode + "_PS.cso"));
 			step.AddBindable(Bind::InputLayout::Resolve(gfx, m_vtxLayout, pvsbc));
 			if (hasTexture)
 			{
@@ -135,7 +135,7 @@ Material::Material(Graphics& gfx, const aiMaterial& material, const std::filesys
 			{
 				Step mask(1u);
 
-				auto pvs = Bind::VertexShader::Resolve(gfx, "SolidVS.cso");
+				auto pvs = Bind::VertexShader::Resolve(gfx, "Solid_VS.cso");
 				auto pvsbc = pvs->GetByteCode();
 				mask.AddBindable(std::move(pvs));
 				mask.AddBindable(Bind::InputLayout::Resolve(gfx, m_vtxLayout, pvsbc));
@@ -145,10 +145,10 @@ Material::Material(Graphics& gfx, const aiMaterial& material, const std::filesys
 			}
 			{
 				Step draw(2u);
-				auto pvs = Bind::VertexShader::Resolve(gfx, "SolidVS.cso");
+				auto pvs = Bind::VertexShader::Resolve(gfx, "Solid_VS.cso");
 				auto pvsbc = pvs->GetByteCode();
 				draw.AddBindable(std::move(pvs));
-				draw.AddBindable(Bind::PixelShader::Resolve(gfx, "SolidPS.cso"));
+				draw.AddBindable(Bind::PixelShader::Resolve(gfx, "Solid_PS.cso"));
 
 				DynamicData::RawLayoutEx layout;
 				layout.Add<DynamicData::EFloat3>("color");
