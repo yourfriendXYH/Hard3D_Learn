@@ -1,0 +1,196 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <FxCompile Include="HLSL\PhongDifNrm_PS.hlsl" />
+    <FxCompile Include="HLSL\PhongDifNrm_VS.hlsl" />
+    <FxCompile Include="HLSL\PhongPSNormalMap.hlsl" />
+    <FxCompile Include="HLSL\PhongPSNotex.hlsl" />
+    <FxCompile Include="HLSL\PhongVSNotex.hlsl" />
+    <FxCompile Include="Phong_PS.hlsl" />
+    <FxCompile Include="PhongPSSpecNormalMap.hlsl" />
+    <FxCompile Include="PhongPSSpecNormalMask.hlsl" />
+    <FxCompile Include="Phong_VS.hlsl" />
+    <FxCompile Include="PhongVSNormalMap.hlsl" />
+    <FxCompile Include="PixelShader.hlsl" />
+    <FxCompile Include="Solid_PS.hlsl" />
+    <FxCompile Include="Solid_VS.hlsl" />
+    <FxCompile Include="TexturePS.hlsl" />
+    <FxCompile Include="TextureVS.hlsl" />
+    <FxCompile Include="VertexShader.hlsl" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="Bindable.cpp" />
+    <ClCompile Include="Bindable\Blender.cpp" />
+    <ClCompile Include="Bindable\FrameCommander.cpp" />
+    <ClCompile Include="Bindable\Job.cpp" />
+    <ClCompile Include="Bindable\NullPixelShader.cpp" />
+    <ClCompile Include="Bindable\Pass.cpp" />
+    <ClCompile Include="Bindable\Rasterizer.cpp" />
+    <ClCompile Include="Bindable\Stencil.cpp" />
+    <ClCompile Include="Bindable\Step.cpp" />
+    <ClCompile Include="Bindable\Technique.cpp" />
+    <ClCompile Include="Bindable\TechniqueProbe.cpp" />
+    <ClCompile Include="Bindable\TransformCBufDoubleboi.cpp" />
+    <ClCompile Include="Camera.cpp" />
+    <ClCompile Include="CommonFunction.cpp" />
+    <ClCompile Include="Drawable.cpp" />
+    <ClCompile Include="DrawableBase.cpp" />
+    <ClCompile Include="Drawable\AssimpTest.cpp" />
+    <ClCompile Include="Drawable\Cylinder.cpp" />
+    <ClCompile Include="Drawable\Material.cpp" />
+    <ClCompile Include="Drawable\Mesh.cpp" />
+    <ClCompile Include="Drawable\SolidSphere.cpp" />
+    <ClCompile Include="Drawable\TestCube.cpp" />
+    <ClCompile Include="Drawable\TestPlane.cpp" />
+    <ClCompile Include="dxerr.cpp" />
+    <ClCompile Include="DxgiInfoManager.cpp" />
+    <ClCompile Include="DynamicData\DynamicConstant.cpp" />
+    <ClCompile Include="DynamicData\DynamicVertex.cpp" />
+    <ClCompile Include="DynamicData\LayoutCodex.cpp" />
+    <ClCompile Include="GDIPlusManager.cpp" />
+    <ClCompile Include="Graphics.cpp" />
+    <ClCompile Include="ImguiManager.cpp" />
+    <ClCompile Include="imgui\imgui.cpp" />
+    <ClCompile Include="imgui\imgui_demo.cpp" />
+    <ClCompile Include="imgui\imgui_draw.cpp" />
+    <ClCompile Include="imgui\imgui_impl_dx11.cpp" />
+    <ClCompile Include="imgui\imgui_impl_win32.cpp" />
+    <ClCompile Include="imgui\imgui_tables.cpp" />
+    <ClCompile Include="imgui\imgui_widgets.cpp" />
+    <ClCompile Include="IndexBuffer.cpp" />
+    <ClCompile Include="InputLayout.cpp" />
+    <ClCompile Include="Keyboard.cpp" />
+    <ClCompile Include="Light\PointLight.cpp" />
+    <ClCompile Include="Melon.cpp" />
+    <ClCompile Include="Mouse.cpp" />
+    <ClCompile Include="PixelShader.cpp" />
+    <ClCompile Include="Pyramid.cpp" />
+    <ClCompile Include="Sampler.cpp" />
+    <ClCompile Include="Sheet.cpp" />
+    <ClCompile Include="SkinnedBox.cpp" />
+    <ClCompile Include="Surface.cpp" />
+    <ClCompile Include="TestBox.cpp" />
+    <ClCompile Include="Texture.cpp" />
+    <ClCompile Include="Topology.cpp" />
+    <ClCompile Include="TransformCBuf.cpp" />
+    <ClCompile Include="Utils\CommonDirectXMath.cpp" />
+    <ClCompile Include="Utils\ScriptCommander.cpp" />
+    <ClCompile Include="Utils\TexturePreprocessor.cpp" />
+    <ClCompile Include="Utils\XYHUtil.cpp" />
+    <ClCompile Include="VertexBuffer.cpp" />
+    <ClCompile Include="VertexShader.cpp" />
+    <ClCompile Include="Window.cpp" />
+    <ClCompile Include="WinMain.cpp" />
+    <ClCompile Include="XuYuHaoException.cpp" />
+    <ClCompile Include="XYHApp.cpp" />
+    <ClCompile Include="XyhTimer.cpp" />
+    <ClCompile Include="Drawable\Node.cpp">
+      <Filter>Drawable</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="Bindable.h" />
+    <ClInclude Include="BindableCodex.h" />
+    <ClInclude Include="Bindable\Blender.h" />
+    <ClInclude Include="Bindable\ConstantBuffersEx.h" />
+    <ClInclude Include="Bindable\FrameCommander.h" />
+    <ClInclude Include="Bindable\Job.h" />
+    <ClInclude Include="Bindable\NullPixelShader.h" />
+    <ClInclude Include="Bindable\Pass.h" />
+    <ClInclude Include="Bindable\Rasterizer.h" />
+    <ClInclude Include="Bindable\Stencil.h" />
+    <ClInclude Include="Bindable\Step.h" />
+    <ClInclude Include="Bindable\Technique.h" />
+    <ClInclude Include="Bindable\TechniqueProbe.h" />
+    <ClInclude Include="Bindable\TransformCBufDoubleboi.h" />
+    <ClInclude Include="Camera.h" />
+    <ClInclude Include="Cone.h" />
+    <ClInclude Include="Cube.h" />
+    <ClInclude Include="DrawableBase.h" />
+    <ClInclude Include="CommonFunction.h" />
+    <ClInclude Include="CommonType.h" />
+    <ClInclude Include="ConstantBuffers.h" />
+    <ClInclude Include="Drawable\Material.h" />
+    <ClInclude Include="Drawable\SolidSphere.h" />
+    <ClInclude Include="Drawable\TestCube.h" />
+    <ClInclude Include="Drawable\TestPlane.h" />
+    <ClInclude Include="dxerr.h" />
+    <ClInclude Include="DxgiInfoManager.h" />
+    <ClInclude Include="DynamicData\DynamicConstant.h" />
+    <ClInclude Include="DynamicData\DynamicVertex.h" />
+    <ClInclude Include="DynamicData\LayoutCodex.h" />
+    <ClInclude Include="GDIPlusManager.h" />
+    <ClInclude Include="Geometry\Cube.h" />
+    <ClInclude Include="Geometry\Plane.h" />
+    <ClInclude Include="Graphics.h" />
+    <ClInclude Include="GraphicsThrowMacros.h" />
+    <ClInclude Include="ImguiManager.h" />
+    <ClInclude Include="imgui\imconfig.h" />
+    <ClInclude Include="imgui\imgui.h" />
+    <ClInclude Include="imgui\imgui_impl_dx11.h" />
+    <ClInclude Include="imgui\imgui_impl_win32.h" />
+    <ClInclude Include="imgui\imgui_internal.h" />
+    <ClInclude Include="imgui\imstb_rectpack.h" />
+    <ClInclude Include="imgui\imstb_textedit.h" />
+    <ClInclude Include="imgui\imstb_truetype.h" />
+    <ClInclude Include="IndexBuffer.h" />
+    <ClInclude Include="IndexedTriangleList.h" />
+    <ClInclude Include="InputLayout.h" />
+    <ClInclude Include="json.hpp" />
+    <ClInclude Include="Light\PointLight.h" />
+    <ClInclude Include="PixelShader.h" />
+    <ClInclude Include="Plane.h" />
+    <ClInclude Include="Prism.h" />
+    <ClInclude Include="Sampler.h" />
+    <ClInclude Include="Sphere.h" />
+    <ClInclude Include="Surface.h" />
+    <ClInclude Include="Texture.h" />
+    <ClInclude Include="Topology.h" />
+    <ClInclude Include="TransformCBuf.h" />
+    <ClInclude Include="Utils\CommonDirectXMath.h" />
+    <ClInclude Include="Utils\NormalMapTwerker.h" />
+    <ClInclude Include="Utils\ScriptCommander.h" />
+    <ClInclude Include="Utils\TexturePreprocessor.h" />
+    <ClInclude Include="Utils\XYHUtil.h" />
+    <ClInclude Include="VertexBuffer.h" />
+    <ClInclude Include="VertexShader.h" />
+    <ClInclude Include="WindowsThrowMacros.h" />
+    <ClInclude Include="Keyboard.h" />
+    <ClInclude Include="Mouse.h" />
+    <ClInclude Include="resource.h" />
+    <ClInclude Include="resource1.h" />
+    <ClInclude Include="Window.h" />
+    <ClInclude Include="XuYuHaoException.h" />
+    <ClInclude Include="XYHApp.h" />
+    <ClInclude Include="XYHMath.h" />
+    <ClInclude Include="XyhTimer.h" />
+    <ClInclude Include="XYHWin.h" />
+    <ClInclude Include="XYHWRL.h" />
+    <ClInclude Include="HLSL\LightVectorData.hlsl" />
+    <ClInclude Include="HLSL\ShaderOps.hlsl" />
+    <ClInclude Include="HLSL\Transform.hlsl" />
+    <ClInclude Include="PointLight.hlsl" />
+    <ClInclude Include="Drawable\Node.h">
+      <Filter>Drawable</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="hw3d.rc" />
+  </ItemGroup>
+  <ItemGroup>
+    <Image Include="chili.ico" />
+    <Image Include="CubeTexture.jpg" />
+    <Image Include="pix_1.png" />
+    <Image Include="pix_2.jpg" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="DXGetErrorDescription.inl" />
+    <None Include="DXGetErrorString.inl" />
+    <None Include="DXTrace.inl" />
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="Drawable">
+      <UniqueIdentifier>{c8b8ec7e-c2b0-495e-ae90-c6520eb98110}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+</Project>

@@ -30,31 +30,31 @@ void Mesh::Submit(FrameCommander& frame, DirectX::FXMMATRIX accumulatedTransform
 	Drawable::Submit(frame);
 }
 
-Node::Node(int id, const std::string& name, std::vector<Mesh*> meshPtrs, const DirectX::XMMATRIX& transform) noexcept
-	:
-	m_meshPtrs(std::move(meshPtrs)),
-	m_name(name),
-	m_id(id)
-{
-	DirectX::XMStoreFloat4x4(&this->m_transform, transform);
-	DirectX::XMStoreFloat4x4(&this->m_appliedTransform, DirectX::XMMatrixIdentity());
-}
-
-void Node::Submit(FrameCommander& frame, DirectX::FXMMATRIX accumulatedTransform) const noexcept
-{
-	const auto built =
-		DirectX::XMLoadFloat4x4(&this->m_appliedTransform) *
-		DirectX::XMLoadFloat4x4(&this->m_transform) *
-		accumulatedTransform;
-	for (const auto pMesh : this->m_meshPtrs)
-	{
-		pMesh->Submit(frame, built);
-	}
-	for (const auto& node : this->m_childPtrs)
-	{
-		node->Submit(frame, built);
-	}
-}
+//Node::Node(int id, const std::string& name, std::vector<Mesh*> meshPtrs, const DirectX::XMMATRIX& transform) noexcept
+//	:
+//	m_meshPtrs(std::move(meshPtrs)),
+//	m_name(name),
+//	m_id(id)
+//{
+//	DirectX::XMStoreFloat4x4(&this->m_transform, transform);
+//	DirectX::XMStoreFloat4x4(&this->m_appliedTransform, DirectX::XMMatrixIdentity());
+//}
+//
+//void Node::Submit(FrameCommander& frame, DirectX::FXMMATRIX accumulatedTransform) const noexcept
+//{
+//	const auto built =
+//		DirectX::XMLoadFloat4x4(&this->m_appliedTransform) *
+//		DirectX::XMLoadFloat4x4(&this->m_transform) *
+//		accumulatedTransform;
+//	for (const auto pMesh : this->m_meshPtrs)
+//	{
+//		pMesh->Submit(frame, built);
+//	}
+//	for (const auto& node : this->m_childPtrs)
+//	{
+//		node->Submit(frame, built);
+//	}
+//}
 
 //void Node::Draw(Graphics& gfx, DirectX::FXMMATRIX accumulatedTransform) const
 //{
@@ -72,45 +72,45 @@ void Node::Submit(FrameCommander& frame, DirectX::FXMMATRIX accumulatedTransform
 //	}
 //}
 
-void Node::SetAppliedTransform(DirectX::FXMMATRIX transform) noexcept
-{
-	DirectX::XMStoreFloat4x4(&m_appliedTransform, transform);
-}
-
-const DirectX::XMFLOAT4X4& Node::GetAppliedTransfrom() const noexcept
-{
-	return m_appliedTransform;
-}
-
-int Node::GetId() const noexcept
-{
-	return m_id;
-}
-
-void Node::ShowTree(Node*& pSelectedNode) const noexcept
-{
-	const int selectedId = pSelectedNode == nullptr ? -1 : pSelectedNode->GetId();
-
-	const auto nodeFlag = ImGuiTreeNodeFlags_OpenOnArrow
-		| ((GetId() == selectedId) ? ImGuiTreeNodeFlags_Selected : 0) // 当前的节点是选中的，则高亮
-		| ((m_childPtrs.empty()) ? ImGuiTreeNodeFlags_Leaf : 0); // 子节点为空，则TreeNodeEx返回false
-
-	const auto expanded = ImGui::TreeNodeEx((void*)(intptr_t)GetId(), nodeFlag, m_name.c_str());
-
-	if (ImGui::IsItemClicked())
-	{
-		pSelectedNode = const_cast<Node*>(this); // 引用指针赋值
-	}
-
-	if (expanded)
-	{
-		for (const auto& pChildNode : m_childPtrs)
-		{
-			pChildNode->ShowTree(pSelectedNode);
-		}
-		ImGui::TreePop();
-	}
-}
+//void Node::SetAppliedTransform(DirectX::FXMMATRIX transform) noexcept
+//{
+//	DirectX::XMStoreFloat4x4(&m_appliedTransform, transform);
+//}
+//
+//const DirectX::XMFLOAT4X4& Node::GetAppliedTransfrom() const noexcept
+//{
+//	return m_appliedTransform;
+//}
+//
+//int Node::GetId() const noexcept
+//{
+//	return m_id;
+//}
+//
+//void Node::ShowTree(Node*& pSelectedNode) const noexcept
+//{
+//	const int selectedId = pSelectedNode == nullptr ? -1 : pSelectedNode->GetId();
+//
+//	const auto nodeFlag = ImGuiTreeNodeFlags_OpenOnArrow
+//		| ((GetId() == selectedId) ? ImGuiTreeNodeFlags_Selected : 0) // 当前的节点是选中的，则高亮
+//		| ((m_childPtrs.empty()) ? ImGuiTreeNodeFlags_Leaf : 0); // 子节点为空，则TreeNodeEx返回false
+//
+//	const auto expanded = ImGui::TreeNodeEx((void*)(intptr_t)GetId(), nodeFlag, m_name.c_str());
+//
+//	if (ImGui::IsItemClicked())
+//	{
+//		pSelectedNode = const_cast<Node*>(this); // 引用指针赋值
+//	}
+//
+//	if (expanded)
+//	{
+//		for (const auto& pChildNode : m_childPtrs)
+//		{
+//			pChildNode->ShowTree(pSelectedNode);
+//		}
+//		ImGui::TreePop();
+//	}
+//}
 
 //const DynamicData::BufferEx* Node::GetMaterialConstant() const noexcept
 //{
@@ -129,11 +129,11 @@ void Node::ShowTree(Node*& pSelectedNode) const noexcept
 //	pcb->SetBuffer(buf);
 //}
 
-void Node::AddChild(std::unique_ptr<Node> pChild)
-{
-	assert(nullptr != pChild);
-	this->m_childPtrs.emplace_back(std::move(pChild));
-}
+//void Node::AddChild(std::unique_ptr<Node> pChild)
+//{
+//	assert(nullptr != pChild);
+//	this->m_childPtrs.emplace_back(std::move(pChild));
+//}
 
 class ModelWindow
 {

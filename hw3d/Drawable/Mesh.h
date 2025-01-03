@@ -19,6 +19,7 @@
 #include "../DynamicData/DynamicConstant.h"
 #include <type_traits>
 #include <filesystem>
+#include "Node.h"
 
 // 模型异常类
 class ModelException
@@ -48,42 +49,42 @@ private:
 	mutable DirectX::XMFLOAT4X4 m_transform; // 模型的变换矩阵
 };
 
-// 模型节点
-class Node
-{
-	friend class Model;
-public:
-	Node(int id, const std::string& name, std::vector<Mesh*> meshPtrs, const DirectX::XMMATRIX& transform) noexcept;
-
-	// 递归绘制Mesh
-	//void Draw(Graphics& gfx, DirectX::FXMMATRIX accumulatedTransform) const;
-
-	void Submit(class FrameCommander& frame, DirectX::FXMMATRIX accumulatedTransform) const noexcept;
-
-	void SetAppliedTransform(DirectX::FXMMATRIX transform) noexcept;
-
-	const DirectX::XMFLOAT4X4& GetAppliedTransfrom() const noexcept;
-
-	int GetId() const noexcept;
-
-	void ShowTree(Node*& pSelectedNode) const noexcept;
-
-	//const DynamicData::BufferEx* GetMaterialConstant() const noexcept;
-
-	//void SetMaterialConstant(const DynamicData::BufferEx& buf) noexcept;
-
-private:
-	// 给Model使用
-	void AddChild(std::unique_ptr<Node> pChild);
-
-private:
-	int m_id;
-	std::string m_name;
-	std::vector<std::unique_ptr<Node>> m_childPtrs;	// 子节点
-	std::vector<Mesh*> m_meshPtrs;
-	DirectX::XMFLOAT4X4 m_transform;
-	DirectX::XMFLOAT4X4 m_appliedTransform;
-};
+//// 模型节点
+//class Node
+//{
+//	friend class Model;
+//public:
+//	Node(int id, const std::string& name, std::vector<Mesh*> meshPtrs, const DirectX::XMMATRIX& transform) noexcept;
+//
+//	// 递归绘制Mesh
+//	//void Draw(Graphics& gfx, DirectX::FXMMATRIX accumulatedTransform) const;
+//
+//	void Submit(class FrameCommander& frame, DirectX::FXMMATRIX accumulatedTransform) const noexcept;
+//
+//	void SetAppliedTransform(DirectX::FXMMATRIX transform) noexcept;
+//
+//	const DirectX::XMFLOAT4X4& GetAppliedTransfrom() const noexcept;
+//
+//	int GetId() const noexcept;
+//
+//	void ShowTree(Node*& pSelectedNode) const noexcept;
+//
+//	//const DynamicData::BufferEx* GetMaterialConstant() const noexcept;
+//
+//	//void SetMaterialConstant(const DynamicData::BufferEx& buf) noexcept;
+//
+//private:
+//	// 给Model使用
+//	void AddChild(std::unique_ptr<Node> pChild);
+//
+//private:
+//	int m_id;
+//	std::string m_name;
+//	std::vector<std::unique_ptr<Node>> m_childPtrs;	// 子节点
+//	std::vector<Mesh*> m_meshPtrs;
+//	DirectX::XMFLOAT4X4 m_transform;
+//	DirectX::XMFLOAT4X4 m_appliedTransform;
+//};
 
 // 加载模型并绘制
 class Model
