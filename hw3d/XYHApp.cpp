@@ -281,7 +281,7 @@ XYHApp::XYHApp(const std::string& commandLine)
 
 	//m_testCube.SetPos({ 0.0f, 0.0f, 0.0f });
 
-	m_testStripey.SetModelRootTransform(DirectX::XMMatrixTranslation(-13.5f, 6.0f, 3.5f));
+	m_testStripey.SetRootTransform(DirectX::XMMatrixTranslation(-13.5f, 6.0f, 3.5f));
 
 	//m_TestCube1.SetModelRootTransform(DirectX::XMMatrixTranslation(-5.0f, 0.0f, 0.0f));
 

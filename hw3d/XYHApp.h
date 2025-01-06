@@ -9,6 +9,7 @@
 #include "Drawable/TestCube.h"
 #include "Utils/ScriptCommander.h"
 #include "Bindable/FrameCommander.h"
+#include "Drawable/Model.h"
 
 class XYHApp
 {

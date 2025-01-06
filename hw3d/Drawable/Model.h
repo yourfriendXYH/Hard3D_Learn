@@ -15,7 +15,7 @@ struct aiNode;
 class Model
 {
 public:
-	// pathString: 模型文件的路径
+	// pathString: 模型文件的路径；scale: 模型大小的缩放比例；
 	Model(Graphics& gfx, const std::string& pathString, float scale = 1.0f);
 	~Model() noexcept;
 

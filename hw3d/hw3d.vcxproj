@@ -171,6 +171,8 @@
     <ClCompile Include="Drawable\Cylinder.cpp" />
     <ClCompile Include="Drawable\Material.cpp" />
     <ClCompile Include="Drawable\Mesh.cpp" />
+    <ClCompile Include="Drawable\Model.cpp" />
+    <ClCompile Include="Drawable\ModelWindow.cpp" />
     <ClCompile Include="Drawable\Node.cpp" />
     <ClCompile Include="Drawable\SolidSphere.cpp" />
     <ClCompile Include="Drawable\TestCube.cpp" />
@@ -241,6 +243,8 @@
     <ClInclude Include="CommonType.h" />
     <ClInclude Include="ConstantBuffers.h" />
     <ClInclude Include="Drawable\Material.h" />
+    <ClInclude Include="Drawable\Model.h" />
+    <ClInclude Include="Drawable\ModelWindow.h" />
     <ClInclude Include="Drawable\Node.h" />
     <ClInclude Include="Drawable\SolidSphere.h" />
     <ClInclude Include="Drawable\TestCube.h" />
