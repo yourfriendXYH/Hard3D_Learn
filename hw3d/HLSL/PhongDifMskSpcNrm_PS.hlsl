@@ -1,1 +1,1 @@
-//#include "PhongDifNrm_PS.hlsl"
+#include "PhongDifNrm_PS.hlsl"

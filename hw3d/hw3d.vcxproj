@@ -326,17 +326,17 @@
     <ClInclude Include="HLSL\LightVectorData.hlsl">
       <FileType>Document</FileType>
     </ClInclude>
-    <ClInclude Include="HLSL\PhongDifMskSpcNrm_PS.hlsl">
+    <FxCompile Include="HLSL\PhongDifMskSpcNrm_PS.hlsl">
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Pixel</ShaderType>
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Pixel</ShaderType>
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Pixel</ShaderType>
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Pixel</ShaderType>
       <FileType>Document</FileType>
-    </ClInclude>
-    <ClInclude Include="HLSL\PhongDifMskSpcNrm_VS.hlsl">
+    </FxCompile>
+    <FxCompile Include="HLSL\PhongDifMskSpcNrm_VS.hlsl">
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Vertex</ShaderType>
       <FileType>Document</FileType>
-    </ClInclude>
+    </FxCompile>
     <FxCompile Include="HLSL\PhongDifNrm_PS.hlsl">
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Pixel</ShaderType>
     </FxCompile>

@@ -343,9 +343,6 @@ void XYHApp::DoFrame()
 	//
 	//m_testPlane.Draw(m_wnd.GetGfx());
 
-	// 绘制哥布林
-	//m_gobber.Draw(m_wnd.GetGfx());
-
 	auto delta = m_timer.Mark();
 
 	//// 绘制点光源
@@ -357,6 +354,9 @@ void XYHApp::DoFrame()
 
 	//// mipmap的测试条纹
 	//m_testStripey.Draw(m_wnd.GetGfx());
+
+	// 绘制哥布林
+	m_gobber.Submit(m_frameCommader);
 
 	m_pointLight.Submit(m_frameCommader);
 	m_testCube.Submit(m_frameCommader);

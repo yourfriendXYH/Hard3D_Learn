@@ -56,7 +56,7 @@ private:
 	//Model m_TestCube1{ m_wnd.GetGfx(), "Models\\brick_wall\\brick_wall.obj", 6.0f };
 
 	// ∏Á≤º¡÷
-	//Model m_gobber{ m_wnd.GetGfx(), "Models\\gobber\\GoblinX.obj", 6.0f };
+	Model m_gobber{ m_wnd.GetGfx(), "Models\\gobber\\GoblinX.obj", 6.0f };
 
 	// ÃıŒ∆
 	Model m_testStripey{ m_wnd.GetGfx(), "Models\\stripey\\stripey.obj", 2.0f };
