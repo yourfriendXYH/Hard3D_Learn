@@ -5,6 +5,7 @@
 #include "Node.h"
 #include "Mesh.h"
 #include "ModelWindow.h"
+#include "Material.h"
 
 
 Model::Model(Graphics& gfx, const std::string& pathString, float scale)
@@ -26,14 +27,23 @@ Model::Model(Graphics& gfx, const std::string& pathString, float scale)
 		// 模型文件读取失败
 	}
 
+	// 收集模型的材质数据,并生成材质相关的管线数据
+	std::vector<Material> materials;
+	for (size_t i = 0u; i < pScene->mNumMaterials; ++i)
+	{
+		materials.emplace_back(gfx, *pScene->mMaterials[i], pathString);
+	}
+
+	// 创建模型所有的Mesh, 并生成相应的网格管线数据
 	for (size_t i = 0u; i < pScene->mNumMeshes; ++i)
 	{
-		m_meshPtrs.emplace_back(ParseMesh(gfx, *pScene->mMeshes[i], pScene->mMaterials, pathString, scale));
+		const auto& mesh = *pScene->mMeshes[i];
+		m_meshPtrs.push_back(std::make_unique<Mesh>(gfx, materials[mesh.mMaterialIndex], mesh));
 	}
 
 	// 解析模型节点数据
 	int nextId = 0;
-	m_pRoot = ParseNode(nextId, *pScene->mRootNode);
+	m_pRoot = ParseNode(nextId, *pScene->mRootNode, DirectX::XMMatrixScaling(scale, scale, scale));
 }
 
 Model::~Model() noexcept
@@ -58,15 +68,10 @@ void Model::SetRootTransform(DirectX::FXMMATRIX transform)
 	m_pRoot->SetAppliedTransform(transform);
 }
 
-std::unique_ptr<Mesh> Model::ParseMesh(Graphics& gfx, const aiMesh& mesh, const aiMaterial* const* pMaterials, const std::filesystem::path& path, float scale)
-{
-	return {};
-}
-
-std::unique_ptr<Node> Model::ParseNode(int& nextId, const aiNode& node) noexcept
+std::unique_ptr<Node> Model::ParseNode(int& nextId, const aiNode& node, DirectX::FXMMATRIX additionalTransform) noexcept
 {
 	// 获取模型节点的Transform（）
-	const auto transform = DirectX::XMMatrixTranspose(DirectX::XMLoadFloat4x4(
+	const auto transform = additionalTransform * DirectX::XMMatrixTranspose(DirectX::XMLoadFloat4x4(
 		reinterpret_cast<const DirectX::XMFLOAT4X4*>(&node.mTransformation)));
 
 	// 获取该节点的模型
@@ -83,7 +88,7 @@ std::unique_ptr<Node> Model::ParseNode(int& nextId, const aiNode& node) noexcept
 	// 遍历子节点，递归解析并获取
 	for (size_t i = 0u; i < node.mNumChildren; ++i)
 	{
-		pNode->AddChild(ParseNode(nextId, *node.mChildren[i]));
+		pNode->AddChild(ParseNode(nextId, *node.mChildren[i], DirectX::XMMatrixIdentity()));
 	}
 
 	return pNode;

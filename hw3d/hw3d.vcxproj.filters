@@ -1,15 +1,11 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
-    <FxCompile Include="HLSL\PhongDifNrm_PS.hlsl" />
-    <FxCompile Include="HLSL\PhongDifNrm_VS.hlsl" />
     <FxCompile Include="HLSL\PhongPSNormalMap.hlsl" />
     <FxCompile Include="HLSL\PhongPSNotex.hlsl" />
     <FxCompile Include="HLSL\PhongVSNotex.hlsl" />
-    <FxCompile Include="Phong_PS.hlsl" />
     <FxCompile Include="PhongPSSpecNormalMap.hlsl" />
     <FxCompile Include="PhongPSSpecNormalMask.hlsl" />
-    <FxCompile Include="Phong_VS.hlsl" />
     <FxCompile Include="PhongVSNormalMap.hlsl" />
     <FxCompile Include="PixelShader.hlsl" />
     <FxCompile Include="Solid_PS.hlsl" />
@@ -17,6 +13,36 @@
     <FxCompile Include="TexturePS.hlsl" />
     <FxCompile Include="TextureVS.hlsl" />
     <FxCompile Include="VertexShader.hlsl" />
+    <FxCompile Include="HLSL\PhongDif_VS.hlsl">
+      <Filter>HLSL</Filter>
+    </FxCompile>
+    <FxCompile Include="HLSL\PhongDif_PS.hlsl">
+      <Filter>HLSL</Filter>
+    </FxCompile>
+    <FxCompile Include="HLSL\PhongDifSpc_VS.hlsl">
+      <Filter>HLSL</Filter>
+    </FxCompile>
+    <FxCompile Include="HLSL\PhongDifSpc_PS.hlsl">
+      <Filter>HLSL</Filter>
+    </FxCompile>
+    <FxCompile Include="HLSL\Phong_PS.hlsl">
+      <Filter>HLSL</Filter>
+    </FxCompile>
+    <FxCompile Include="HLSL\Phong_VS.hlsl">
+      <Filter>HLSL</Filter>
+    </FxCompile>
+    <FxCompile Include="HLSL\PhongDifNrm_PS.hlsl">
+      <Filter>HLSL</Filter>
+    </FxCompile>
+    <FxCompile Include="HLSL\PhongDifNrm_VS.hlsl">
+      <Filter>HLSL</Filter>
+    </FxCompile>
+    <FxCompile Include="HLSL\PhongDifSpcNrm_PS.hlsl">
+      <Filter>HLSL</Filter>
+    </FxCompile>
+    <FxCompile Include="HLSL\PhongDifSpcNrm_VS.hlsl">
+      <Filter>HLSL</Filter>
+    </FxCompile>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Bindable.cpp" />
@@ -85,6 +111,12 @@
     <ClCompile Include="XYHApp.cpp" />
     <ClCompile Include="XyhTimer.cpp" />
     <ClCompile Include="Drawable\Node.cpp">
+      <Filter>Drawable</Filter>
+    </ClCompile>
+    <ClCompile Include="Drawable\Model.cpp">
+      <Filter>Drawable</Filter>
+    </ClCompile>
+    <ClCompile Include="Drawable\ModelWindow.cpp">
       <Filter>Drawable</Filter>
     </ClCompile>
   </ItemGroup>
@@ -169,9 +201,23 @@
     <ClInclude Include="HLSL\LightVectorData.hlsl" />
     <ClInclude Include="HLSL\ShaderOps.hlsl" />
     <ClInclude Include="HLSL\Transform.hlsl" />
-    <ClInclude Include="PointLight.hlsl" />
     <ClInclude Include="Drawable\Node.h">
       <Filter>Drawable</Filter>
+    </ClInclude>
+    <ClInclude Include="Drawable\Model.h">
+      <Filter>Drawable</Filter>
+    </ClInclude>
+    <ClInclude Include="Drawable\ModelWindow.h">
+      <Filter>Drawable</Filter>
+    </ClInclude>
+    <ClInclude Include="HLSL\PointLight.hlsl">
+      <Filter>HLSL</Filter>
+    </ClInclude>
+    <ClInclude Include="HLSL\PhongDifMskSpcNrm_VS.hlsl">
+      <Filter>HLSL</Filter>
+    </ClInclude>
+    <ClInclude Include="HLSL\PhongDifMskSpcNrm_PS.hlsl">
+      <Filter>HLSL</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -191,6 +237,9 @@
   <ItemGroup>
     <Filter Include="Drawable">
       <UniqueIdentifier>{c8b8ec7e-c2b0-495e-ae90-c6520eb98110}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="HLSL">
+      <UniqueIdentifier>{bd32a851-c351-4026-9dd6-148e8f829f39}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
 </Project>

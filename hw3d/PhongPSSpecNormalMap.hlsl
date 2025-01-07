@@ -1,5 +1,5 @@
 #include "ShaderOps.hlsl"
-#include "PointLight.hlsl"
+#include "HLSL/PointLight.hlsl"
 #include "HLSL/LightVectorData.hlsl"
 
 cbuffer ObjectCBuf

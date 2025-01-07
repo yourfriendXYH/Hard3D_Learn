@@ -7,6 +7,7 @@
 class Node;
 class Mesh;
 class FrameCommander;
+class ModelWindow;
 
 struct aiMesh;
 struct aiMaterial;
@@ -27,13 +28,11 @@ public:
 	void SetRootTransform(DirectX::FXMMATRIX transform);
 
 private:
-	// 解析网格模型
-	static std::unique_ptr<Mesh> ParseMesh(Graphics& gfx, const aiMesh& mesh, const aiMaterial* const* pMaterials, const std::filesystem::path& path, float scale);
 	// 解析模型节点
-	std::unique_ptr<Node> ParseNode(int& nextId, const aiNode& node) noexcept;
+	std::unique_ptr<Node> ParseNode(int& nextId, const aiNode& nodem, DirectX::FXMMATRIX additionalTransform) noexcept;
 
 private:
 	std::unique_ptr<Node> m_pRoot; // 模型的根节点
 	std::vector<std::unique_ptr<Mesh>> m_meshPtrs; // 根节点挂载的模型drawable
-	std::unique_ptr<class ModelWindow> m_pWindow; // 调整模型的UI窗口
+	std::unique_ptr<ModelWindow> m_pWindow; // 调整模型的UI窗口
 };

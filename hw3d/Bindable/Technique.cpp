@@ -1,8 +1,9 @@
 #include "Technique.h"
 #include "TechniqueProbe.h"
 
-Technique::Technique(std::string name) noexcept
+Technique::Technique(std::string name, bool startActive) noexcept
 	:
+	m_active(startActive),
 	m_name(name)
 {
 
@@ -10,6 +11,7 @@ Technique::Technique(std::string name) noexcept
 
 void Technique::Submit(class FrameCommander& frame, const Drawable& drawable) const noexcept
 {
+	// 活跃时才提交Bindable
 	if (m_active)
 	{
 		for (const auto& step : m_steps)

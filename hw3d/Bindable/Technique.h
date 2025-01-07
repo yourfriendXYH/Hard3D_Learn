@@ -6,7 +6,7 @@ class Technique
 {
 public:
 	Technique() = default;
-	Technique(std::string name) noexcept;
+	Technique(std::string name, bool startActive = true) noexcept;
 
 	// Ã·Ωª
 	void Submit(class FrameCommander& frame, const class Drawable& drawable) const noexcept;

@@ -23,13 +23,13 @@ void Node::Submit(FrameCommander& frame, DirectX::FXMMATRIX accumulatedTransform
 	// 提交自身Mesh的Bindable到渲染队列
 	for (const auto pMesh : m_meshPtrs)
 	{
-		pMesh->Submit(frame, accumulatedTransform);
+		pMesh->Submit(frame, built);
 	}
 
 	// 提交子节点的Bindable到渲染队列
 	for (const auto& pChildNode : m_childPtrs)
 	{
-		pChildNode->Submit(frame, accumulatedTransform);
+		pChildNode->Submit(frame, built);
 	}
 }
 
