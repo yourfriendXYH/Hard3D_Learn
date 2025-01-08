@@ -250,6 +250,7 @@
     <ClInclude Include="ConstantBuffers.h" />
     <ClInclude Include="Drawable\Material.h" />
     <ClInclude Include="Drawable\Model.h" />
+    <ClInclude Include="Drawable\ModelProbe.h" />
     <ClInclude Include="Drawable\ModelWindow.h" />
     <ClInclude Include="Drawable\Node.h" />
     <ClInclude Include="Drawable\SolidSphere.h" />

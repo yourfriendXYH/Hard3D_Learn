@@ -10,9 +10,9 @@
 
 using namespace Bind;
 
-Drawable::Drawable(Graphics& gfx, const Material& material, const aiMesh& mesh) noexcept
+Drawable::Drawable(Graphics& gfx, const Material& material, const aiMesh& mesh, float scale) noexcept
 {
-	m_pVertexBuffer = material.MakeVertexBindable(gfx, mesh);
+	m_pVertexBuffer = material.MakeVertexBindable(gfx, mesh, scale);
 	m_pIndexBuffer = material.MakeIndexBindable(gfx, mesh);
 	m_pTopology = Topology::Resolve(gfx);
 

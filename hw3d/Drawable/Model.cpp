@@ -6,6 +6,7 @@
 #include "Mesh.h"
 #include "ModelWindow.h"
 #include "Material.h"
+#include "../Utils/CommonDirectXMath.h"
 
 
 Model::Model(Graphics& gfx, const std::string& pathString, float scale)
@@ -38,12 +39,12 @@ Model::Model(Graphics& gfx, const std::string& pathString, float scale)
 	for (size_t i = 0u; i < pScene->mNumMeshes; ++i)
 	{
 		const auto& mesh = *pScene->mMeshes[i];
-		m_meshPtrs.push_back(std::make_unique<Mesh>(gfx, materials[mesh.mMaterialIndex], mesh));
+		m_meshPtrs.push_back(std::make_unique<Mesh>(gfx, materials[mesh.mMaterialIndex], mesh, scale));
 	}
 
 	// 解析模型节点数据
 	int nextId = 0;
-	m_pRoot = ParseNode(nextId, *pScene->mRootNode, DirectX::XMMatrixScaling(scale, scale, scale));
+	m_pRoot = ParseNode(nextId, *pScene->mRootNode, scale);
 }
 
 Model::~Model() noexcept
@@ -68,11 +69,17 @@ void Model::SetRootTransform(DirectX::FXMMATRIX transform)
 	m_pRoot->SetAppliedTransform(transform);
 }
 
-std::unique_ptr<Node> Model::ParseNode(int& nextId, const aiNode& node, DirectX::FXMMATRIX additionalTransform) noexcept
+void Model::Accetp(ModelProbe& probe)
+{
+	assert(m_pRoot);
+	m_pRoot->Accetp(probe);
+}
+
+std::unique_ptr<Node> Model::ParseNode(int& nextId, const aiNode& node, float scale) noexcept
 {
 	// 获取模型节点的Transform（）
-	const auto transform = additionalTransform * DirectX::XMMatrixTranspose(DirectX::XMLoadFloat4x4(
-		reinterpret_cast<const DirectX::XMFLOAT4X4*>(&node.mTransformation)));
+	const auto transform = ScaleTranslation(DirectX::XMMatrixTranspose(DirectX::XMLoadFloat4x4(
+		reinterpret_cast<const DirectX::XMFLOAT4X4*>(&node.mTransformation))), scale);
 
 	// 获取该节点的模型
 	std::vector<Mesh*> curMeshPtrs;
@@ -88,7 +95,7 @@ std::unique_ptr<Node> Model::ParseNode(int& nextId, const aiNode& node, DirectX:
 	// 遍历子节点，递归解析并获取
 	for (size_t i = 0u; i < node.mNumChildren; ++i)
 	{
-		pNode->AddChild(ParseNode(nextId, *node.mChildren[i], DirectX::XMMatrixIdentity()));
+		pNode->AddChild(ParseNode(nextId, *node.mChildren[i], scale));
 	}
 
 	return pNode;

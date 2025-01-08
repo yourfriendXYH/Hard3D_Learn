@@ -131,7 +131,7 @@ Material::Material(Graphics& gfx, const aiMaterial& material, const std::filesys
 
 		// √Ë±ﬂÃÿ–ß Outline Technique
 		{
-			Technique outline("Outline");
+			Technique outline("Outline", false);
 			{
 				Step mask(1u);
 
@@ -229,9 +229,20 @@ std::vector<unsigned short> Material::ExtractIndices(const aiMesh& mesh) const n
 	return indices;
 }
 
-std::shared_ptr<Bind::VertexBuffer> Material::MakeVertexBindable(Graphics& gfx, const aiMesh& mesh) const noexcept
+std::shared_ptr<Bind::VertexBuffer> Material::MakeVertexBindable(Graphics& gfx, const aiMesh& mesh, float scale) const noexcept
 {
-	return Bind::VertexBuffer::Resolve(gfx, MakeMeshTag(mesh), ExtractVertices(mesh));
+	auto verticeCBuf = ExtractVertices(mesh);
+	if (scale != 1.0f)
+	{
+		for (size_t i = 0u; i < verticeCBuf.VerticesSize(); ++i)
+		{
+			DirectX::XMFLOAT3& pos = verticeCBuf[i].Attr<DynamicData::VertexLayout::ElementType::Position3D>();
+			pos.x *= scale;
+			pos.y *= scale;
+			pos.z *= scale;
+		}
+	}
+	return Bind::VertexBuffer::Resolve(gfx, MakeMeshTag(mesh), std::move(verticeCBuf));
 }
 
 std::shared_ptr<Bind::IndexBuffer> Material::MakeIndexBindable(Graphics& gfx, const aiMesh& mesh) const noexcept

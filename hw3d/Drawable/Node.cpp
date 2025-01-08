@@ -1,5 +1,6 @@
 #include "Node.h"
 #include "Mesh.h"
+#include "ModelProbe.h"
 
 
 Node::Node(int id, const std::string& name, std::vector<Mesh*> meshPtrs, const DirectX::XMMATRIX& transform) noexcept
@@ -74,6 +75,29 @@ void Node::ShowTree(Node*& pSelectedNode) const noexcept
 		}
 		ImGui::TreePop();
 	}
+}
+
+bool Node::HasChild() const noexcept
+{
+	return !m_childPtrs.empty();
+}
+
+void Node::Accetp(ModelProbe& probe)
+{
+	// 递归显示节点的UI???
+	if (probe.PushNode(*this))
+	{
+		for (auto& pChildNode : m_childPtrs)
+		{
+			pChildNode->Accetp(probe);
+		}
+		probe.PopNode(*this);
+	}
+}
+
+const std::string& Node::GetName() const
+{
+	return m_name;
 }
 
 void Node::AddChild(std::unique_ptr<Node> pChild) noexcept

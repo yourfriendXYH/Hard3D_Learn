@@ -27,9 +27,11 @@ public:
 	// 设置模型根节点的transform
 	void SetRootTransform(DirectX::FXMMATRIX transform);
 
+	void Accetp(class ModelProbe& probe);
+
 private:
 	// 解析模型节点
-	std::unique_ptr<Node> ParseNode(int& nextId, const aiNode& nodem, DirectX::FXMMATRIX additionalTransform) noexcept;
+	std::unique_ptr<Node> ParseNode(int& nextId, const aiNode& nodem, float scale) noexcept;
 
 private:
 	std::unique_ptr<Node> m_pRoot; // 模型的根节点

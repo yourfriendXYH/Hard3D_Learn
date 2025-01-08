@@ -6,3 +6,5 @@ DirectX::XMFLOAT3 ExtractEulerAngles(const DirectX::XMFLOAT4X4& matrix);
 
 // 提取平移向量
 DirectX::XMFLOAT3 ExtractTranslation(const DirectX::XMFLOAT4X4& matrix);
+
+DirectX::XMMATRIX ScaleTranslation(DirectX::FXMMATRIX matrix, float scale);

@@ -19,7 +19,7 @@ public:
 	// 提取顶点索引
 	std::vector<unsigned short> ExtractIndices(const aiMesh& mesh) const noexcept;
 
-	std::shared_ptr<Bind::VertexBuffer> MakeVertexBindable(Graphics& gfx, const aiMesh& mesh) const noexcept;
+	std::shared_ptr<Bind::VertexBuffer> MakeVertexBindable(Graphics& gfx, const aiMesh& mesh, float scale = 1.0f) const noexcept;
 
 	std::shared_ptr<Bind::IndexBuffer> MakeIndexBindable(Graphics& gfx, const aiMesh& mesh) const noexcept;
 

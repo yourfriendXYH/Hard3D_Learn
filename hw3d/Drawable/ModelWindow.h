@@ -41,14 +41,14 @@ private:
 		float m_z = 0.0f;
 	};
 
-	struct NodeData
-	{
-		TransformParameters m_transformParams;
-		bool m_transformParamsDirty;
-		std::optional<DynamicData::BufferEx> m_materialCBuf;
-		bool m_materialCBufDirty;
-	};
+	//struct NodeData
+	//{
+	//	TransformParameters m_transformParams;
+	//	bool m_transformParamsDirty;
+	//	std::optional<DynamicData::BufferEx> m_materialCBuf;
+	//	bool m_materialCBufDirty;
+	//};
 
 	Node* m_pSelectedNode;
-	std::unordered_map<int, NodeData> m_NodesTransform;
+	std::unordered_map<int, TransformParameters> m_NodesTransform;
 };

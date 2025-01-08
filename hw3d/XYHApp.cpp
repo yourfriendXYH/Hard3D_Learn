@@ -22,6 +22,8 @@
 #include "Utils/XYHUtil.h"
 #include "Drawable/Material.h"
 #include "Bindable/TechniqueProbe.h"
+#include "Drawable/ModelProbe.h"
+#include "Utils/CommonDirectXMath.h"
 
 //#include "assimp/include/assimp/Importer.hpp"
 //#include "assimp/include/assimp/scene.h"
@@ -348,12 +350,14 @@ void XYHApp::DoFrame()
 	//// 绘制点光源
 	//m_pointLight.Draw(m_wnd.GetGfx());
 
-	//// 测试场景
-	//// 场景要先绘制，否则描边效果看不到
-	//m_testSponza.Draw(m_wnd.GetGfx());
+
 
 	//// mipmap的测试条纹
 	//m_testStripey.Draw(m_wnd.GetGfx());
+
+	// 测试场景
+	// 场景要先绘制，否则描边效果看不到
+	m_testSponza.Submit(m_frameCommader);
 
 	// 绘制哥布林
 	m_gobber.Submit(m_frameCommader);
@@ -509,6 +513,115 @@ void XYHApp::DoFrame()
 	} probe;
 	m_pLoaded->Accept(probe);
 
+	class MP : public ModelProbe
+	{
+	public:
+		void SpawnWindow(Model& model)
+		{
+			ImGui::Begin("Model");
+			ImGui::Columns(2, nullptr, true);
+
+			// 右侧UI树显示
+			model.Accetp(*this);
+
+			// 左侧UI显示
+			ImGui::NextColumn();
+			if (nullptr != m_pSelectedNode)
+			{
+				bool dirty = false;
+				const auto dcheck = [&dirty](bool changed) {dirty = dirty || changed; };
+				auto& tf = ResolveTransform();
+				ImGui::TextColored({ 0.4f,1.0f,0.6f,1.0f }, "Translation");
+				dcheck(ImGui::SliderFloat("X", &tf.m_x, -60.f, 60.f));
+				dcheck(ImGui::SliderFloat("Y", &tf.m_y, -60.f, 60.f));
+				dcheck(ImGui::SliderFloat("Z", &tf.m_z, -60.f, 60.f));
+				ImGui::TextColored({ 0.4f,1.0f,0.6f,1.0f }, "Orientation");
+				dcheck(ImGui::SliderAngle("X-rotation", &tf.m_xRot, -180.0f, 180.0f));
+				dcheck(ImGui::SliderAngle("Y-rotation", &tf.m_yRot, -180.0f, 180.0f));
+				dcheck(ImGui::SliderAngle("Z-rotation", &tf.m_zRot, -180.0f, 180.0f));
+				if (dirty)
+				{
+					m_pSelectedNode->SetAppliedTransform(
+						DirectX::XMMatrixRotationX(tf.m_xRot) *
+						DirectX::XMMatrixRotationY(tf.m_yRot) *
+						DirectX::XMMatrixRotationZ(tf.m_zRot) *
+						DirectX::XMMatrixTranslation(tf.m_x, tf.m_y, tf.m_z)
+					);
+				}
+			}
+
+			ImGui::End();
+		}
+	protected:
+		bool PushNode(Node& node) override
+		{
+			// 当前选中模型节点的ID
+			const auto selectedId = (m_pSelectedNode == nullptr) ? -1 : m_pSelectedNode->GetId();
+
+			const auto node_flags = ImGuiTreeNodeFlags_OpenOnArrow
+				| (node.GetId() == selectedId) ? ImGuiTreeNodeFlags_Selected : 0
+				| (node.HasChild()) ? 0 : ImGuiTreeNodeFlags_Leaf;
+
+			//生成当前节点对应的ImGUI
+			const auto expanded = ImGui::TreeNodeEx((void*)(intptr_t)node.GetId(), node_flags, node.GetName().c_str());
+
+			if (ImGui::IsItemClicked()) // 如果自身节点被选中
+			{
+				m_pSelectedNode = &node;
+			}
+
+			return expanded;
+		}
+
+		void PopNode(Node& node) override
+		{
+			ImGui::TreePop();
+		}
+
+
+	private:
+		Node* m_pSelectedNode = nullptr;
+
+		struct TransformParameters
+		{
+			float m_xRot = 0.0f;
+			float m_yRot = 0.0f;
+			float m_zRot = 0.0f;
+			float m_x = 0.0f;
+			float m_y = 0.0f;
+			float m_z = 0.0f;
+		};
+		std::unordered_map<int, TransformParameters> transformParams;
+
+	private:
+		TransformParameters& ResolveTransform() noexcept
+		{
+			const auto id = m_pSelectedNode->GetId();
+			auto i = transformParams.find(id);
+			if (i == transformParams.end())
+			{
+				return LoadTransform(id);
+			}
+			return i->second;
+		}
+		TransformParameters& LoadTransform(int id) noexcept
+		{
+			const auto& applied = m_pSelectedNode->GetAppliedTransform();
+			const auto angles = ExtractEulerAngles(applied);
+			const auto translation = ExtractTranslation(applied);
+			TransformParameters tp;
+			tp.m_zRot = angles.z;
+			tp.m_xRot = angles.x;
+			tp.m_yRot = angles.y;
+			tp.m_x = translation.x;
+			tp.m_y = translation.y;
+			tp.m_z = translation.z;
+			return transformParams.insert({ id,{ tp } }).first->second;
+		}
+	};
+	static MP modelProbe;
+	modelProbe.SpawnWindow(m_testSponza);
+	//modelProbe.SpawnWindow(m_gobber);
 	// 控制相机的UI
 	m_camera.SpawnControlWindow();
 	// 控制灯的UI

@@ -34,7 +34,7 @@ private:
 class Mesh : public Drawable
 {
 public:
-	Mesh(Graphics& gfx, const class Material& mat, const aiMesh& mesh) noexcept;
+	Mesh(Graphics& gfx, const class Material& mat, const aiMesh& mesh, float scale = 1.0f) noexcept;
 
 	//// 传入累计的矩阵
 	//void Draw(Graphics& gfx, DirectX::FXMMATRIX accumulatedTransform) const noexcept;

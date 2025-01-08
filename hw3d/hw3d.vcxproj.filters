@@ -43,6 +43,8 @@
     <FxCompile Include="HLSL\PhongDifSpcNrm_VS.hlsl">
       <Filter>HLSL</Filter>
     </FxCompile>
+    <FxCompile Include="HLSL\PhongDifMskSpcNrm_PS.hlsl" />
+    <FxCompile Include="HLSL\PhongDifMskSpcNrm_VS.hlsl" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Bindable.cpp" />
@@ -213,11 +215,8 @@
     <ClInclude Include="HLSL\PointLight.hlsl">
       <Filter>HLSL</Filter>
     </ClInclude>
-    <ClInclude Include="HLSL\PhongDifMskSpcNrm_VS.hlsl">
-      <Filter>HLSL</Filter>
-    </ClInclude>
-    <ClInclude Include="HLSL\PhongDifMskSpcNrm_PS.hlsl">
-      <Filter>HLSL</Filter>
+    <ClInclude Include="Drawable\ModelProbe.h">
+      <Filter>Drawable</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

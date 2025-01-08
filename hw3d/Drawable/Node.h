@@ -25,6 +25,15 @@ public:
 	// 当前模型的UI节点
 	void ShowTree(Node*& pSelectedNode) const noexcept;
 
+	// 是否有模型子节点
+	bool HasChild() const noexcept;
+
+	// 显示控制管线数据的UI???
+	void Accetp(class ModelProbe& probe);
+
+	// 获取模型节点名
+	const std::string& GetName() const;
+
 private:
 	void AddChild(std::unique_ptr<Node> pChild) noexcept;
 
