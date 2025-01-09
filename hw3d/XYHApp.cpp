@@ -584,6 +584,7 @@ void XYHApp::DoFrame()
 				{
 					virtual void OnSetTechnique()
 					{
+						// 设置描边效果的Technique是否激活
 						if (m_pTechnique->GetName() == "Outline")
 						{
 							m_pTechnique->SetActiveState(m_highlighted);
@@ -593,10 +594,13 @@ void XYHApp::DoFrame()
 					bool m_highlighted = false;
 				}probe;
 
+				// 上一个选中的模型节点，取消显示Technique
 				if (nullptr != m_pSelectedNode)
 				{
 					m_pSelectedNode->Accetp(probe);
 				}
+
+				// 当前选中的节点显示Technique
 				probe.m_highlighted = true;
 				node.Accetp(probe);
 
