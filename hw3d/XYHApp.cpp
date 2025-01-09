@@ -484,6 +484,10 @@ void XYHApp::DoFrame()
 			{
 				dcheck(ImGui::SliderFloat(tag("Scale"), &v, 1.0f, 2.0f, "%.3f"));
 			}
+			if (auto v = buffer["offset"]; v.Exists()) // 描边效果的偏移值
+			{
+				dcheck(ImGui::SliderFloat(tag("offset"), &v, 0.0f, 1.0f, "%.3f"));
+			}
 			if (auto v = buffer["color"]; v.Exists())
 			{
 				dcheck(ImGui::ColorPicker3(tag("Color"), reinterpret_cast<float*>(&static_cast<dx::XMFLOAT3&>(v))));
@@ -499,6 +503,10 @@ void XYHApp::DoFrame()
 			if (auto v = buffer["specularWeight"]; v.Exists())
 			{
 				dcheck(ImGui::SliderFloat(tag("Spec. Weight"), &v, 0.0f, 2.0f));
+			}
+			if (auto v = buffer["useSpecularMap"]; v.Exists())
+			{
+				dcheck(ImGui::Checkbox(tag("Specular Map Enable"), &v));
 			}
 			if (auto v = buffer["useNormalMap"]; v.Exists())
 			{
@@ -549,6 +557,11 @@ void XYHApp::DoFrame()
 					);
 				}
 			}
+			if (nullptr != m_pSelectedNode)
+			{
+				Probe probe;
+				m_pSelectedNode->Accetp(probe);
+			}
 
 			ImGui::End();
 		}
@@ -567,6 +580,26 @@ void XYHApp::DoFrame()
 
 			if (ImGui::IsItemClicked()) // 如果自身节点被选中
 			{
+				struct Probe : public TechniqueProbe
+				{
+					virtual void OnSetTechnique()
+					{
+						if (m_pTechnique->GetName() == "Outline")
+						{
+							m_pTechnique->SetActiveState(m_highlighted);
+						}
+					}
+
+					bool m_highlighted = false;
+				}probe;
+
+				if (nullptr != m_pSelectedNode)
+				{
+					m_pSelectedNode->Accetp(probe);
+				}
+				probe.m_highlighted = true;
+				node.Accetp(probe);
+
 				m_pSelectedNode = &node;
 			}
 

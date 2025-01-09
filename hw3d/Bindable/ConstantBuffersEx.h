@@ -6,7 +6,7 @@
 namespace Bind
 {
 	// 扩展的像素常数缓存，适配DynamicConstant
-	class PixelConstantBufferEx : public Bindable
+	class ConstantBufferEx : public Bindable
 	{
 	public:
 		// 更新像素常数缓存
@@ -21,14 +21,8 @@ namespace Bind
 			GetContext(gfx)->Unmap(m_pConstantBuffer.Get(), 0u);
 		}
 
-		void Bind(Graphics& gfx) noexcept override
-		{
-			// 绑定常数缓存到像素着色器
-			GetContext(gfx)->PSSetConstantBuffers(m_slot, 1u, m_pConstantBuffer.GetAddressOf());
-		}
-
 	protected:
-		PixelConstantBufferEx(Graphics& gfx, const DynamicData::LayoutElementEx& layoutRoot, UINT slot, const DynamicData::BufferEx* pBuf)
+		ConstantBufferEx(Graphics& gfx, const DynamicData::LayoutElementEx& layoutRoot, UINT slot, const DynamicData::BufferEx* pBuf)
 			:
 			m_slot(slot)
 		{
@@ -56,24 +50,49 @@ namespace Bind
 	private:
 		virtual const DynamicData::LayoutElementEx& GetLayout() const noexcept = 0;
 
-	private:
+	protected:
 		Microsoft::WRL::ComPtr<ID3D11Buffer> m_pConstantBuffer;
 		UINT m_slot; // 插槽索引
 	};
 
-	class CachingPixelConstantBufferEx : public PixelConstantBufferEx
+	class PixelConstantBufferEx : public ConstantBufferEx
 	{
 	public:
-		CachingPixelConstantBufferEx(Graphics& gfx, const DynamicData::CookedLayoutEx& layout, UINT slot)
+		using ConstantBufferEx::ConstantBufferEx;
+
+		void Bind(Graphics& gfx) noexcept override
+		{
+			// 绑定常数缓存到像素着色器
+			GetContext(gfx)->PSSetConstantBuffers(m_slot, 1u, m_pConstantBuffer.GetAddressOf());
+		}
+	};
+
+	class VertexConstantBufferEx : public ConstantBufferEx
+	{
+	public:
+		using ConstantBufferEx::ConstantBufferEx;
+
+		void Bind(Graphics& gfx) noexcept override
+		{
+			// 绑定常数缓存到像素着色器
+			GetContext(gfx)->VSSetConstantBuffers(m_slot, 1u, m_pConstantBuffer.GetAddressOf());
+		}
+	};
+
+	template<class T>
+	class CachingConstantBufferEx : public T
+	{
+	public:
+		CachingConstantBufferEx(Graphics& gfx, const DynamicData::CookedLayoutEx& layout, UINT slot)
 			:
-			PixelConstantBufferEx(gfx, *layout.ShareRoot(), slot, nullptr),
+			T(gfx, *layout.ShareRoot(), slot, nullptr),
 			m_buf(DynamicData::BufferEx(layout))
 		{
 		}
 
-		CachingPixelConstantBufferEx(Graphics& gfx, const DynamicData::BufferEx& buf, UINT slot)
+		CachingConstantBufferEx(Graphics& gfx, const DynamicData::BufferEx& buf, UINT slot)
 			:
-			PixelConstantBufferEx(gfx, buf.GetRootLayoutElement(), slot, &buf),
+			T(gfx, buf.GetRootLayoutElement(), slot, &buf),
 			m_buf(buf)
 		{
 		}
@@ -98,10 +117,10 @@ namespace Bind
 		{
 			if (m_dirty)
 			{
-				Update(gfx, m_buf);
+				T::Update(gfx, m_buf);
 				m_dirty = false;
 			}
-			PixelConstantBufferEx::Bind(gfx);
+			T::Bind(gfx);
 		}
 
 		void Accept(TechniqueProbe& probe)
@@ -117,28 +136,31 @@ namespace Bind
 		DynamicData::BufferEx m_buf;
 	};
 
-	class NoCachePixelConstantBufferEx : public PixelConstantBufferEx
-	{
-	public:
-		NoCachePixelConstantBufferEx(Graphics& gfx, const DynamicData::CookedLayoutEx& layout, UINT slot)
-			:
-			PixelConstantBufferEx(gfx, *layout.ShareRoot(), slot, nullptr),
-			m_pLayoutRoot(layout.ShareRoot())
-		{
-		}
-		NoCachePixelConstantBufferEx(Graphics& gfx, const DynamicData::BufferEx& buf, UINT slot)
-			:
-			PixelConstantBufferEx(gfx, buf.GetRootLayoutElement(), slot, &buf),
-			m_pLayoutRoot(buf.ShareLayoutRoot())
-		{
-		}
+	using CachingPixelConstantBufferEx = CachingConstantBufferEx<PixelConstantBufferEx>;
+	using CachingVertexConstantBufferEx = CachingConstantBufferEx<VertexConstantBufferEx>;
 
-		const DynamicData::LayoutElementEx& GetLayout() const noexcept override
-		{
-			return *m_pLayoutRoot;
-		}
+	//class NoCachePixelConstantBufferEx : public PixelConstantBufferEx
+	//{
+	//public:
+	//	NoCachePixelConstantBufferEx(Graphics& gfx, const DynamicData::CookedLayoutEx& layout, UINT slot)
+	//		:
+	//		PixelConstantBufferEx(gfx, *layout.ShareRoot(), slot, nullptr),
+	//		m_pLayoutRoot(layout.ShareRoot())
+	//	{
+	//	}
+	//	NoCachePixelConstantBufferEx(Graphics& gfx, const DynamicData::BufferEx& buf, UINT slot)
+	//		:
+	//		PixelConstantBufferEx(gfx, buf.GetRootLayoutElement(), slot, &buf),
+	//		m_pLayoutRoot(buf.ShareLayoutRoot())
+	//	{
+	//	}
 
-	private:
-		std::shared_ptr<DynamicData::LayoutElementEx> m_pLayoutRoot;
-	};
+	//	const DynamicData::LayoutElementEx& GetLayout() const noexcept override
+	//	{
+	//		return *m_pLayoutRoot;
+	//	}
+
+	//private:
+	//	std::shared_ptr<DynamicData::LayoutElementEx> m_pLayoutRoot;
+	//};
 }

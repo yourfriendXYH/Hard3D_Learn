@@ -95,6 +95,14 @@ void Node::Accetp(ModelProbe& probe)
 	}
 }
 
+void Node::Accetp(TechniqueProbe& probe)
+{
+	for (auto& pMesh : m_meshPtrs)
+	{
+		pMesh->Accept(probe);
+	}
+}
+
 const std::string& Node::GetName() const
 {
 	return m_name;

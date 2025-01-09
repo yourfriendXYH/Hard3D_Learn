@@ -5,6 +5,7 @@
 cbuffer ObjectCBuf
 {
     bool useGlossAlpha;
+    bool useSpecularMap;
     float3 specularColor;
     float specularWeight;
     float specularGloss;
@@ -39,7 +40,9 @@ float4 main(float3 viewFragPos : Position, float3 viewNormal : Normal, float3 vi
     // replace normal with mapped if normal mapping enabled
     if (useNormalMap)
     {
-        viewNormal = MapNormalViewSpace(normalize(viewTan), normalize(viewBitan), viewNormal, tc, nmap, splr);
+        //viewNormal = MapNormalViewSpace(normalize(viewTan), normalize(viewBitan), viewNormal, tc, nmap, splr);
+        const float3 mappedNormal = MapNormalViewSpace(normalize(viewTan), normalize(viewBitan), viewNormal, tc, nmap, splr);
+        viewNormal = lerp(viewNormal, mappedNormal, normalMapWeight);
     }
 	// fragment to light vector data
     const LightVectorData lv = CalculateLightVectorData(viewLightPos, viewFragPos);
@@ -47,7 +50,14 @@ float4 main(float3 viewFragPos : Position, float3 viewNormal : Normal, float3 vi
     float3 specularReflectionColor;
     float specularPower = specularGloss;
     const float4 specularSample = spec.Sample(splr, tc);
-    specularReflectionColor = specularSample.rgb;
+    if (useSpecularMap)
+    {
+        specularReflectionColor = specularSample.rgb;
+    }
+    else
+    {
+        specularReflectionColor = specularColor;
+    }
     if (useGlossAlpha)
     {
         specularPower = pow(2.0f, specularSample.a * 13.0f);

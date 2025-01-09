@@ -28,8 +28,10 @@ public:
 	// 是否有模型子节点
 	bool HasChild() const noexcept;
 
-	// 显示控制管线数据的UI???
+	// 显示控制管线数据的UI(控制Transform)
 	void Accetp(class ModelProbe& probe);
+
+	void Accetp(class TechniqueProbe& probe);
 
 	// 获取模型节点名
 	const std::string& GetName() const;

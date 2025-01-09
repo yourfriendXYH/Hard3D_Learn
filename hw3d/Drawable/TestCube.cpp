@@ -35,17 +35,19 @@ TestCube::TestCube(Graphics& gfx, float size)
 			only.AddBindable(Texture::Resolve(gfx, "Resources/Wall/brickwall.jpg"));
 			only.AddBindable(Sampler::Resolve(gfx));
 
-			auto pvs = VertexShader::Resolve(gfx, "PhongVS.cso");
+			auto pvs = VertexShader::Resolve(gfx, "PhongDif_VS.cso");
 			auto pvsbc = pvs->GetByteCode();
 			only.AddBindable(std::move(pvs));
-			only.AddBindable(PixelShader::Resolve(gfx, "PhongPS.cso"));
+			only.AddBindable(PixelShader::Resolve(gfx, "PhongDif_PS.cso"));
 
 			DynamicData::RawLayoutEx layout;
-			layout.Add<DynamicData::EFloat>("specularIntensity");
-			layout.Add<DynamicData::EFloat>("specularPower");
+			layout.Add<DynamicData::EFloat3>("specularColor");
+			layout.Add<DynamicData::EFloat>("specularWeight");
+			layout.Add<DynamicData::EFloat>("specularGloss");
 			DynamicData::BufferEx buf = DynamicData::BufferEx(std::move(layout));
-			buf["specularIntensity"] = 0.1f;
-			buf["specularPower"] = 20.0f;
+			buf["specularColor"] = DirectX::XMFLOAT3{ 1.0f,1.0f,1.0f };
+			buf["specularWeight"] = 0.1f;
+			buf["specularGloss"] = 20.0f;
 
 			only.AddBindable(std::make_shared<CachingPixelConstantBufferEx>(gfx, buf, 1u));
 			//only.AddBindable(PixelConstantBuffer<PSMaterialConstant>::Resolve(gfx, m_pmc, 1u));

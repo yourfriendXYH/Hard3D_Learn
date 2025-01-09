@@ -19,7 +19,10 @@ protected:
 	virtual void OnSetTechnique() {};
 	virtual void OnSetStep() {};
 
-	virtual bool OnVisitBuffer(DynamicData::BufferEx& buffer) = 0;
+	virtual bool OnVisitBuffer(DynamicData::BufferEx& buffer)
+	{
+		return false;
+	}
 
 protected:
 	class Technique* m_pTechnique = nullptr;

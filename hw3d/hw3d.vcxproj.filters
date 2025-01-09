@@ -45,6 +45,9 @@
     </FxCompile>
     <FxCompile Include="HLSL\PhongDifMskSpcNrm_PS.hlsl" />
     <FxCompile Include="HLSL\PhongDifMskSpcNrm_VS.hlsl" />
+    <FxCompile Include="HLSL\Offset_VS.hlsl">
+      <Filter>HLSL</Filter>
+    </FxCompile>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Bindable.cpp" />
