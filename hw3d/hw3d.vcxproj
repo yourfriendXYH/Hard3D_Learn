@@ -159,11 +159,14 @@
   <ItemGroup>
     <ClCompile Include="Bindable.cpp" />
     <ClCompile Include="Bindable\Blender.cpp" />
+    <ClCompile Include="Bindable\DepthStencil.cpp" />
     <ClCompile Include="Bindable\FrameCommander.cpp" />
+    <ClCompile Include="Bindable\GraphicsResource.cpp" />
     <ClCompile Include="Bindable\Job.cpp" />
     <ClCompile Include="Bindable\NullPixelShader.cpp" />
     <ClCompile Include="Bindable\Pass.cpp" />
     <ClCompile Include="Bindable\Rasterizer.cpp" />
+    <ClCompile Include="Bindable\RenderTarget.cpp" />
     <ClCompile Include="Bindable\Stencil.cpp" />
     <ClCompile Include="Bindable\Step.cpp" />
     <ClCompile Include="Bindable\Technique.cpp" />
@@ -231,11 +234,14 @@
     <ClInclude Include="BindableCodex.h" />
     <ClInclude Include="Bindable\Blender.h" />
     <ClInclude Include="Bindable\ConstantBuffersEx.h" />
+    <ClInclude Include="Bindable\DepthStencil.h" />
     <ClInclude Include="Bindable\FrameCommander.h" />
+    <ClInclude Include="Bindable\GraphicsResource.h" />
     <ClInclude Include="Bindable\Job.h" />
     <ClInclude Include="Bindable\NullPixelShader.h" />
     <ClInclude Include="Bindable\Pass.h" />
     <ClInclude Include="Bindable\Rasterizer.h" />
+    <ClInclude Include="Bindable\RenderTarget.h" />
     <ClInclude Include="Bindable\Stencil.h" />
     <ClInclude Include="Bindable\Step.h" />
     <ClInclude Include="Bindable\Technique.h" />

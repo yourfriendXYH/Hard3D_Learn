@@ -13,7 +13,7 @@ namespace Bind
 
 class Graphics
 {
-	friend Bind::Bindable;
+	friend class GraphicsResource;
 
 public:
 	class Exception : public XyhException

@@ -124,6 +124,15 @@
     <ClCompile Include="Drawable\ModelWindow.cpp">
       <Filter>Drawable</Filter>
     </ClCompile>
+    <ClCompile Include="Bindable\GraphicsResource.cpp">
+      <Filter>Bindable</Filter>
+    </ClCompile>
+    <ClCompile Include="Bindable\RenderTarget.cpp">
+      <Filter>Bindable</Filter>
+    </ClCompile>
+    <ClCompile Include="Bindable\DepthStencil.cpp">
+      <Filter>Bindable</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Bindable.h" />
@@ -221,6 +230,15 @@
     <ClInclude Include="Drawable\ModelProbe.h">
       <Filter>Drawable</Filter>
     </ClInclude>
+    <ClInclude Include="Bindable\GraphicsResource.h">
+      <Filter>Bindable</Filter>
+    </ClInclude>
+    <ClInclude Include="Bindable\RenderTarget.h">
+      <Filter>Bindable</Filter>
+    </ClInclude>
+    <ClInclude Include="Bindable\DepthStencil.h">
+      <Filter>Bindable</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="hw3d.rc" />
@@ -242,6 +260,9 @@
     </Filter>
     <Filter Include="HLSL">
       <UniqueIdentifier>{bd32a851-c351-4026-9dd6-148e8f829f39}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Bindable">
+      <UniqueIdentifier>{bdff24e3-9f3f-4c87-952d-1b28dc250c81}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
 </Project>
