@@ -10,6 +10,7 @@ namespace Bind
 {
 	class Bindable;
 }
+class DepthStencil;
 
 class Graphics
 {
@@ -76,7 +77,17 @@ public:
 	void SetCamera(DirectX::FXMMATRIX cameraMatrix) noexcept;
 	DirectX::XMMATRIX GetCamera() const noexcept;
 
+	UINT GetWidth() const noexcept;
+	UINT GetHeight() const noexcept;
+
+	void BindSwapBuffer() noexcept;
+	void BindSwapBuffer(const DepthStencil& ds) noexcept;
+
 private:
+
+	UINT m_width;
+	UINT m_height;
+
 #ifndef NDEBUG
 	DxgiInfoManager infoManager;
 #endif

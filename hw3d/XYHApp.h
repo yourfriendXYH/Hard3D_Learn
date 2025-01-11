@@ -42,7 +42,7 @@ private:
 
 	ScriptCommander m_scriptCommander;
 
-	FrameCommander m_frameCommader;
+	FrameCommander m_frameCommader{ m_wnd.GetGfx() };
 
 	std::vector<std::unique_ptr<class Drawable>> m_drawables;
 

@@ -5,6 +5,7 @@
 #include <d3dcompiler.h>
 #include "imgui/imgui_impl_dx11.h"
 #include "imgui/imgui_impl_win32.h"
+#include "Bindable/DepthStencil.h"
 
 namespace wrl = Microsoft::WRL;
 
@@ -15,6 +16,9 @@ namespace wrl = Microsoft::WRL;
 //#define GFX_DEVICE_REMOVED_EXCEPT(hr) Graphics::DeviceRemovedException(__LINE__, __FILE__, (hr))
 
 Graphics::Graphics(HWND hWnd, int width, int height)
+	:
+	m_width(width),
+	m_height(height)
 {
 	// 交换链描述
 	DXGI_SWAP_CHAIN_DESC sd = {};
@@ -67,33 +71,33 @@ Graphics::Graphics(HWND hWnd, int width, int height)
 		&m_pRenderTargetView
 	));
 
-	// create depth stensil texture
-	wrl::ComPtr<ID3D11Texture2D> pDepthStencil;
-	D3D11_TEXTURE2D_DESC descDepth = {};
-	descDepth.Width = width;
-	descDepth.Height = height;
-	descDepth.MipLevels = 1u;
-	descDepth.ArraySize = 1u;
-	descDepth.Format = DXGI_FORMAT_D24_UNORM_S8_UINT;
-	descDepth.SampleDesc.Count = 1u;
-	descDepth.SampleDesc.Quality = 0u;
-	descDepth.Usage = D3D11_USAGE_DEFAULT;
-	descDepth.BindFlags = D3D11_BIND_DEPTH_STENCIL;
-	GFX_THROW_INFO(m_pDevice->CreateTexture2D(&descDepth, nullptr, &pDepthStencil));
+	//// create depth stensil texture
+	//wrl::ComPtr<ID3D11Texture2D> pDepthStencil;
+	//D3D11_TEXTURE2D_DESC descDepth = {};
+	//descDepth.Width = width;
+	//descDepth.Height = height;
+	//descDepth.MipLevels = 1u;
+	//descDepth.ArraySize = 1u;
+	//descDepth.Format = DXGI_FORMAT_D24_UNORM_S8_UINT;
+	//descDepth.SampleDesc.Count = 1u;
+	//descDepth.SampleDesc.Quality = 0u;
+	//descDepth.Usage = D3D11_USAGE_DEFAULT;
+	//descDepth.BindFlags = D3D11_BIND_DEPTH_STENCIL;
+	//GFX_THROW_INFO(m_pDevice->CreateTexture2D(&descDepth, nullptr, &pDepthStencil));
 
-	// create view of depth stensil texture
-	D3D11_DEPTH_STENCIL_VIEW_DESC descDSV = {};
-	descDSV.Format = DXGI_FORMAT_D24_UNORM_S8_UINT;
-	descDSV.ViewDimension = D3D11_DSV_DIMENSION_TEXTURE2D;
-	descDSV.Texture2D.MipSlice = 0u;
+	//// create view of depth stensil texture
+	//D3D11_DEPTH_STENCIL_VIEW_DESC descDSV = {};
+	//descDSV.Format = DXGI_FORMAT_D24_UNORM_S8_UINT;
+	//descDSV.ViewDimension = D3D11_DSV_DIMENSION_TEXTURE2D;
+	//descDSV.Texture2D.MipSlice = 0u;
 
-	// 创建深度模具视图
-	m_pDevice->CreateDepthStencilView(
-		pDepthStencil.Get(), &descDSV, &m_pDSV
-	);
+	//// 创建深度模具视图
+	//m_pDevice->CreateDepthStencilView(
+	//	pDepthStencil.Get(), &descDSV, &m_pDSV
+	//);
 
-	// bind depth stensil view to OM (输出合并阶段 Output Merger)
-	m_pDeviceContext->OMSetRenderTargets(1u, m_pRenderTargetView.GetAddressOf(), m_pDSV.Get());
+	//// bind depth stensil view to OM (输出合并阶段 Output Merger)
+	//m_pDeviceContext->OMSetRenderTargets(1u, m_pRenderTargetView.GetAddressOf(), m_pDSV.Get());
 
 
 	// 配置视口
@@ -120,9 +124,8 @@ void Graphics::BeginFrame(float red, float green, float blue)
 		ImGui::NewFrame();
 	}
 
-	const float color[] = { red,green,blue,1.0f };
+	const float color[] = { red,green,blue,0.0f };
 	m_pDeviceContext->ClearRenderTargetView(m_pRenderTargetView.Get(), color);
-	m_pDeviceContext->ClearDepthStencilView(m_pDSV.Get(), D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.0f, 0u);
 }
 
 void Graphics::EndFrame()
@@ -158,158 +161,6 @@ void Graphics::ClearBuffer(float red, float green, float blue) noexcept
 	m_pDeviceContext->ClearDepthStencilView(m_pDSV.Get(), D3D11_CLEAR_DEPTH, 1.0f, 0u);
 }
 
-//void Graphics::DrawTestTriangle(double rotAngle)
-//{
-//	namespace wrl = Microsoft::WRL;
-//	HRESULT hr;
-//
-//	struct Vertex
-//	{
-//		float x;
-//		float y;
-//		float r;
-//		float g;
-//		float b;
-//	};
-//
-//	struct OneTrangle
-//	{
-//		Vertex vertices[3];
-//	};
-//
-//	const Vertex vertices[] = {
-//		{0.0f, 0.5f, 1.f, 0.f, 0.f},
-//		{0.5f, -0.5f, 0.f, 1.f, 0.f},
-//		{-0.5f, -0.5f, 0.f, 0.f, 1.f},
-//
-//		{-0.3f, 0.3f, 1.f, 0.f, 0.f},
-//		{0.3f, 0.3f, 0.f, 1.f, 0.f},
-//		{0.0f, -0.8f, 0.f, 0.f, 1.f}
-//	};
-//
-//	 创建并设置顶点缓存
-//	D3D11_BUFFER_DESC bd = {};	//缓冲描述
-//	bd.BindFlags = D3D11_BIND_VERTEX_BUFFER;
-//	bd.Usage = D3D11_USAGE_DEFAULT;
-//	bd.CPUAccessFlags = 0u;
-//	bd.MiscFlags = 0u;
-//	bd.ByteWidth = sizeof(vertices);
-//	bd.StructureByteStride = sizeof(Vertex);
-//	D3D11_SUBRESOURCE_DATA sd = {};	//子资源数据
-//	sd.pSysMem = vertices;
-//	wrl::ComPtr<ID3D11Buffer> pVertexBuffer;
-//	GFX_THROW_INFO(m_pDevice->CreateBuffer(&bd, &sd, &pVertexBuffer));
-//	IA：输入装配器 Input Assembler
-//	const UINT stride = sizeof(Vertex);
-//	const UINT offset = 0u; // 只有顶点一种数据，偏移量为0
-//	m_pDeviceContext->IASetVertexBuffers(0u, 1u, pVertexBuffer.GetAddressOf(), &stride, &offset);
-//
-//	 创建并生成索引缓存
-//	const unsigned short indices[] =
-//	{
-//		0, 1, 2,
-//		0, 2, 3,
-//		0, 4, 1,
-//		2, 1, 5,
-//	};
-//	D3D11_BUFFER_DESC ibd = {};
-//	ibd.BindFlags = D3D11_BIND_INDEX_BUFFER;
-//	ibd.Usage = D3D11_USAGE_DEFAULT;
-//	ibd.CPUAccessFlags = 0u;
-//	ibd.MiscFlags = 0u;
-//	ibd.ByteWidth = sizeof(indices);
-//	ibd.StructureByteStride = sizeof(unsigned short);
-//	D3D11_SUBRESOURCE_DATA isd = {};
-//	isd.pSysMem = indices;
-//	wrl::ComPtr<ID3D11Buffer> pIndexBuffer;
-//	GFX_THROW_INFO(m_pDevice->CreateBuffer(&ibd, &isd, &pIndexBuffer));
-//	m_pDeviceContext->IASetIndexBuffer(pIndexBuffer.Get(), DXGI_FORMAT_R16_UINT, 0u);
-//
-//
-//	 创建常量缓存，并存储矩阵
-//	struct ConstantBuffer
-//	{
-//		struct
-//		{
-//			float element[4][4];
-//		}transformation;
-//	};
-//	const ConstantBuffer cb =
-//	{
-//		{
-//			(3.f / 4.f) * std::cos(rotAngle), std::sin(rotAngle), 0.0f, 0.0f,
-//			(3.f / 4.f) * -std::sin(rotAngle), std::cos(rotAngle), 0.0f, 0.0f,
-//			0.0f, 0.0f, 1.0f, 0.0f,
-//			0.0f, 0.0f, 0.0f, 1.0f,
-//		}
-//	};
-//	wrl::ComPtr<ID3D11Buffer> pConstantBuffer;
-//	D3D11_BUFFER_DESC cbd = {};
-//	cbd.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
-//	cbd.Usage = D3D11_USAGE_DYNAMIC;
-//	cbd.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
-//	cbd.MiscFlags = 0u;
-//	cbd.ByteWidth = sizeof(cb);
-//	cbd.StructureByteStride = 0u;
-//	D3D11_SUBRESOURCE_DATA csd = {};
-//	csd.pSysMem = &cb;
-//	GFX_THROW_INFO(m_pDevice->CreateBuffer(&cbd, &csd, &pConstantBuffer));
-//	m_pDeviceContext->VSSetConstantBuffers(0u, 1u, pConstantBuffer.GetAddressOf());
-//
-//	 着色器被编译成cso字节码文件
-//
-//	wrl::ComPtr<ID3DBlob> pBlob;
-//
-//	 创建像素着色器
-//	wrl::ComPtr<ID3D11PixelShader> pPixelShader;
-//	GFX_THROW_INFO(D3DReadFileToBlob(L"PixelShader.cso", &pBlob));
-//	GFX_THROW_INFO(m_pDevice->CreatePixelShader(pBlob->GetBufferPointer(), pBlob->GetBufferSize(), nullptr, &pPixelShader));
-//	m_pDeviceContext->PSSetShader(pPixelShader.Get(), nullptr, 0u);
-//
-//	 创建顶点着色器
-//	wrl::ComPtr<ID3D11VertexShader> pVertexShader;
-//	 你可以使用narrow string，只能使用wild string
-//	GFX_THROW_INFO(D3DReadFileToBlob(L"VertexShader.cso", &pBlob));
-//	 创建着色器，第三个参数后面讨论
-//	GFX_THROW_INFO(m_pDevice->CreateVertexShader(pBlob->GetBufferPointer(), pBlob->GetBufferSize(), nullptr, &pVertexShader));
-//	 将着色器绑定到管道
-//	m_pDeviceContext->VSSetShader(pVertexShader.Get(), nullptr, 0u);
-//
-//	创建输入布局
-//	wrl::ComPtr<ID3D11InputLayout> pInputLayout;
-//	const D3D11_INPUT_ELEMENT_DESC ied[] =
-//	{
-//		{"Position", 0, DXGI_FORMAT_R32G32_FLOAT, 0, 0, D3D11_INPUT_PER_VERTEX_DATA, 0},
-//		{"Color", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 8u, D3D11_INPUT_PER_VERTEX_DATA, 0}
-//	};
-//	GFX_THROW_INFO(m_pDevice->CreateInputLayout(ied, (UINT)std::size(ied), pBlob->GetBufferPointer(), pBlob->GetBufferSize(), &pInputLayout));
-//
-//	 设置输入布局
-//	m_pDeviceContext->IASetInputLayout(pInputLayout.Get());
-//
-//	 设置渲染目标
-//	m_pDeviceContext->OMSetRenderTargets(1u, m_pRenderTargetView.GetAddressOf(), nullptr);
-//
-//	 设置图元拓扑
-//	m_pDeviceContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY::D3D10_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
-//
-//	 配置视口
-//	D3D11_VIEWPORT vp;
-//	vp.Width = 800;
-//	vp.Height = 600;
-//	vp.MinDepth = 0;
-//	vp.MaxDepth = 1;
-//	vp.TopLeftX = 0;
-//	vp.TopLeftY = 0;
-//	m_pDeviceContext->RSSetViewports(1u, &vp);
-//
-//	GFX_THROW_INFO_ONLY(m_pDeviceContext->Draw((UINT)std::size(vertices), 0u)); // 绘制三个顶点，从索引0开始
-//
-//	GFX_THROW_INFO_ONLY(m_pDeviceContext->DrawIndexed((UINT)std::size(indices), 0u, 0u));
-//
-//
-//}
-
 void Graphics::DrawIndexed(UINT count)
 {
 	m_pDeviceContext->DrawIndexed(count, 0u, 0u);
@@ -333,6 +184,26 @@ void Graphics::SetCamera(DirectX::FXMMATRIX cameraMatrix) noexcept
 DirectX::XMMATRIX Graphics::GetCamera() const noexcept
 {
 	return m_cameraMatrix;
+}
+
+UINT Graphics::GetWidth() const noexcept
+{
+	return m_width;
+}
+
+UINT Graphics::GetHeight() const noexcept
+{
+	return m_height;
+}
+
+void Graphics::BindSwapBuffer() noexcept
+{
+	m_pDeviceContext->OMSetRenderTargets(1u, m_pRenderTargetView.GetAddressOf(), nullptr);
+}
+
+void Graphics::BindSwapBuffer(const DepthStencil& ds) noexcept
+{
+	m_pDeviceContext->OMSetRenderTargets(1u, m_pRenderTargetView.GetAddressOf(), ds.m_pDepthStencilView.Get());
 }
 
 Graphics::HrException::HrException(int line, const char* file, HRESULT hr, std::vector<std::string> infoMsgs) noexcept
