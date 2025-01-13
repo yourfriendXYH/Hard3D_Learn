@@ -7,7 +7,7 @@
 class BlurPack
 {
 public:
-	BlurPack(Graphics& gfx, int radius = 5, float simgma = 1.0f);
+	BlurPack(Graphics& gfx, int radius = 5, float sigma = 1.0f);
 
 public:
 	void Bind(Graphics& gfx);
@@ -16,13 +16,16 @@ public:
 
 	void SetVertical(Graphics& gfx);
 
-	void SetKernel(Graphics& gfx);
+	// 计算高斯分布的权重值
+	// radius：模糊像素半径
+	void SetKernel(Graphics& gfx, int radius, float sigma);
 
 private:
+	// 高斯分布的权重数据
 	struct Kernel
 	{
-		int m_nTaps;
-		DirectX::XMFLOAT4 m_coefficients[15]; // 系数
+		int m_nTaps; // 权重数量
+		DirectX::XMFLOAT4 m_coefficients[15]; // 权重值
 	};
 
 	struct Control
