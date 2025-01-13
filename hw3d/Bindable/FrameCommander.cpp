@@ -29,7 +29,7 @@ FrameCommander::FrameCommander(Graphics& gfx)
 
 	// 创建全屏着色器
 	m_pVsFull = Bind::VertexShader::Resolve(gfx, "Fullscreen_VS.cso");
-	m_pPsFull = Bind::PixelShader::Resolve(gfx, "Funk_PS.cso");
+	m_pPsFull = Bind::PixelShader::Resolve(gfx, "BlurOutline_PS.cso");
 	m_pLayoutFull = Bind::InputLayout::Resolve(gfx, vtxLayout, m_pVsFull->GetByteCode());
 	m_pSamplerFull = Bind::Sampler::Resolve(gfx, false, true);
 	m_pBlenderFull = Bind::Blender::Resolve(gfx, true);
@@ -61,7 +61,7 @@ void FrameCommander::Execute(Graphics& gfx) const noexcept
 
 	// outline drawing pass
 	m_renderTarget.BindAsTarget(gfx);
-	Stencil::Resolve(gfx, Stencil::Mode::Off)->Bind(gfx);
+	Stencil::Resolve(gfx, Stencil::Mode::Mask)->Bind(gfx);
 	m_passes[2].Execute(gfx);
 
 	// 绘制全屏纹理（后期处理）

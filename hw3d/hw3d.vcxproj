@@ -191,6 +191,7 @@
     <ClCompile Include="DynamicData\DynamicConstant.cpp" />
     <ClCompile Include="DynamicData\DynamicVertex.cpp" />
     <ClCompile Include="DynamicData\LayoutCodex.cpp" />
+    <ClCompile Include="Effects\BlurPack.cpp" />
     <ClCompile Include="GDIPlusManager.cpp" />
     <ClCompile Include="Graphics.cpp" />
     <ClCompile Include="ImguiManager.cpp" />
@@ -267,6 +268,7 @@
     <ClInclude Include="DynamicData\DynamicConstant.h" />
     <ClInclude Include="DynamicData\DynamicVertex.h" />
     <ClInclude Include="DynamicData\LayoutCodex.h" />
+    <ClInclude Include="Effects\BlurPack.h" />
     <ClInclude Include="GDIPlusManager.h" />
     <ClInclude Include="Geometry\Cube.h" />
     <ClInclude Include="Geometry\Plane.h" />
@@ -339,7 +341,7 @@
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Vertex</ShaderType>
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Vertex</ShaderType>
     </FxCompile>
-    <FxCompile Include="HLSL\Funk_PS.hlsl">
+    <FxCompile Include="HLSL\BlurOutline_PS.hlsl">
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Pixel</ShaderType>
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Pixel</ShaderType>
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Pixel</ShaderType>

@@ -26,3 +26,18 @@ constexpr T interpolate(const T& src, const T& dst, float alpha)
 	return src + (dst - src) * alpha;
 }
 
+// 角度转弧度
+template<typename T>
+constexpr T to_rad(T deg) noexcept
+{
+	return deg * PI / (T)180.0;
+}
+
+// 高斯
+template<typename T>
+constexpr T gauss(T x, T sigma) noexcept
+{
+	const auto ss = sq(sigma);
+	return ((T)1.0 / sqrt((T)2.0 * (T)PI_D * ss)) * exp(-sq(x) / ((T)2.0 * ss));
+}
+
