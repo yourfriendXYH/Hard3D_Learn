@@ -18,17 +18,31 @@ public:
 
 	// 计算高斯分布的权重值
 	// radius：模糊像素半径
-	void SetKernel(Graphics& gfx, int radius, float sigma);
+	void SetKernelGauss(Graphics& gfx, int radius, float sigma) noexcept;
+
+	// 平均权重
+	void SetKernelBox(Graphics& gfx, int radius) noexcept;
 
 	void ShowWindow(Graphics& gfx);
 
 private:
+
+	// 模糊算法类型
+	enum class KernelType
+	{
+		Gauss, // 高斯模糊
+		Box,
+	};
+
+	static constexpr int m_maxRadius = 15; // 最大的模糊半径
+	KernelType m_kernelType = KernelType::Gauss; // 模糊类型
+
 	// 高斯分布的权重数据
 	struct Kernel
 	{
 		int m_nTaps; // 权重数量
 		float m_padding[3];
-		DirectX::XMFLOAT4 m_coefficients[31]; // 权重值
+		DirectX::XMFLOAT4 m_coefficients[m_maxRadius * 2 + 1]; // 权重值
 	};
 
 	struct Control
@@ -41,6 +55,6 @@ private:
 	Bind::PixelConstantBuffer<Kernel> m_pcb;
 	Bind::PixelConstantBuffer<Control> m_ccb;
 
-	int m_radius;
+	int m_radius; // 模糊半径
 	float m_sigma;
 };

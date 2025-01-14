@@ -69,7 +69,7 @@ void FrameCommander::Execute(Graphics& gfx) noexcept
 	//m_renderTarget1.BindAsTexture(gfx, 0);
 
 	m_renderTarget2.BindAsTarget(gfx);
-	//m_renderTarget1.BindAsTexture(gfx, 0);
+	m_renderTarget1.BindAsTexture(gfx, 0);
 
 	m_pVbFull->Bind(gfx);
 	m_pIbFull->Bind(gfx);
