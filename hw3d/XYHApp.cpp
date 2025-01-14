@@ -669,6 +669,8 @@ void XYHApp::DoFrame()
 
 	m_testStripey.ShowWindow(m_wnd.GetGfx(), "Stripey");
 
+	m_frameCommader.BlurShowWindow(m_wnd.GetGfx());
+
 	//m_testBluePlane.SpawnControlWindow(m_wnd.GetGfx(), "Blue Plane");
 	//m_testRedPlane.SpawnControlWindow(m_wnd.GetGfx(), "Red Plane");
 

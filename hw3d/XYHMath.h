@@ -6,14 +6,14 @@ constexpr double PI_D = 3.1415926535897932;
 
 // 平方square
 template<typename T>
-constexpr auto sq(const T& x)
+constexpr auto sq(const T& x) noexcept
 {
 	return x * x;
 }
 
 // 将角度限制在[-180, 180)
 template<typename T>
-T wrap_angle(T theta)
+T wrap_angle(T theta) noexcept
 {
 	const T modded = fmod(theta, (T)2.0 * (T)PI_D);
 	return (modded > (T)PI_D) ? (modded - (T)2.0 * (T)PI_D) : modded;
@@ -21,7 +21,7 @@ T wrap_angle(T theta)
 
 // ???
 template<typename T>
-constexpr T interpolate(const T& src, const T& dst, float alpha)
+constexpr T interpolate(const T& src, const T& dst, float alpha) noexcept
 {
 	return src + (dst - src) * alpha;
 }
