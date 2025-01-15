@@ -2,9 +2,9 @@
 #include "../XYHMath.h"
 #include "../imgui/imgui.h"
 
-BlurPack::BlurPack(Graphics& gfx, int radius /*= 5*/, float sigma /*= 1.0f*/)
+BlurPack::BlurPack(Graphics& gfx, int radius /*= 5*/, float sigma /*= 1.0f*/, const char* shader)
 	:
-	m_shader(gfx, "Blur_PS.cso"),
+	m_shader(gfx, shader),
 	m_pcb(gfx, 0u),
 	m_ccb(gfx, 1u)
 {
@@ -66,10 +66,8 @@ void BlurPack::SetKernelBox(Graphics& gfx, int radius) noexcept
 	m_pcb.Update(gfx, k);
 }
 
-void BlurPack::ShowWindow(Graphics& gfx)
+void BlurPack::RenderWidget(Graphics& gfx)
 {
-	ImGui::Begin("Blur");
-
 	bool filterChanged = false;
 	{
 		const char* items[] = { "Gauss","Box" };
@@ -114,6 +112,5 @@ void BlurPack::ShowWindow(Graphics& gfx)
 			SetKernelBox(gfx, m_radius);
 		}
 	}
-	ImGui::End();
 }
 

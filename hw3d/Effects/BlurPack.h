@@ -7,7 +7,7 @@
 class BlurPack
 {
 public:
-	BlurPack(Graphics& gfx, int radius = 7, float sigma = 2.6f);
+	BlurPack(Graphics& gfx, int radius = 7, float sigma = 2.6f, const char* shader = "Blur_PS.cso");
 
 public:
 	void Bind(Graphics& gfx);
@@ -23,7 +23,7 @@ public:
 	// 平均权重
 	void SetKernelBox(Graphics& gfx, int radius) noexcept;
 
-	void ShowWindow(Graphics& gfx);
+	void RenderWidget(Graphics& gfx);
 
 private:
 

@@ -21,4 +21,7 @@ public:
 private:
 	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> m_pTextureView;
 	Microsoft::WRL::ComPtr<ID3D11RenderTargetView> m_pTargetView;
+
+	UINT m_width;
+	UINT m_height;
 };

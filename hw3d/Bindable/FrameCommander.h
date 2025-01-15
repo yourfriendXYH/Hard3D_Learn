@@ -45,10 +45,11 @@ private:
 	std::array<Pass, 3> m_passes;
 	DepthStencil m_depthStencil;
 
+	int m_downFactor = 1;
 
-	RenderTarget m_renderTarget1;
+	std::optional<RenderTarget> m_renderTarget1;
 
-	RenderTarget m_renderTarget2;
+	std::optional<RenderTarget> m_renderTarget2;
 
 	BlurPack m_blur;
 
@@ -58,6 +59,10 @@ private:
 	std::shared_ptr<Bind::VertexShader> m_pVsFull;
 	//std::shared_ptr<Bind::PixelShader> m_pPsFull;
 	std::shared_ptr<Bind::InputLayout> m_pLayoutFull;
-	std::shared_ptr<Bind::Sampler> m_pSamplerFull;
-	//std::shared_ptr<Bind::Blender> m_pBlenderFull;
+
+	// 修复模糊放大混合通道的采样问题
+	std::shared_ptr<Bind::Sampler> m_pSamplerFullPoint;
+	std::shared_ptr<Bind::Sampler> m_pSamplerFullBilin;
+
+	std::shared_ptr<Bind::Blender> m_pBlenderMerge;
 };

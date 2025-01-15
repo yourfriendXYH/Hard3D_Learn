@@ -3,6 +3,9 @@
 #include <array>
 
 RenderTarget::RenderTarget(Graphics& gfx, UINT width, UINT height)
+	:
+	m_width(width),
+	m_height(height)
 {
 	// 创建纹理资源
 	D3D11_TEXTURE2D_DESC  textureDesc = {};
@@ -44,11 +47,29 @@ void RenderTarget::BindAsTexture(Graphics& gfx, UINT slot) const noexcept
 void RenderTarget::BindAsTarget(Graphics& gfx) const noexcept
 {
 	GetContext(gfx)->OMSetRenderTargets(1u, m_pTargetView.GetAddressOf(), nullptr);
+
+	D3D11_VIEWPORT viewport;
+	viewport.Width = (float)m_width;
+	viewport.Height = (float)m_height;
+	viewport.MinDepth = 0.0f;
+	viewport.MaxDepth = 1.0f;
+	viewport.TopLeftX = 0.0f;
+	viewport.TopLeftY = 0.0f;
+	GetContext(gfx)->RSSetViewports(1u, &viewport);
 }
 
 void RenderTarget::BindAsTarget(Graphics& gfx, const DepthStencil& depthStencil) const noexcept
 {
 	GetContext(gfx)->OMSetRenderTargets(1u, m_pTargetView.GetAddressOf(), depthStencil.m_pDepthStencilView.Get());
+
+	D3D11_VIEWPORT viewport;
+	viewport.Width = (float)m_width;
+	viewport.Height = (float)m_height;
+	viewport.MinDepth = 0.0f;
+	viewport.MaxDepth = 1.0f;
+	viewport.TopLeftX = 0.0f;
+	viewport.TopLeftY = 0.0f;
+	GetContext(gfx)->RSSetViewports(1u, &viewport);
 }
 
 void RenderTarget::Clear(Graphics& gfx, const std::array<float, 4>& color) const noexcept

@@ -100,16 +100,16 @@ Graphics::Graphics(HWND hWnd, int width, int height)
 	//m_pDeviceContext->OMSetRenderTargets(1u, m_pRenderTargetView.GetAddressOf(), m_pDSV.Get());
 
 
-	// 配置视口
-	D3D11_VIEWPORT vp;
-	vp.Width = (float)width;
-	vp.Height = (float)height;
-	vp.MinDepth = 0;
-	vp.MaxDepth = 1;
-	vp.TopLeftX = 0;
-	vp.TopLeftY = 0;
-	// （光栅化阶段 Rasterizer Stage）
-	m_pDeviceContext->RSSetViewports(1u, &vp);
+	//// 配置视口
+	//D3D11_VIEWPORT vp;
+	//vp.Width = (float)width;
+	//vp.Height = (float)height;
+	//vp.MinDepth = 0;
+	//vp.MaxDepth = 1;
+	//vp.TopLeftX = 0;
+	//vp.TopLeftY = 0;
+	//// （光栅化阶段 Rasterizer Stage）
+	//m_pDeviceContext->RSSetViewports(1u, &vp);
 
 	ImGui_ImplDX11_Init(m_pDevice.Get(), m_pDeviceContext.Get());
 }
@@ -199,11 +199,29 @@ UINT Graphics::GetHeight() const noexcept
 void Graphics::BindSwapBuffer() noexcept
 {
 	m_pDeviceContext->OMSetRenderTargets(1u, m_pRenderTargetView.GetAddressOf(), nullptr);
+
+	D3D11_VIEWPORT viewport;
+	viewport.Width = (float)m_width;
+	viewport.Height = (float)m_height;
+	viewport.MinDepth = 0.0f;
+	viewport.MaxDepth = 1.0f;
+	viewport.TopLeftX = 0.0f;
+	viewport.TopLeftY = 0.0f;
+	m_pDeviceContext->RSSetViewports(1u, &viewport);
 }
 
 void Graphics::BindSwapBuffer(const DepthStencil& ds) noexcept
 {
 	m_pDeviceContext->OMSetRenderTargets(1u, m_pRenderTargetView.GetAddressOf(), ds.m_pDepthStencilView.Get());
+
+	D3D11_VIEWPORT viewport;
+	viewport.Width = (float)m_width;
+	viewport.Height = (float)m_height;
+	viewport.MinDepth = 0.0f;
+	viewport.MaxDepth = 1.0f;
+	viewport.TopLeftX = 0.0f;
+	viewport.TopLeftY = 0.0f;
+	m_pDeviceContext->RSSetViewports(1u, &viewport);
 }
 
 Graphics::HrException::HrException(int line, const char* file, HRESULT hr, std::vector<std::string> infoMsgs) noexcept
