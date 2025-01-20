@@ -87,7 +87,7 @@ void FrameCommander::Execute(Graphics& gfx) noexcept
 
 	gfx.BindSwapBuffer(m_depthStencil);
 	m_renderTarget2->BindAsTexture(gfx, 0u);
-	//m_pBlenderMerge->Bind(gfx);
+	m_pBlenderMerge->Bind(gfx);
 	m_pSamplerFullBilin->Bind(gfx);
 
 	Bind::Stencil::Resolve(gfx, Stencil::Mode::Mask)->Bind(gfx);
